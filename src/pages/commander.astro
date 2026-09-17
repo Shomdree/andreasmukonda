@@ -1,0 +1,106 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import OrderForm from "../components/OrderForm.astro";
+import UnavailableNotice from "../components/UnavailableNotice.astro";
+import { pageI18n } from "../i18n/request";
+import { submitOrder } from "../lib/actions";
+import { isUnavailableMessage } from "../lib/env";
+import { getServices, getSettings } from "../lib/queries";
+import { whatsappUrl, orderWhatsAppMessage } from "../lib/whatsapp";
+
+const { locale, t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const services = await getServices();
+const selectedSlug = Astro.url.searchParams.get("service");
+const reference = Astro.url.searchParams.get("ref");
+let errors: Record<string, string> | undefined;
+let values: Record<string, string> | undefined;
+
+if (Astro.request.method === "POST") {
+  const result = await submitOrder(Astro.request, await Astro.request.formData());
+  if (result.ok) {
+    const params = new URLSearchParams({
+      ref: result.data.reference,
+      projet: result.data.serviceTitle || "projet",
+    });
+    return Astro.redirect(`${href("/commander")}?${params.toString()}`);
+  }
+  errors = result.errors;
+  values = result.values;
+}
+
+const orderText = reference ? orderWhatsAppMessage(reference, locale) : t.whatsapp.generic;
+const wa1 = whatsappUrl(settings.whatsapp, orderText);
+const wa2 = whatsappUrl(settings.whatsappSecondary, orderText);
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.orderTitle}
+  description={t.seo.orderDescription}
+  canonicalPath="/commander"
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/commander"), label: t.nav.order }]} />
+      <h1 class="display">{t.order.title}</h1>
+      {
+        reference ? (
+          <div class="ok" role="status" data-reveal="up">
+            <p class="display">{t.order.successTitle}</p>
+            <p>
+              {t.order.referenceLabel} : <strong>{reference}</strong>
+            </p>
+            <p>{t.order.successBody}</p>
+            <div class="row">
+              {wa1 ? (
+                <a class="btn btn-primary" href={wa1} rel="noopener noreferrer">
+                  {t.order.whatsappCta}
+                </a>
+              ) : null}
+              {wa2 ? (
+                <a class="btn btn-ghost" href={wa2} rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+              ) : null}
+              <a class="btn btn-ghost" href={href("/")}>{t.notFound.home}</a>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p class="lead">{t.order.lead}</p>
+            <p class="lead">{t.order.follow}</p>
+            <h2>{t.order.howTitle}</h2>
+            <ol class="notes" data-reveal="up">
+              {t.order.steps.map((step) => <li>{step}</li>)}
+            </ol>
+            <p><strong>{t.order.quoteNote}</strong></p>
+            {
+              isUnavailableMessage(errors?.form) ? (
+                <UnavailableNotice variant="order" message={t.form.unavailableOrder} primaryHref={wa1} secondaryHref={wa2} />
+              ) : (
+                <OrderForm
+                  action={href("/commander")}
+                  services={services}
+                  selectedSlug={selectedSlug}
+                  errors={errors}
+                  values={values}
+                />
+              )
+            }
+          </>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
+  .lead { color: var(--fg-soft); margin: 0.5rem 0 1.4rem; }
+  .ok { display: grid; gap: 0.7rem; max-width: 38rem; }
+  .ok .display { font-size: 2rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.6rem; }
+  .notes { color: var(--fg-soft); margin: 0 0 1.4rem; padding-left: 1.1rem; }
+</style>

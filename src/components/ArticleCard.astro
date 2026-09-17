@@ -1,0 +1,26 @@
+---
+import type { PostItem } from "../lib/types";
+type Props = { post: PostItem };
+---
+
+<article>
+  <p class="kicker">{Astro.props.post.category}</p>
+  <h3 class="display">
+    <a href={`/actualites/${Astro.props.post.slug}`}>{Astro.props.post.title}</a>
+  </h3>
+  <p>{Astro.props.post.excerpt}</p>
+</article>
+
+<style>
+  h3 {
+    font-size: 1.5rem;
+    margin: 0.3rem 0 0.4rem;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  p {
+    color: var(--fg-soft);
+  }
+</style>

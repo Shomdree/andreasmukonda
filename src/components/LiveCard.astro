@@ -1,0 +1,96 @@
+---
+import type { LiveItem } from "../lib/types";
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { pageI18n } from "../i18n/request";
+
+type Props = { live: LiveItem };
+const { live } = Astro.props;
+const { t, locale } = pageI18n(Astro.locals);
+const labels = {
+  programme: t.catalog.liveScheduled,
+  "en-direct": t.catalog.liveNow,
+  replay: t.catalog.liveReplay,
+};
+const cta = live.status === "replay" ? t.catalog.watchReplay : t.catalog.watchLive;
+const dateLocale = locale === "en" ? "en-GB" : "fr-FR";
+
+function embedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) {
+      return `https://www.youtube-nocookie.com/embed/${u.searchParams.get("v")}`;
+    }
+    if (u.hostname === "youtu.be") {
+      return `https://www.youtube-nocookie.com/embed${u.pathname}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+const embed = embedUrl(live.url);
+---
+
+<article class="live" data-embed={embed ?? ""}>
+  <div class="media-frame thumb">
+    <ResponsiveImage src={live.thumbnailUrl} alt="" width={800} height={450} />
+  </div>
+  <p class="kicker">{live.platform} · {labels[live.status]}</p>
+  <h3 class="display">{live.title}</h3>
+  <p>{live.description}</p>
+  {
+    live.scheduledAt && (
+      <p class="meta">
+        <time datetime={live.scheduledAt}>
+          {new Date(live.scheduledAt).toLocaleString(dateLocale, { dateStyle: "medium", timeStyle: "short" })}
+        </time>
+        {live.duration ? ` · ${live.duration}` : ""}
+      </p>
+    )
+  }
+  <p>
+    <a class="btn btn-primary play" href={live.url} rel="noopener noreferrer" data-player-title={t.catalog.videoPlayer}>
+      {cta}
+    </a>
+  </p>
+</article>
+
+<script>
+  for (const card of document.querySelectorAll<HTMLElement>(".live")) {
+    const embed = card.dataset.embed;
+    const button = card.querySelector<HTMLAnchorElement>(".play");
+    if (!embed || !button) continue;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      const frame = document.createElement("iframe");
+      frame.src = `${embed}?rel=0`;
+      frame.title = button.dataset.playerTitle || "Video";
+      frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      frame.allowFullscreen = true;
+      frame.loading = "lazy";
+      frame.setAttribute("style", "width:100%;aspect-ratio:16/9;border:0;background:#000");
+      card.querySelector(".thumb")?.replaceWith(frame);
+      button.remove();
+    });
+  }
+</script>
+
+<style>
+  .live {
+    display: grid;
+    gap: 0.45rem;
+  }
+  .thumb {
+    aspect-ratio: 16 / 9;
+  }
+  h3 {
+    font-size: 1.4rem;
+  }
+  p {
+    color: var(--fg-soft);
+  }
+  .meta {
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+</style>

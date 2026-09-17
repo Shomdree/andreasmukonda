@@ -1,0 +1,36 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import EmptyState from "../../components/EmptyState.astro";
+import { pageI18n } from "../../i18n/request";
+import { getPosts, getSettings } from "../../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const posts = await getPosts();
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.newsTitle}
+  description={t.seo.newsDescription}
+  canonicalPath="/actualites"
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/actualites"), label: t.nav.news }]} />
+      <h1 class="display">{t.news.title}</h1>
+      <p class="lead">{t.news.lead}</p>
+      <div class="list">
+        {posts.length ? posts.map((post) => <ArticleCard post={post} />) : <EmptyState title={t.news.empty} />}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
+  .lead { color: var(--fg-soft); margin-bottom: 1.8rem; }
+  .list { display: grid; gap: 1.6rem; }
+</style>

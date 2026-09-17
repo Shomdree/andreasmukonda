@@ -1,0 +1,71 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import StatusBadge from "../../../components/admin/StatusBadge.astro";
+import { deleteRow, listRows, updateRow } from "../../../lib/admin";
+import { contactStatuses, visitorLocaleLabel } from "../../../lib/status";
+
+const id = Astro.params.id ?? "";
+let notice = "";
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const action = String(data.get("action") ?? "save");
+  if (action === "delete") {
+    await deleteRow(Astro.request, Astro.cookies, "contact_messages", id);
+    return Astro.redirect("/admin/messages");
+  }
+  const status = String(data.get("quick") || data.get("status") || "lue");
+  await updateRow(Astro.request, Astro.cookies, "contact_messages", id, {
+    status,
+  });
+  notice = "Enregistré.";
+}
+
+const rows = await listRows(Astro.request, Astro.cookies, "contact_messages", { limit: 200 });
+const row = rows.find((item) => String(item.id) === id);
+if (!row) return Astro.redirect("/admin/messages");
+---
+
+<AdminLayout title="Message">
+  {notice && <p class="ok">{notice}</p>}
+  <p><StatusBadge status={String(row.status ?? "")} /></p>
+  <dl>
+    <div><dt>Nom</dt><dd>{row.full_name}</dd></div>
+    <div><dt>Email</dt><dd><a href={`mailto:${row.email}`}>{row.email}</a></dd></div>
+    <div><dt>Téléphone</dt><dd>{row.phone || "—"}</dd></div>
+    <div><dt>Préférence</dt><dd>{row.preferred_contact}</dd></div>
+    <div><dt>Langue</dt><dd>{visitorLocaleLabel(row.locale)}</dd></div>
+    <div><dt>Objet</dt><dd>{row.subject}</dd></div>
+    <div><dt>Message</dt><dd>{row.message}</dd></div>
+  </dl>
+  <form method="post" class="form">
+    <input type="hidden" name="action" value="save" />
+    <div class="field">
+      <label for="status">Statut</label>
+      <select id="status" name="status">
+        {contactStatuses.map((s) => (
+          <option value={s} selected={row.status === s ? true : undefined}>{s}</option>
+        ))}
+      </select>
+    </div>
+    <div class="row">
+      <button class="btn btn-primary" type="submit">Enregistrer</button>
+      <button class="btn btn-ghost" type="submit" name="quick" value="lue">Marquer lu</button>
+      <button class="btn btn-ghost" type="submit" name="quick" value="repondue">Marquer traité</button>
+      <button class="btn btn-ghost" type="submit" name="quick" value="archivee">Archiver</button>
+    </div>
+  </form>
+  <form method="post" onsubmit="return confirm('Supprimer ce message ?');">
+    <input type="hidden" name="action" value="delete" />
+    <button class="btn btn-ghost" type="submit">Supprimer</button>
+  </form>
+</AdminLayout>
+
+<style>
+  dl { display: grid; gap: 0.6rem; margin: 1rem 0; }
+  dt { color: var(--mute); font-size: 0.8rem; }
+  dd { color: var(--fg-soft); white-space: pre-wrap; }
+  .form { display: grid; gap: 0.8rem; max-width: 40rem; margin-bottom: 1rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .ok { color: var(--color-ok); }
+</style>

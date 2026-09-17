@@ -1,0 +1,50 @@
+---
+import { siteUrl } from "../lib/env";
+import { localeOg, type Locale } from "../i18n/config";
+import { hreflangLinks, localizedPath } from "../i18n/utils";
+
+type Props = {
+  title: string;
+  description: string;
+  image?: string;
+  path: string;
+  locale: Locale;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+};
+
+const origin = siteUrl();
+const publicPath = localizedPath(Astro.props.locale, Astro.props.path);
+const canonical = `${origin}${publicPath === "/" ? "" : publicPath}`;
+const image = Astro.props.image?.startsWith("http")
+  ? Astro.props.image
+  : `${origin}${Astro.props.image ?? "/images/andreas/og.jpg"}`;
+const blocks = Astro.props.jsonLd
+  ? Array.isArray(Astro.props.jsonLd)
+    ? Astro.props.jsonLd
+    : [Astro.props.jsonLd]
+  : [];
+const alternates = hreflangLinks(origin, Astro.props.path);
+---
+
+<title>{Astro.props.title}</title>
+<meta name="description" content={Astro.props.description} />
+<link rel="canonical" href={canonical} />
+{alternates.map((item) => <link rel="alternate" hreflang={item.lang} href={item.href} />)}
+<meta property="og:type" content="website" />
+<meta property="og:locale" content={localeOg[Astro.props.locale]} />
+{alternates
+  .filter((item) => item.lang !== "x-default" && item.lang !== Astro.props.locale)
+  .map((item) => <meta property="og:locale:alternate" content={localeOg[item.lang as Locale]} />)}
+<meta property="og:title" content={Astro.props.title} />
+<meta property="og:description" content={Astro.props.description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={image} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={Astro.props.title} />
+<meta name="twitter:description" content={Astro.props.description} />
+<meta name="twitter:image" content={image} />
+{
+  blocks.map((block) => (
+    <script type="application/ld+json" set:html={JSON.stringify(block)} />
+  ))
+}

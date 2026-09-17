@@ -1,0 +1,114 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { adminClient } from "../../lib/admin";
+import { getSettings } from "../../lib/queries";
+import { historicalPricing } from "../../content/historical-pricing";
+
+const settings = await getSettings();
+const client = await adminClient(Astro.request, Astro.cookies);
+let notice = "";
+
+if (Astro.request.method === "POST" && client) {
+  const data = await Astro.request.formData();
+  const social_links = {
+    facebook: String(data.get("facebook") ?? ""),
+    instagram: String(data.get("instagram") ?? ""),
+    tiktok: String(data.get("tiktok") ?? ""),
+    youtube: String(data.get("youtube") ?? ""),
+    pinterest: String(data.get("pinterest") ?? ""),
+    linkedin: String(data.get("linkedin") ?? ""),
+    x: String(data.get("x") ?? ""),
+    behance: String(data.get("behance") ?? ""),
+  };
+  const cleaned = Object.fromEntries(Object.entries(social_links).filter(([, v]) => v));
+  await client.from("site_settings").upsert({
+    id: 1,
+    site_name: String(data.get("site_name") ?? ""),
+    legal_name: String(data.get("legal_name") ?? ""),
+    monogram: String(data.get("monogram") ?? "AM"),
+    professional_title: String(data.get("professional_title") ?? ""),
+    tagline: String(data.get("tagline") ?? ""),
+    positioning: String(data.get("positioning") ?? ""),
+    hero_title: String(data.get("hero_title") ?? ""),
+    hero_subtitle: String(data.get("hero_subtitle") ?? ""),
+    short_bio: String(data.get("short_bio") ?? ""),
+    long_bio: String(data.get("long_bio") ?? ""),
+    philosophy: String(data.get("philosophy") ?? ""),
+    education: String(data.get("education") ?? ""),
+    publications_note: String(data.get("publications_note") ?? ""),
+    ecosystem_intro: String(data.get("ecosystem_intro") ?? ""),
+    email: String(data.get("email") ?? ""),
+    phone: String(data.get("phone") ?? ""),
+    phone_secondary: String(data.get("phone_secondary") ?? ""),
+    whatsapp: String(data.get("whatsapp") ?? "").replace(/\D/g, ""),
+    whatsapp_secondary: String(data.get("whatsapp_secondary") ?? "").replace(/\D/g, ""),
+    location: String(data.get("location") ?? ""),
+    availability: String(data.get("availability") ?? ""),
+    portrait_url: String(data.get("portrait_url") ?? ""),
+    logo_url: String(data.get("logo_url") ?? ""),
+    seo_title: String(data.get("seo_title") ?? ""),
+    seo_description: String(data.get("seo_description") ?? ""),
+    social_links: cleaned,
+  });
+  notice = "Paramètres enregistrés.";
+}
+
+const s = settings;
+---
+
+<AdminLayout title="Paramètres">
+  {notice && <p class="ok">{notice}</p>}
+  {
+    !client && (
+      <p class="note">Configurez Supabase pour enregistrer ces champs. En attendant, les valeurs par défaut s'affichent.</p>
+    )
+  }
+  <form method="post" class="form">
+    <div class="field"><label for="site_name">Nom court</label><input id="site_name" name="site_name" value={s.name} /></div>
+    <div class="field"><label for="legal_name">Nom complet</label><input id="legal_name" name="legal_name" value={s.legalName} /></div>
+    <div class="field"><label for="monogram">Monogramme</label><input id="monogram" name="monogram" value={s.monogram} /></div>
+    <div class="field"><label for="professional_title">Signature</label><input id="professional_title" name="professional_title" value={s.professionalTitle} /></div>
+    <div class="field"><label for="tagline">Slogan</label><input id="tagline" name="tagline" value={s.tagline} /></div>
+    <div class="field"><label for="positioning">Sous-titre / positionnement</label><textarea id="positioning" name="positioning">{s.positioning}</textarea></div>
+    <div class="field"><label for="hero_title">Titre hero</label><input id="hero_title" name="hero_title" value={s.heroTitle} /></div>
+    <div class="field"><label for="hero_subtitle">Description hero</label><textarea id="hero_subtitle" name="hero_subtitle">{s.heroSubtitle}</textarea></div>
+    <div class="field"><label for="short_bio">Bio courte</label><textarea id="short_bio" name="short_bio">{s.shortBio}</textarea></div>
+    <div class="field"><label for="long_bio">Bio longue</label><textarea id="long_bio" name="long_bio">{s.longBio}</textarea></div>
+    <div class="field"><label for="philosophy">Philosophie</label><textarea id="philosophy" name="philosophy">{s.philosophy}</textarea></div>
+    <div class="field"><label for="education">Formation académique</label><input id="education" name="education" value={s.education} /></div>
+    <div class="field"><label for="publications_note">Publications (note, sans titres inventés)</label><textarea id="publications_note" name="publications_note">{s.publicationsNote}</textarea></div>
+    <div class="field"><label for="ecosystem_intro">Intro écosystème GSI</label><textarea id="ecosystem_intro" name="ecosystem_intro">{s.ecosystemIntro}</textarea></div>
+    <div class="field"><label for="email">Email professionnel</label><input id="email" name="email" type="email" value={s.email} /></div>
+    <div class="field"><label for="phone">Téléphone 1 (affichage)</label><input id="phone" name="phone" value={s.phone} /></div>
+    <div class="field"><label for="phone_secondary">Téléphone 2 (affichage)</label><input id="phone_secondary" name="phone_secondary" value={s.phoneSecondary} /></div>
+    <div class="field"><label for="whatsapp">WhatsApp 1 (chiffres, ex. 243841197130)</label><input id="whatsapp" name="whatsapp" value={s.whatsapp} /></div>
+    <div class="field"><label for="whatsapp_secondary">WhatsApp 2 (chiffres)</label><input id="whatsapp_secondary" name="whatsapp_secondary" value={s.whatsappSecondary} /></div>
+    <div class="field"><label for="location">Zone</label><input id="location" name="location" value={s.location} /></div>
+    <div class="field"><label for="availability">Disponibilité</label><input id="availability" name="availability" value={s.availability} /></div>
+    <div class="field"><label for="portrait_url">Portrait officiel (URL)</label><input id="portrait_url" name="portrait_url" value={s.portrait} /></div>
+    <div class="field"><label for="logo_url">Logo personnel (URL)</label><input id="logo_url" name="logo_url" value={s.logo} /></div>
+    <div class="field"><label for="seo_title">SEO titre</label><input id="seo_title" name="seo_title" value={s.seoTitle} /></div>
+    <div class="field"><label for="seo_description">SEO description</label><textarea id="seo_description" name="seo_description">{s.seoDescription}</textarea></div>
+    <div class="field"><label for="facebook">Facebook</label><input id="facebook" name="facebook" value={s.socialLinks.facebook ?? ""} /></div>
+    <div class="field"><label for="instagram">Instagram</label><input id="instagram" name="instagram" value={s.socialLinks.instagram ?? ""} /></div>
+    <div class="field"><label for="tiktok">TikTok</label><input id="tiktok" name="tiktok" value={s.socialLinks.tiktok ?? ""} /></div>
+    <div class="field"><label for="youtube">YouTube</label><input id="youtube" name="youtube" value={s.socialLinks.youtube ?? ""} /></div>
+    <div class="field"><label for="pinterest">Pinterest</label><input id="pinterest" name="pinterest" value={s.socialLinks.pinterest ?? ""} /></div>
+    <div class="field"><label for="linkedin">LinkedIn</label><input id="linkedin" name="linkedin" value={s.socialLinks.linkedin ?? ""} /></div>
+    <div class="field"><label for="x">X</label><input id="x" name="x" value={s.socialLinks.x ?? ""} /></div>
+    <div class="field"><label for="behance">Behance</label><input id="behance" name="behance" value={s.socialLinks.behance ?? ""} /></div>
+    <button class="btn btn-primary" type="submit">Enregistrer</button>
+  </form>
+  <h2>Tarifs historiques (non publiés)</h2>
+  <p class="note">À confirmer avant affichage public. Les pages utilisent « Sur devis ».</p>
+  <ul>
+    {Object.values(historicalPricing).map((item) => <li>{item.label} : {item.amount}</li>)}
+  </ul>
+</AdminLayout>
+
+<style>
+  .form { display: grid; gap: 0.8rem; max-width: 42rem; }
+  .ok { color: var(--color-ok); }
+  .note { color: var(--color-ember); }
+  h2 { margin-top: 2rem; font-size: 1.1rem; }
+</style>

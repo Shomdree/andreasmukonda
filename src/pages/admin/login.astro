@@ -1,0 +1,55 @@
+---
+import { submitLogin } from "../../lib/actions";
+
+let errors: Record<string, string> = {};
+const requested = Astro.url.searchParams.get("next") || "/admin";
+const next = requested.startsWith("/admin") && !requested.startsWith("//") ? requested : "/admin";
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const result = await submitLogin(Astro.request, Astro.cookies, data);
+  if (result.ok) return Astro.redirect(next);
+  errors = result.errors;
+}
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connexion admin</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <main class="box">
+      <p class="kicker">Studio</p>
+      <h1 class="display">Administration</h1>
+      <p>Espace réservé. Pas d'inscription publique.</p>
+      {errors.form && <p class="err" role="alert">{errors.form}</p>}
+      <form method="post">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" required minlength="8" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary" type="submit">Se connecter</button>
+      </form>
+      <p><a href="/">Retour au site</a></p>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  @import "../../styles/global.css";
+  .box {
+    width: min(420px, calc(100% - 2rem));
+    margin: 12vh auto;
+  }
+  h1 { font-size: 2.2rem; margin: 0.3rem 0 0.6rem; }
+  form { display: grid; gap: 0.9rem; margin: 1.2rem 0; }
+  .err { color: var(--color-danger); }
+</style>

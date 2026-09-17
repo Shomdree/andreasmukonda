@@ -1,0 +1,128 @@
+---
+import { ecosystemBranches } from "../content/defaults";
+
+type Branch = {
+  brand: string;
+  title: string;
+  text: string;
+  href: string;
+  cta?: string;
+  items?: readonly string[];
+};
+
+type Props = { branches?: Branch[]; hub?: string };
+const branches = Astro.props.branches ?? [...ecosystemBranches];
+---
+
+<div class="eco">
+  <p class="hub">{Astro.props.hub ?? "Global SHOMDREE Industries"}</p>
+  <div class="acts">
+    {
+      branches.map((card, i) => (
+        <article class="act" data-reveal="scale" style={`--d:${i * 80}ms`}>
+          <p class="kicker">{card.brand}</p>
+          <h3 class="display">{card.title}</h3>
+          <p>{card.text}</p>
+          {card.items && card.items.length > 0 && (
+            <ul>
+              {card.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+          {card.cta && card.href && (
+            <p>
+              <a class="btn btn-ghost" href={card.href}>
+                {card.cta} <span class="arrow" aria-hidden="true">→</span>
+              </a>
+            </p>
+          )}
+        </article>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .eco {
+    position: relative;
+  }
+  .hub {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+  .hub::after {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-top: 0.7rem;
+    background: var(--line);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 700ms var(--ease-emphasized);
+  }
+  .eco:has(.is-in) .hub::after,
+  .hub::after {
+    transform: scaleX(1);
+  }
+  .acts {
+    display: grid;
+    gap: 1.2rem;
+  }
+  .act {
+    position: relative;
+    overflow: hidden;
+    padding: 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      background-color var(--motion-fast) var(--ease-standard);
+    transition-delay: var(--d, 0ms);
+  }
+  .act::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.06) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 700ms var(--ease-standard);
+    pointer-events: none;
+  }
+  .act:hover::after {
+    transform: translateX(120%);
+  }
+  .act:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--color-ember) 55%, var(--line));
+    background: rgba(255, 255, 255, 0.04);
+  }
+  h3 {
+    font-size: 1.25rem;
+    margin: 0.25rem 0 0.5rem;
+    max-width: 28ch;
+  }
+  p,
+  li {
+    color: var(--fg-soft);
+  }
+  ul {
+    margin: 0.8rem 0 1rem;
+    padding-left: 1.1rem;
+  }
+  @media (min-width: 800px) {
+    .acts {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .act:hover {
+      transform: none;
+    }
+  }
+</style>

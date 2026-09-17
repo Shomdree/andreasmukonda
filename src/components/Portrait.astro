@@ -1,0 +1,84 @@
+---
+type Props = {
+  src: string;
+  alt: string;
+  eager?: boolean;
+  class?: string;
+  sizes?: string;
+  live?: boolean;
+};
+
+const { src, alt, eager, live } = Astro.props;
+const loading = eager ? "eager" : "lazy";
+const fetchpriority = eager ? "high" : "auto";
+const base = src.replace(/\.(jpe?g|png|webp|avif)$/i, "");
+const hasOptimized = Boolean(src) && !src.includes("placeholder") && !src.startsWith("http");
+const sizes = Astro.props.sizes ?? "(max-width: 700px) 78vw, 420px";
+---
+
+{
+  hasOptimized ? (
+    <picture>
+      <source
+        type="image/avif"
+        srcset={`${base}-480.avif 480w, ${base}-720.avif 720w, ${base}-960.avif 960w`}
+        sizes={sizes}
+      />
+      <source
+        type="image/webp"
+        srcset={`${base}-480.webp 480w, ${base}-720.webp 720w, ${base}-960.webp 960w`}
+        sizes={sizes}
+      />
+      <img
+        class:list={["portrait-img", live && "is-live", Astro.props.class]}
+        src={`${base}-720.jpg`}
+        srcset={`${base}-480.jpg 480w, ${base}-720.jpg 720w, ${base}-960.jpg 960w`}
+        sizes={sizes}
+        alt={alt}
+        width="720"
+        height="900"
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchpriority}
+      />
+    </picture>
+  ) : (
+    <img
+      class:list={["portrait-img", live && "is-live", Astro.props.class]}
+      src={src}
+      alt={alt}
+      width="720"
+      height="900"
+      loading={loading}
+      decoding="async"
+      fetchpriority={fetchpriority}
+    />
+  )
+}
+
+<style>
+  .portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--pos, 50% 16%);
+    display: block;
+  }
+  .is-live {
+    animation: ken 20s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes ken {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.06);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-live {
+      animation: none;
+    }
+  }
+</style>

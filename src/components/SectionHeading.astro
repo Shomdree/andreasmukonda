@@ -1,0 +1,23 @@
+---
+type Props = { kicker?: string; title: string; text?: string };
+---
+
+<header class="heading" data-reveal="up">
+  {Astro.props.kicker && <p class="kicker">{Astro.props.kicker}</p>}
+  <h2 class="display">{Astro.props.title}</h2>
+  {Astro.props.text && <p class="lead">{Astro.props.text}</p>}
+</header>
+
+<style>
+  .heading {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    max-width: 40rem;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    margin: 0.35rem 0 0.6rem;
+  }
+  .lead {
+    color: var(--fg-soft);
+  }
+</style>

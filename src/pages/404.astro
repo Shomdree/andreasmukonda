@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageI18n } from "../i18n/request";
+import { getSettings } from "../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+---
+
+<BaseLayout settings={settings} title={t.seo.notFoundTitle} description={t.seo.notFoundDescription} canonicalPath={Astro.locals.pathWithoutLocale || "/"}>
+  <section class="section">
+    <div class="container-am">
+      <p class="kicker">404</p>
+      <h1 class="display">{t.notFound.title}</h1>
+      <p>{t.notFound.lead}</p>
+      <p class="row">
+        <a class="btn btn-primary" href={href("/")}>{t.notFound.home}</a>
+        <a class="btn btn-ghost" href={href("/contact")}>{t.notFound.contact}</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.2rem, 8vw, 4rem); max-width: 16ch; margin: 0.4rem 0 1rem; }
+  p { color: var(--fg-soft); }
+  .row { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.4rem; }
+</style>

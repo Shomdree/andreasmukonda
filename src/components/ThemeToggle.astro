@@ -1,0 +1,121 @@
+---
+import { pageI18n } from "../i18n/request";
+
+type Props = { variant?: "header" | "menu" };
+const { variant = "header" } = Astro.props;
+const { t } = pageI18n(Astro.locals);
+---
+
+<button
+  type="button"
+  class:list={["theme-toggle", variant]}
+  data-theme-toggle
+  data-label-light={t.theme.toLight}
+  data-label-dark={t.theme.toDark}
+  aria-label={t.theme.toLight}
+>
+  <span class="icon sun" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
+    </svg>
+  </span>
+  <span class="icon moon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M16.5 13.5A7 7 0 0 1 10.5 6 6.2 6.2 0 0 0 12 5a7 7 0 1 1-1.5 13.8 6.5 6.5 0 0 0 6-5.3Z"></path>
+    </svg>
+  </span>
+  {variant === "menu" && <span class="caption">{t.theme.label}</span>}
+</button>
+
+<script>
+  const COOKIE = "preferred_theme";
+  const DARK = "#0E1014";
+  const LIGHT = "#F7F5F0";
+
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme: "dark" | "light") {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem(COOKIE, theme);
+    } catch {
+      /* private mode */
+    }
+    document.cookie = `${COOKIE}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.setAttribute("content", theme === "light" ? LIGHT : DARK);
+    });
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+      const next = theme === "light" ? button.dataset.labelDark : button.dataset.labelLight;
+      if (next) button.setAttribute("aria-label", next);
+      button.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+    });
+  }
+
+  function bootThemeToggle() {
+    applyTheme(currentTheme());
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+      if (button.dataset.bound === "1") return;
+      button.dataset.bound = "1";
+      button.addEventListener("click", () => {
+        applyTheme(currentTheme() === "dark" ? "light" : "dark");
+      });
+    });
+  }
+
+  bootThemeToggle();
+  document.addEventListener("astro:page-load", bootThemeToggle);
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover {
+    border-color: var(--fg);
+  }
+  .icon {
+    display: none;
+    line-height: 0;
+  }
+  .sun {
+    display: block;
+  }
+  .moon {
+    display: none;
+  }
+  :global(html[data-theme="light"]) .sun {
+    display: none;
+  }
+  :global(html[data-theme="light"]) .moon {
+    display: block;
+  }
+  .caption {
+    display: none;
+  }
+  .menu {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 0.7rem;
+    border-radius: 8px;
+  }
+  .menu .caption {
+    display: inline;
+    font-weight: 650;
+  }
+</style>

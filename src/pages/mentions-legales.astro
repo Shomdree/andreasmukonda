@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageI18n } from "../i18n/request";
+import { identity } from "../i18n/identity";
+import { getSettings } from "../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+---
+
+<BaseLayout settings={settings} title={t.seo.legalTitle} description={t.seo.legalDescription} canonicalPath="/mentions-legales">
+  <article class="section">
+    <div class="container-am prose">
+      <h1 class="display">{t.legal.title}</h1>
+      <h2>{t.legal.editor}</h2>
+      <p>{t.legal.editorBody}</p>
+      <h2>{t.legal.contact}</h2>
+      <p><a href={`mailto:${identity.email}`}>{identity.email}</a></p>
+      <p><a href={href("/contact")}>{t.nav.contact}</a></p>
+      <h2>{t.legal.hosting}</h2>
+      <p>{t.legal.hostingBody}</p>
+      <h2>{t.legal.data}</h2>
+      <p>{t.legal.dataBody}</p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  h1 { font-size: 2.4rem; margin-bottom: 1rem; }
+  h2 { margin: 1.4rem 0 0.5rem; font-size: 1.1rem; }
+  .prose p { color: var(--fg-soft); margin-bottom: 0.8rem; max-width: 40rem; }
+</style>

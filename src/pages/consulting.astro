@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ConsultationForm from "../components/ConsultationForm.astro";
+import ProcessSteps from "../components/ProcessSteps.astro";
+import { pageI18n } from "../i18n/request";
+import { submitConsultation } from "../lib/actions";
+import { getSettings } from "../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+let errors: Record<string, string> | undefined;
+let values: Record<string, string> | undefined;
+let sent = Astro.url.searchParams.get("ok") === "1";
+
+if (Astro.request.method === "POST") {
+  const result = await submitConsultation(Astro.request, await Astro.request.formData());
+  if (result.ok) return Astro.redirect(`${href("/consulting")}?ok=1`);
+  errors = result.errors;
+  values = result.values;
+}
+
+const steps = [
+  { title: t.consultingPage.step1Title, text: t.consultingPage.step1 },
+  { title: t.consultingPage.step2Title, text: t.consultingPage.step2 },
+  { title: t.consultingPage.step3Title, text: t.consultingPage.step3 },
+];
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.consultingTitle}
+  description={t.seo.consultingDescription}
+  canonicalPath="/consulting"
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/consulting"), label: t.nav.consulting }]} />
+      <h1 class="display">{t.consultingPage.title}</h1>
+      <p class="lead">{t.consultingPage.lead}</p>
+      <p class="lead">{t.consultingPage.follow}</p>
+      <ProcessSteps steps={steps} />
+      <p>{t.consultingPage.listLabel}</p>
+      <ul>{t.consultingPage.items.map((item) => <li>{item}</li>)}</ul>
+      <h2 id="demande">{t.consultingPage.cta}</h2>
+      {sent ? <p class="ok" role="status">{t.questions.success}</p> : <ConsultationForm action={href("/consulting")} errors={errors} values={values} />}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
+  .lead, p, li { color: var(--fg-soft); }
+  h2 { margin: 1.8rem 0 0.8rem; }
+  ul { padding-left: 1.1rem; }
+  .ok { color: var(--color-ok); }
+</style>

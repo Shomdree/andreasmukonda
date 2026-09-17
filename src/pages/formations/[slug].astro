@@ -1,0 +1,79 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import TrainingRegistrationForm from "../../components/TrainingRegistrationForm.astro";
+import { pageI18n } from "../../i18n/request";
+import { localizeTraining } from "../../i18n/localize";
+import { submitTraining } from "../../lib/actions";
+import { getSettings, getTraining } from "../../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const found = await getTraining(Astro.params.slug ?? "");
+if (!found) return Astro.redirect(href("/"));
+const training = localizeTraining(found, t);
+
+let errors: Record<string, string> | undefined;
+let values: Record<string, string> | undefined;
+let sent = Astro.url.searchParams.get("ok") === "1";
+
+if (Astro.request.method === "POST") {
+  const result = await submitTraining(Astro.request, await Astro.request.formData());
+  if (result.ok) {
+    return Astro.redirect(`${href(`/formations/${training.slug}`)}?ok=1`);
+  }
+  errors = result.errors;
+  values = result.values;
+}
+---
+
+<BaseLayout
+  settings={settings}
+  title={`${training.title} — ${t.nav.trainings}`}
+  description={training.excerpt}
+  canonicalPath={`/formations/${training.slug}`}
+>
+  <article class="section">
+    <div class="container-am">
+      <Breadcrumbs
+        homeHref={href("/")}
+        homeLabel={t.nav.home}
+        items={[
+          { href: href("/formations"), label: t.nav.trainings },
+          { href: href(`/formations/${training.slug}`), label: training.title },
+        ]}
+      />
+      <p class="kicker">{training.level} · {training.format}</p>
+      <h1 class="display">{training.title}</h1>
+      <p class="lead">{training.description}</p>
+      <dl>
+        <div><dt>{t.catalog.audience}</dt><dd>{training.audience}</dd></div>
+        <div><dt>{t.catalog.trainer}</dt><dd>{training.trainer}</dd></div>
+        <div><dt>{t.catalog.duration}</dt><dd>{training.duration}</dd></div>
+        <div><dt>{t.catalog.location}</dt><dd>{training.location}</dd></div>
+        <div><dt>{t.catalog.places}</dt><dd>{training.capacity ?? t.catalog.toConfirm}</dd></div>
+        <div><dt>{t.catalog.price}</dt><dd>{training.priceLabel}</dd></div>
+      </dl>
+      <h2>{t.catalog.program}</h2>
+      <p>{training.program}</p>
+      <h2 id="inscription">{t.catalog.registration}</h2>
+      {
+        sent ? (
+          <p class="ok" role="status">{t.catalog.registrationSuccess}</p>
+        ) : training.registrationOpen ? (
+          <TrainingRegistrationForm action={href(`/formations/${training.slug}`)} trainingId={training.id} errors={errors} values={values} />
+        ) : (
+          <p>{t.trainings.interest} <a href={href("/contact")}>{t.nav.contact}</a>.</p>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2rem, 7vw, 3.6rem); max-width: 18ch; }
+  .lead, dd, p { color: var(--fg-soft); }
+  dl { display: grid; gap: 0.8rem; margin: 1.4rem 0; }
+  dt { color: var(--mute); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .ok { color: var(--color-ok); }
+</style>

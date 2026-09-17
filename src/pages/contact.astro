@@ -1,0 +1,97 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ContactForm from "../components/ContactForm.astro";
+import UnavailableNotice from "../components/UnavailableNotice.astro";
+import SocialLinks from "../components/SocialLinks.astro";
+import CTASection from "../components/CTASection.astro";
+import { pageI18n } from "../i18n/request";
+import { identity } from "../i18n/identity";
+import { submitContact } from "../lib/actions";
+import { isUnavailableMessage } from "../lib/env";
+import { getSettings } from "../lib/queries";
+import { whatsappUrl } from "../lib/whatsapp";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+let errors: Record<string, string> | undefined;
+let values: Record<string, string> | undefined;
+let sent = Astro.url.searchParams.get("ok") === "1";
+
+if (Astro.request.method === "POST") {
+  const result = await submitContact(Astro.request, await Astro.request.formData());
+  if (result.ok) return Astro.redirect(`${href("/contact")}?ok=1`);
+  errors = result.errors;
+  values = result.values;
+}
+
+const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
+const wa2 = whatsappUrl(settings.whatsappSecondary, t.whatsapp.generic);
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.contactTitle}
+  description={t.seo.contactDescription}
+  canonicalPath="/contact"
+>
+  <section class="section">
+    <div class="container-am split">
+      <div class="info" data-reveal="left">
+        <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/contact"), label: t.nav.contact }]} />
+        <h1 class="display">{t.contact.title}</h1>
+        <p class="lead">{t.contact.lead}</p>
+        <p class="lead">{t.contact.follow}</p>
+        <p><strong>{t.contact.emailLabel}</strong><br /><a href={`mailto:${identity.email}`}>{identity.email}</a></p>
+        {
+          wa && (
+            <p>
+              <strong>{t.contact.whatsappLabel}</strong><br />
+              <a href={wa} rel="noopener noreferrer">{identity.phone}</a>
+            </p>
+          )
+        }
+        {
+          wa2 && (
+            <p>
+              <a href={wa2} rel="noopener noreferrer">{identity.phoneSecondary}</a>
+            </p>
+          )
+        }
+        <p><strong>{t.contact.locationLabel}</strong><br />{t.contact.location}</p>
+        <SocialLinks links={settings.socialLinks} whatsapp={settings.whatsapp} />
+      </div>
+      <div class="form" data-reveal="right">
+        {
+          sent ? (
+            <p class="ok" role="status">
+              <span class="check" aria-hidden="true">✓</span>
+              {t.contact.success}
+            </p>
+          ) : isUnavailableMessage(errors?.form) ? (
+            <UnavailableNotice variant="contact" message={t.contact.error} primaryHref={wa} secondaryHref={wa2} />
+          ) : (
+            <ContactForm action={href("/contact")} errors={errors} values={values} />
+          )
+        }
+      </div>
+    </div>
+  </section>
+  <CTASection
+    title={t.cta.title}
+    text={t.cta.lead}
+    primaryHref={href("/commander")}
+    primaryLabel={t.cta.start}
+    secondaryHref={wa ?? href("/questions")}
+    secondaryLabel={t.cta.whatsapp}
+  />
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.2rem); }
+  .lead { color: var(--fg-soft); }
+  .ok { color: var(--color-ok); font-size: 1.15rem; display: flex; gap: 0.5rem; align-items: center; }
+  @media (min-width: 880px) {
+    .split { display: grid; grid-template-columns: 0.8fr 1.1fr; gap: 2.5rem; align-items: start; }
+  }
+</style>

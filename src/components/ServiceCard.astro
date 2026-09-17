@@ -1,0 +1,85 @@
+---
+import type { ServiceItem } from "../lib/types";
+import { pageI18n } from "../i18n/request";
+import { localizeService } from "../i18n/localize";
+
+type Props = { service: ServiceItem; index?: number };
+const { index = 0 } = Astro.props;
+const { t, href } = pageI18n(Astro.locals);
+const service = localizeService(Astro.props.service, t);
+const detailsHref = href(`/services/${service.slug}`);
+const ctaHref = service.ctaHref.startsWith("/") ? href(service.ctaHref) : service.ctaHref;
+---
+
+<article class="card" data-reveal="up" style={`--d:${Math.min(index * 80, 320)}ms`}>
+  <p class="kicker">{service.priceLabel}</p>
+  <h3 class="display">{service.title}</h3>
+  <p>{service.excerpt}</p>
+  <div class="row">
+    <a href={detailsHref}>{t.catalog.details}</a>
+    <a class="btn btn-ghost" href={ctaHref}>
+      {service.ctaLabel} <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.3rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    margin-bottom: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      background-color var(--motion-fast) var(--ease-standard);
+    transition-delay: var(--d, 0ms);
+  }
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.07) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 700ms var(--ease-standard);
+    pointer-events: none;
+  }
+  .card:hover::after {
+    transform: translateX(120%);
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--color-ember) 50%, var(--line));
+    background: rgba(255, 255, 255, 0.04);
+  }
+  h3 {
+    font-size: 1.55rem;
+    margin: 0.25rem 0 0.5rem;
+    color: var(--fg);
+  }
+  p {
+    color: var(--fg-soft);
+    max-width: 40rem;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .row > a:first-child {
+    color: var(--fg);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover {
+      transform: none;
+    }
+  }
+</style>

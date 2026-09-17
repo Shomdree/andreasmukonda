@@ -1,0 +1,35 @@
+---
+type Props = { status: string };
+const map: Record<string, string> = {
+  nouvelle: "Nouvelle",
+  en_analyse: "En analyse",
+  devis_envoye: "Devis envoyé",
+  confirmee: "Confirmée",
+  en_production: "En production",
+  en_attente_client: "En attente client",
+  terminee: "Terminée",
+  annulee: "Annulée",
+  lue: "Lue",
+  repondue: "Répondue",
+  archivee: "Archivée",
+  publiee: "Publiée",
+  programme: "Programmé",
+  "en-direct": "En direct",
+  replay: "Replay",
+};
+---
+
+<span class="badge">{map[Astro.props.status] ?? Astro.props.status}</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    padding: 0 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--color-ember);
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+type Props = { action: string; name?: string };
+---
+
+<form method="post" action={Astro.props.action} onsubmit="return confirm('Confirmer la suppression ?')">
+  <input type="hidden" name="intent" value="delete" />
+  {Astro.props.name && <input type="hidden" name="id" value={Astro.props.name} />}
+  <button class="danger" type="submit">Supprimer</button>
+</form>
+
+<style>
+  .danger {
+    background: none;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    min-height: 44px;
+    padding: 0 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+</style>

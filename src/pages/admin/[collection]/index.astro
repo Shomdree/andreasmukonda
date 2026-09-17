@@ -1,0 +1,74 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import DataTable from "../../../components/admin/DataTable.astro";
+import { collectionBySlug } from "../../../lib/admin-collections";
+import { listRows } from "../../../lib/admin";
+import {
+  catalogFaq as demoFaq,
+  catalogLives as demoLives,
+  catalogPosts as demoPosts,
+  catalogProjects as demoProjects,
+  catalogServices as demoServices,
+  catalogTestimonials as demoTestimonials,
+  catalogTrainings as demoTrainings,
+} from "../../../content/demo";
+
+const collection = collectionBySlug(Astro.params.collection ?? "");
+if (!collection) return Astro.redirect("/admin");
+
+let rows = await listRows(Astro.request, Astro.cookies, collection.table, { order: "created_at", limit: 100 });
+if (rows.length === 0) {
+  const fallback: Record<string, { id: string; title?: string; name?: string; question?: string }[]> = {
+    portfolio_projects: demoProjects,
+    services: demoServices,
+    trainings: demoTrainings,
+    live_items: demoLives,
+    testimonials: demoTestimonials,
+    posts: demoPosts,
+    faq: demoFaq,
+  };
+  rows = (fallback[collection.table] ?? []).map((item) => ({
+    ...item,
+    [collection.labelField]: item.title ?? item.name ?? item.question,
+  }));
+}
+
+const q = Astro.url.searchParams.get("q")?.toLowerCase() ?? "";
+if (q) {
+  rows = rows.filter((row) => String(row[collection.labelField] ?? "").toLowerCase().includes(q));
+}
+---
+
+<AdminLayout title={collection.title}>
+  <div class="bar">
+    <form method="get">
+      <input type="search" name="q" value={q} placeholder="Recherche" />
+      <button class="btn btn-ghost" type="submit">OK</button>
+    </form>
+    <a class="btn btn-primary" href={`/admin/${collection.slug}/nouveau`}>Nouveau</a>
+  </div>
+  <DataTable
+    columns={[collection.title, "ID"]}
+    rows={rows.map((row) => ({
+      href: `/admin/${collection.slug}/${row.id}`,
+      cells: [String(row[collection.labelField] ?? row.id), String(row.id)],
+    }))}
+  />
+</AdminLayout>
+
+<style>
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  input {
+    min-height: 44px;
+    background: var(--bg-elev);
+    color: var(--fg);
+    border: 1px solid var(--line);
+    padding: 0 0.7rem;
+  }
+</style>

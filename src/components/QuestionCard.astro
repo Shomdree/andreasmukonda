@@ -1,0 +1,24 @@
+---
+import type { PublicQuestion } from "../lib/types";
+type Props = { item: PublicQuestion };
+---
+
+<article class="q">
+  <p class="kicker">{Astro.props.item.category} · {Astro.props.item.displayName}</p>
+  <h3>{Astro.props.item.question}</h3>
+  <p>{Astro.props.item.answer}</p>
+</article>
+
+<style>
+  .q {
+    padding: 1.3rem 0;
+    border-top: 1px solid var(--line);
+  }
+  h3 {
+    font-size: 1.2rem;
+    margin: 0.3rem 0 0.6rem;
+  }
+  p:last-child {
+    color: var(--fg-soft);
+  }
+</style>

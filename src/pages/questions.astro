@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import QuestionCard from "../components/QuestionCard.astro";
+import QuestionForm from "../components/QuestionForm.astro";
+import { pageI18n } from "../i18n/request";
+import { submitQuestion } from "../lib/actions";
+import { getPublicQuestions, getSettings } from "../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const questions = await getPublicQuestions();
+let errors: Record<string, string> | undefined;
+let values: Record<string, string> | undefined;
+let sent = Astro.url.searchParams.get("ok") === "1";
+
+if (Astro.request.method === "POST") {
+  const result = await submitQuestion(Astro.request, await Astro.request.formData());
+  if (result.ok) return Astro.redirect(`${href("/questions")}?ok=1`);
+  errors = result.errors;
+  values = result.values;
+}
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.questionsTitle}
+  description={t.seo.questionsDescription}
+  canonicalPath="/questions"
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/questions"), label: t.nav.questions }]} />
+      <h1 class="display">{t.questions.title}</h1>
+      <p class="lead">{t.questions.lead}</p>
+      <p class="lead">{t.questions.follow}</p>
+      <p class="hint">{t.questions.note}</p>
+      {
+        sent ? (
+          <p class="ok" role="status">{t.questions.success}</p>
+        ) : (
+          <QuestionForm action={href("/questions")} errors={errors} values={values} />
+        )
+      }
+      {questions.length > 0 && questions.map((item) => <QuestionCard item={item} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.1rem, 7vw, 3.8rem); max-width: 18ch; }
+  .lead, .hint { color: var(--fg-soft); margin-bottom: 1.2rem; }
+  .ok { color: var(--color-ok); font-size: 1.1rem; }
+</style>

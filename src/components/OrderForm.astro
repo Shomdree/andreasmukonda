@@ -1,0 +1,198 @@
+---
+import { budgetRanges } from "../content/defaults";
+import type { ServiceItem } from "../lib/types";
+import FormGuard from "./FormGuard.astro";
+import { pageI18n } from "../i18n/request";
+import { localizeBudget, localizeService } from "../i18n/localize";
+
+type Props = {
+  action: string;
+  services: ServiceItem[];
+  selectedSlug?: string | null;
+  errors?: Record<string, string>;
+  values?: Record<string, string>;
+};
+const { t, locale } = pageI18n(Astro.locals);
+const e = Astro.props.errors ?? {};
+const v = Astro.props.values ?? {};
+const services = Astro.props.services.map((item) => localizeService(item, t));
+const selected = v.serviceId || services.find((s) => s.slug === Astro.props.selectedSlug)?.id;
+---
+
+<form class="stack js-form" method="post" action={Astro.props.action} enctype="multipart/form-data" novalidate data-astro-reload>
+  {e.form && <p class="banner" role="alert">{e.form}</p>}
+  <FormGuard />
+  <input type="hidden" name="locale" value={locale} />
+
+  <ol class="progress" aria-hidden="true">
+    {t.order.steps.map((step) => <li>{step}</li>)}
+  </ol>
+
+  <fieldset>
+    <legend>1. {t.form.service}</legend>
+    <div class="field">
+      <label for="serviceId">{t.form.service}</label>
+      <select id="serviceId" name="serviceId" required>
+        <option value="">{t.form.choose}</option>
+        {
+          services.map((s) => (
+            <option value={s.id} selected={selected === s.id} data-title={s.title}>
+              {s.title}
+            </option>
+          ))
+        }
+      </select>
+      {e.serviceId && <p class="error">{e.serviceId}</p>}
+    </div>
+    <input type="hidden" name="serviceTitle" id="serviceTitle" value={v.serviceTitle ?? ""} />
+  </fieldset>
+
+  <fieldset>
+    <legend>2. {t.form.name}</legend>
+    <div class="field">
+      <label for="fullName">{t.form.name}</label>
+      <input id="fullName" name="fullName" required maxlength="80" value={v.fullName ?? ""} autocomplete="name" />
+      {e.fullName && <p class="error">{e.fullName}</p>}
+    </div>
+    <div class="field">
+      <label for="organization">{t.form.organizationOptional}</label>
+      <input id="organization" name="organization" maxlength="120" value={v.organization ?? ""} />
+    </div>
+    <div class="field">
+      <label for="email">{t.form.email}</label>
+      <input id="email" name="email" type="email" required maxlength="120" value={v.email ?? ""} autocomplete="email" />
+      {e.email && <p class="error">{e.email}</p>}
+    </div>
+    <div class="field">
+      <label for="phone">{t.form.phone}</label>
+      <input id="phone" name="phone" type="tel" required inputmode="tel" maxlength="30" value={v.phone ?? ""} autocomplete="tel" />
+      {e.phone && <p class="error">{e.phone}</p>}
+    </div>
+    <div class="field">
+      <label for="whatsapp">WhatsApp</label>
+      <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" maxlength="30" value={v.whatsapp ?? ""} />
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. {t.form.details}</legend>
+    <div class="field">
+      <label for="projectType">{t.form.projectType}</label>
+      <input id="projectType" name="projectType" required maxlength="80" value={v.projectType ?? ""} />
+    </div>
+    <div class="field">
+      <label for="description">{t.form.details}</label>
+      <textarea id="description" name="description" required maxlength="5000">{v.description ?? ""}</textarea>
+      {e.description && <p class="error">{e.description}</p>}
+    </div>
+    <div class="field">
+      <label for="attachment">{t.form.attachment}</label>
+      <p class="hint">{t.form.attachmentHint}</p>
+      <div class="file-wrap">
+        <input id="attachment" name="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.avif,application/pdf,image/jpeg,image/png,image/webp,image/avif" data-no-file={t.form.noFile} />
+        <label class="file-ui" for="attachment">
+          <span class="file-cta">{t.form.chooseFile}</span>
+          <span class="file-name" data-file-name>{t.form.noFile}</span>
+        </label>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>4. {t.form.budget}</legend>
+    <p class="hint">{t.form.budgetHint}</p>
+    <div class="field">
+      <label for="budgetRange">{t.form.budget}</label>
+      <select id="budgetRange" name="budgetRange">
+        {budgetRanges.map((b) => <option value={b} selected={v.budgetRange === b}>{localizeBudget(b, t)}</option>)}
+      </select>
+    </div>
+    <div class="field">
+      <label for="desiredDeadline">{t.form.deadline}</label>
+      <input id="desiredDeadline" name="desiredDeadline" maxlength="80" value={v.desiredDeadline ?? ""} />
+    </div>
+    <div class="field">
+      <label for="contactPreference">{t.form.contactPreference}</label>
+      <select id="contactPreference" name="contactPreference">
+        <option value="whatsapp">WhatsApp</option>
+        <option value="email" selected={v.contactPreference === "email"}>{t.form.email}</option>
+        <option value="telephone" selected={v.contactPreference === "telephone"}>{t.form.phone}</option>
+      </select>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>5</legend>
+    <label class="check">
+      <input type="checkbox" name="consent" required />
+      {t.form.consentOrder}
+    </label>
+    {e.consent && <p class="error">{e.consent}</p>}
+  </fieldset>
+  <button class="btn btn-primary" type="submit" data-loading-label={t.form.sending}>{t.order.cta}</button>
+</form>
+
+<script>
+  const select = document.querySelector<HTMLSelectElement>("#serviceId");
+  const hidden = document.querySelector<HTMLInputElement>("#serviceTitle");
+  const sync = () => {
+    const option = select?.selectedOptions[0];
+    if (hidden && option) hidden.value = option.text.trim();
+  };
+  select?.addEventListener("change", sync);
+  sync();
+
+  const file = document.querySelector<HTMLInputElement>("#attachment");
+  const name = document.querySelector("[data-file-name]");
+  file?.addEventListener("change", () => {
+    if (!name) return;
+    name.textContent = file.files?.[0]?.name || file.dataset.noFile || "";
+  });
+</script>
+
+<style>
+  .stack { display: grid; gap: 1.2rem; max-width: 40rem; }
+  fieldset { border: 1px solid var(--line); padding: 1rem; display: grid; gap: 0.9rem; border-radius: 14px; }
+  legend { padding: 0 0.4rem; color: var(--color-ember); }
+  .banner { color: var(--color-danger); }
+  .check { display: flex; gap: 0.6rem; color: var(--fg-soft); font-size: 0.92rem; }
+  .hint { color: var(--mute); font-size: 0.9rem; margin: 0; }
+  .progress {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.8rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.4rem;
+    color: var(--mute);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .file-wrap {
+    position: relative;
+  }
+  .file-wrap input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  .file-ui {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 44px;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--fg-soft);
+  }
+  .file-cta {
+    color: var(--fg);
+    font-weight: 650;
+  }
+</style>

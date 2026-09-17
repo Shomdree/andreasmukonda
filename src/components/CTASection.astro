@@ -1,0 +1,76 @@
+---
+type Props = {
+  title: string;
+  text?: string;
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+};
+---
+
+<section class="cta section" data-reveal="scale">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="container-am">
+    <h2 class="display">{Astro.props.title}</h2>
+    {Astro.props.text && <p>{Astro.props.text}</p>}
+    <div class="row">
+      <a class="btn btn-primary" href={Astro.props.primaryHref}>
+        {Astro.props.primaryLabel} <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      {
+        Astro.props.secondaryHref && (
+          <a
+            class="btn btn-ghost"
+            href={Astro.props.secondaryHref}
+            rel={Astro.props.secondaryHref.startsWith("http") ? "noopener noreferrer" : undefined}
+          >
+            {Astro.props.secondaryLabel}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .glow {
+    position: absolute;
+    inset: auto -20% -40% 40%;
+    height: 220px;
+    background: radial-gradient(circle, rgba(79, 99, 255, 0.22), transparent 70%);
+    animation: drift 18s ease-in-out infinite;
+    pointer-events: none;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 6vw, 3.4rem);
+    max-width: 18ch;
+  }
+  p {
+    color: var(--fg-soft);
+    max-width: 38rem;
+    margin: 0.8rem 0 1.4rem;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.2rem;
+  }
+  @keyframes drift {
+    50% {
+      transform: translate3d(-24px, 8px, 0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glow {
+      animation: none;
+    }
+  }
+</style>

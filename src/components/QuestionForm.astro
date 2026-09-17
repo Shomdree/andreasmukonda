@@ -1,0 +1,63 @@
+---
+import { questionCategories } from "../content/defaults";
+import FormGuard from "./FormGuard.astro";
+import { pageI18n } from "../i18n/request";
+import { localizeQuestionCategory } from "../i18n/localize";
+
+type Props = {
+  action: string;
+  errors?: Record<string, string>;
+  values?: Record<string, string>;
+};
+const { t, locale } = pageI18n(Astro.locals);
+const e = Astro.props.errors ?? {};
+const v = Astro.props.values ?? {};
+---
+
+<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload>
+  {e.form && <p class="banner" role="alert">{e.form}</p>}
+  <FormGuard />
+  <input type="hidden" name="locale" value={locale} />
+  <div class="field">
+    <label for="q-name">{t.form.name}</label>
+    <input id="q-name" name="fullName" required maxlength="80" value={v.fullName ?? ""} autocomplete="name" />
+    {e.fullName && <p class="error">{e.fullName}</p>}
+  </div>
+  <div class="field">
+    <label for="q-email">{t.form.email} ({t.form.optional})</label>
+    <input id="q-email" name="email" type="email" maxlength="120" value={v.email ?? ""} autocomplete="email" />
+    {e.email && <p class="error">{e.email}</p>}
+  </div>
+  <div class="field">
+    <label for="q-wa">WhatsApp ({t.form.optional})</label>
+    <input id="q-wa" name="whatsapp" type="tel" inputmode="tel" maxlength="30" value={v.whatsapp ?? ""} />
+  </div>
+  <div class="field">
+    <label for="q-cat">{t.form.category}</label>
+    <select id="q-cat" name="category">
+      {questionCategories.map((c) => <option value={c} selected={v.category === c}>{localizeQuestionCategory(c, t)}</option>)}
+    </select>
+  </div>
+  <div class="field">
+    <label for="q-text">{t.form.question}</label>
+    <textarea id="q-text" name="question" required maxlength="2000">{v.question ?? ""}</textarea>
+    {e.question && <p class="error">{e.question}</p>}
+  </div>
+  <label class="check">
+    <input type="checkbox" name="consentPublication" />
+    {t.form.publish}
+  </label>
+  <label class="check">
+    <input type="checkbox" name="consent" required />
+    {t.form.consentQuestion}
+  </label>
+  {e.consent && <p class="error">{e.consent}</p>}
+  <button class="btn btn-primary" type="submit" data-loading-label={t.form.sending}>{t.questions.cta}</button>
+</form>
+
+<style>
+  .stack { display: grid; gap: 1rem; max-width: 36rem; }
+  .banner { color: var(--color-danger); }
+  .check { display: flex; gap: 0.6rem; color: var(--fg-soft); font-size: 0.92rem; }
+  .check input { width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; }
+</style>

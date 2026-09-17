@@ -1,0 +1,33 @@
+---
+import type { FaqItem } from "../lib/types";
+type Props = { items: Pick<FaqItem, "question" | "answer">[] };
+---
+
+<div class="faq">
+  {
+    Astro.props.items.map((item) => (
+      <details>
+        <summary>{item.question}</summary>
+        <p>{item.answer}</p>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  details {
+    border-top: 1px solid var(--line);
+    padding: 0.4rem 0;
+  }
+  summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 650;
+  }
+  p {
+    color: var(--fg-soft);
+    padding-bottom: 0.8rem;
+  }
+</style>

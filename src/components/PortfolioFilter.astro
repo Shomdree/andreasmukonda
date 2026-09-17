@@ -1,0 +1,47 @@
+---
+import type { PortfolioCategory } from "../lib/types";
+import { pageI18n } from "../i18n/request";
+import { localizeCategory } from "../i18n/localize";
+
+type Props = { categories: PortfolioCategory[]; current?: string | null };
+const { categories, current } = Astro.props;
+const { t, href } = pageI18n(Astro.locals);
+---
+
+<nav class="filters" aria-label={t.nav.portfolio}>
+  <a class:list={["chip", !current && "on"]} href={href("/portfolio")}>{t.catalog.all}</a>
+  {
+    categories.map((cat) => {
+      const item = localizeCategory(cat, t);
+      return (
+        <a class:list={["chip", current === item.slug && "on"]} href={`${href("/portfolio")}?categorie=${item.slug}`}>
+          {item.name}
+        </a>
+      );
+    })
+  }
+</nav>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.6rem;
+  }
+  .chip {
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--fg-soft);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .on,
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
+</style>
