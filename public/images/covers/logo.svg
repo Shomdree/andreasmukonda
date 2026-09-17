@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <rect width="1200" height="1500" fill="#171A21"/>
+  <circle cx="600" cy="700" r="280" fill="none" stroke="#F7F5F0" stroke-width="14"/>
+  <text x="600" y="730" text-anchor="middle" fill="#4F63FF" font-size="140" font-family="Georgia,serif">AM</text>
+</svg>
