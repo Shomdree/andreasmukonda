@@ -37,6 +37,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      external: ["ws"],
+    },
     build: {
       cssMinify: true,
     },

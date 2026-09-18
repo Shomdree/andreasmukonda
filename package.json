@@ -28,6 +28,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
     "astro": "^5.13.10",
+    "ws": "^8.21.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {

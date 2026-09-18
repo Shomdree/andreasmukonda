@@ -1,7 +1,15 @@
 import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { AstroCookies } from "astro";
+import WS from "ws";
 import { readServerEnv } from "./env";
+
+/** Node 20 n'a pas WebSocket natif ; supabase-js 2.x le exige à la création du client. */
+function ensureNodeWebSocket(): void {
+  if (typeof globalThis.WebSocket === "undefined") {
+    globalThis.WebSocket = WS as unknown as typeof globalThis.WebSocket;
+  }
+}
 
 function publicSupabase() {
   const url = readServerEnv("PUBLIC_SUPABASE_URL");
@@ -9,12 +17,22 @@ function publicSupabase() {
   return { url, anon };
 }
 
+function authOptions() {
+  return { persistSession: false, autoRefreshToken: false };
+}
+
+function realtimeOptions() {
+  ensureNodeWebSocket();
+  return { transport: globalThis.WebSocket };
+}
+
 export function createBrowserSupabase(): SupabaseClient | null {
   const { url, anon } = publicSupabase();
   if (!url || !anon) return null;
   try {
     return createClient(url, anon, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: authOptions(),
+      realtime: realtimeOptions(),
     });
   } catch {
     return null;
@@ -28,7 +46,8 @@ export function createServiceSupabase(): SupabaseClient | null {
   // Clé serveur uniquement — jamais préfixée PUBLIC_, jamais importée depuis un script client.
   try {
     return createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: authOptions(),
+      realtime: realtimeOptions(),
     });
   } catch {
     return null;
@@ -53,6 +72,7 @@ export function createCookieSupabase(request: Request, cookies: AstroCookies) {
           });
         },
       },
+      realtime: realtimeOptions(),
     });
   } catch {
     return null;
