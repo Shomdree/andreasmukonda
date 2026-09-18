@@ -12,6 +12,14 @@ const settings = await getSettings();
 const project = await getProject(Astro.params.slug ?? "");
 if (!project) return Astro.redirect(href("/"));
 const categoryName = project.category ? localizeCategory(project.category, t).name : t.catalog.project;
+const chapters = [
+  { title: t.portfolio.need, text: project.challenge || project.description },
+  { title: t.portfolio.approach, text: project.solution },
+  { title: t.portfolio.result, text: project.results },
+].filter((item, index, all) => {
+  if (!item.text?.trim()) return false;
+  return all.findIndex((other) => other.text === item.text) === index;
+});
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -30,7 +38,7 @@ const jsonLd = {
   canonicalPath={`/portfolio/${project.slug}`}
   jsonLd={jsonLd}
 >
-  <article>
+  <article class="work">
     <div class="hero media-frame">
       <ResponsiveImage src={project.coverImage} alt={project.coverAlt} width={1600} height={900} eager />
     </div>
@@ -44,35 +52,52 @@ const jsonLd = {
             { href: href(`/portfolio/${project.slug}`), label: project.title },
           ]}
         />
-        <p class="kicker">{categoryName} · {project.year}</p>
+        <p class="kicker">{categoryName}{project.year ? ` · ${project.year}` : ""}</p>
         <h1 class="display">{project.title}</h1>
-        <p class="lead">{project.excerpt}</p>
+        {project.excerpt && <p class="lead">{project.excerpt}</p>}
         <dl>
-          <div><dt>{t.catalog.client}</dt><dd>{project.client}</dd></div>
-          <div><dt>{t.nav.services}</dt><dd>{project.servicesDone.join(", ")}</dd></div>
+          {project.client && (
+            <div>
+              <dt>{t.catalog.client}</dt>
+              <dd>{project.client}</dd>
+            </div>
+          )}
+          {project.servicesDone.length > 0 && (
+            <div>
+              <dt>{t.nav.services}</dt>
+              <dd>{project.servicesDone.join(", ")}</dd>
+            </div>
+          )}
         </dl>
-        <h2>{t.catalog.projectContext}</h2>
-        <p>{project.description}</p>
-        <h2>{t.catalog.projectChallenge}</h2>
-        <p>{project.challenge}</p>
-        <h2>{t.catalog.projectApproach}</h2>
-        <p>{project.solution}</p>
-        {project.results && (
-          <>
-            <h2>{t.catalog.projectResults}</h2>
-            <p>{project.results}</p>
-          </>
-        )}
+        {
+          chapters.map((chapter, index) => (
+            <section class:list={["chapter", index % 2 === 1 && "alt"]}>
+              <h2>{chapter.title}</h2>
+              <p>{chapter.text}</p>
+            </section>
+          ))
+        }
         {
           project.gallery.length > 0 && (
             <>
               <h2>{t.catalog.projectGallery}</h2>
               <div class="gallery">
-                {project.gallery.map((item) => (
-                  <div class="media-frame">
-                    <ResponsiveImage src={item.url} alt={item.alt} width={1000} height={1250} />
-                  </div>
-                ))}
+                {project.gallery.map((item, index) => {
+                  const popId = `work-${index}`;
+                  return (
+                    <>
+                      <button type="button" class="shot media-frame" popovertarget={popId} aria-label={t.portfolio.openWork}>
+                        <ResponsiveImage src={item.url} alt={item.alt} width={1000} height={1250} />
+                      </button>
+                      <div id={popId} popover="auto" class="work-pop">
+                        <button type="button" class="close" popovertarget={popId} popovertargetaction="hide">
+                          {t.portfolio.close}
+                        </button>
+                        <img src={item.url} alt={item.alt} />
+                      </div>
+                    </>
+                  );
+                })}
               </div>
             </>
           )
@@ -83,19 +108,110 @@ const jsonLd = {
   <CTASection
     title={t.portfolio.cta}
     primaryHref={`${href("/commander")}?service=${project.category?.slug ?? "identite-visuelle"}`}
-    primaryLabel={t.nav.order}
+    primaryLabel={t.portfolio.similarCta}
     secondaryHref={href("/portfolio")}
     secondaryLabel={t.nav.portfolio}
   />
 </BaseLayout>
 
 <style>
-  .hero { aspect-ratio: 16 / 9; max-height: 72vh; }
-  h1 { font-size: clamp(2rem, 7vw, 4rem); max-width: 18ch; }
-  .lead, p { color: var(--fg-soft); }
-  h2 { margin-top: 1.8rem; font-size: 1.1rem; }
-  dl { display: grid; gap: 0.8rem; margin: 1.4rem 0; }
-  dt { color: var(--mute); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; }
-  .gallery { display: grid; gap: 1rem; margin-top: 1rem; }
-  @media (min-width: 800px) { .gallery { grid-template-columns: 1fr 1fr; } }
+  .work {
+    min-width: 0;
+  }
+  .hero {
+    aspect-ratio: 16 / 9;
+    max-height: 64vh;
+  }
+  .hero :global(img) {
+    object-fit: contain;
+    height: 100%;
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.8rem);
+    max-width: 18ch;
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .lead,
+  p {
+    color: var(--fg-soft);
+  }
+  .lead {
+    font-size: 1.12rem;
+    max-width: 40rem;
+  }
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ember);
+  }
+  dl {
+    display: grid;
+    gap: 0.8rem;
+    margin: 1.4rem 0 2rem;
+  }
+  dt {
+    color: var(--mute);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .chapter {
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--line);
+    max-width: 42rem;
+  }
+  .gallery {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .shot {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+    background: color-mix(in srgb, var(--bg-elev) 80%, #1c2230);
+  }
+  .shot :global(img) {
+    object-fit: contain;
+    height: 100%;
+  }
+  .work-pop {
+    border: 0;
+    padding: 1rem;
+    background: rgba(8, 10, 14, 0.94);
+    color: var(--fg);
+    width: min(96vw, 1100px);
+  }
+  .work-pop img {
+    display: block;
+    max-width: 100%;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+  .close {
+    display: inline-flex;
+    min-height: 44px;
+    margin-bottom: 0.6rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-weight: 650;
+  }
+  @media (min-width: 800px) {
+    .gallery {
+      grid-template-columns: 1fr 1fr;
+    }
+    dl {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 </style>

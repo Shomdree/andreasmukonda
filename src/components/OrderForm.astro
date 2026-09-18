@@ -28,6 +28,7 @@ type Props = {
   services: ServiceItem[];
   trainings?: TrainingItem[];
   selectedSlug?: string | null;
+  selectedTraining?: string | null;
   errors?: Record<string, string>;
   values?: Record<string, string>;
 };
@@ -37,6 +38,7 @@ const v = Astro.props.values ?? {};
 const services = Astro.props.services.map((item) => localizeService(item, t));
 const trainings = (Astro.props.trainings ?? []).map((item) => localizeTraining(item, t));
 const selected = v.serviceId || services.find((s) => s.slug === Astro.props.selectedSlug)?.id;
+const selectedTraining = v.trainingPick || Astro.props.selectedTraining || "";
 const features = selectedList(v.webFeatures);
 const lab = (map: Record<string, string>, key: string) => map[key] ?? key;
 const designKinds = t.order.designKinds as Record<string, string>;
@@ -246,7 +248,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         <select id="trainingPick" name="trainingPick">
           <option value="">{t.form.choose}</option>
           {trainings.map((item) => (
-            <option value={item.id} selected={v.trainingPick === item.id || v.trainingPick === item.slug}>{item.title}</option>
+            <option value={item.id} selected={selectedTraining === item.id || selectedTraining === item.slug}>{item.title}</option>
           ))}
           <option value="autre" selected={v.trainingPick === "autre"}>{trainingSpecial.autre}</option>
           <option value="unsure" selected={v.trainingPick === "unsure"}>{trainingSpecial.unsure}</option>

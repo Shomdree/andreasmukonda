@@ -6,10 +6,15 @@ import QuestionForm from "../components/QuestionForm.astro";
 import { pageI18n } from "../i18n/request";
 import { submitQuestion } from "../lib/actions";
 import { getPublicQuestions, getSettings } from "../lib/queries";
+import { questionCategories } from "../content/defaults";
+import { localizeQuestionCategory } from "../i18n/localize";
 
 const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
 const questions = await getPublicQuestions();
+const theme = Astro.url.searchParams.get("theme");
+const visible = theme ? questions.filter((item) => item.category === theme) : questions;
+const usedThemes = questionCategories.filter((item) => questions.some((entry) => entry.category === item));
 let errors: Record<string, string> | undefined;
 let values: Record<string, string> | undefined;
 let sent = Astro.url.searchParams.get("ok") === "1";
@@ -28,27 +33,141 @@ if (Astro.request.method === "POST") {
   description={t.seo.questionsDescription}
   canonicalPath="/questions"
 >
-  <section class="section">
+  <section class="section desk">
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/questions"), label: t.nav.questions }]} />
-      <h1 class="display">{t.questions.title}</h1>
-      <p class="lead">{t.questions.lead}</p>
-      <p class="lead">{t.questions.follow}</p>
-      <p class="hint">{t.questions.note}</p>
-      {
-        sent ? (
-          <p class="ok" role="status">{t.questions.success}</p>
-        ) : (
-          <QuestionForm action={href("/questions")} errors={errors} values={values} />
-        )
-      }
-      {questions.length > 0 && questions.map((item) => <QuestionCard item={item} />)}
+      <header class="intro">
+        <h1 class="display">{t.questions.title}</h1>
+        <p class="lead">{t.questions.lead}</p>
+        <p class="lead">{t.questions.follow}</p>
+        <nav class="actions" aria-label={t.nav.questions}>
+          <a class="btn btn-ghost" href="#reponses">{t.questions.find}</a>
+          <a class="btn btn-primary" href="#poser">{t.questions.ask}</a>
+        </nav>
+      </header>
+      <details class="demo">
+        <summary>{t.questions.demoSummary}</summary>
+        <p class="label">{t.questions.demoLabel}</p>
+        <p><strong>{t.questions.demoQuestion}</strong></p>
+        <p>{t.questions.demoAnswer}</p>
+        <p><a href="#poser">{t.questions.demoCta}</a></p>
+      </details>
+      <section id="reponses" class="answers">
+        {
+          usedThemes.length > 0 && (
+            <nav class="themes" aria-label={t.questions.find}>
+              <a class:list={["chip", !theme && "on"]} href={href("/questions")}>{t.questions.allThemes}</a>
+              {usedThemes.map((item) => (
+                <a class:list={["chip", theme === item && "on"]} href={`${href("/questions")}?theme=${encodeURIComponent(item)}`}>
+                  {localizeQuestionCategory(item, t)}
+                </a>
+              ))}
+            </nav>
+          )
+        }
+        {visible.map((item) => <QuestionCard item={item} />)}
+        {questions.length > 0 && visible.length === 0 && <p class="hint">{t.questions.notFound}</p>}
+        <p class="to-form">
+          <a class="btn btn-ghost" href="#poser">{questions.length ? t.questions.notFound : t.questions.ask}</a>
+        </p>
+      </section>
+      <section id="poser" class="ask">
+        <h2>{t.questions.ask}</h2>
+        <p class="hint">{t.questions.note}</p>
+        {
+          sent ? (
+            <p class="ok" role="status">{t.questions.success}</p>
+          ) : (
+            <QuestionForm action={href("/questions")} errors={errors} values={values} />
+          )
+        }
+      </section>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2.1rem, 7vw, 3.8rem); max-width: 18ch; }
-  .lead, .hint { color: var(--fg-soft); margin-bottom: 1.2rem; }
-  .ok { color: var(--color-ok); font-size: 1.1rem; }
+  .desk {
+    padding-top: clamp(1.6rem, 4vw, 3.2rem);
+  }
+  .intro {
+    max-width: 38rem;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 7vw, 3.8rem);
+    max-width: 16ch;
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .lead,
+  .hint {
+    color: var(--fg-soft);
+    margin: 0.6rem 0 0;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1.3rem;
+  }
+  .demo {
+    margin: 2rem 0 0;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--line);
+    max-width: 38rem;
+  }
+  .demo summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-weight: 650;
+  }
+  .demo .label {
+    color: var(--mute);
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.8rem;
+  }
+  .answers {
+    margin-top: 2.2rem;
+  }
+  .themes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+  }
+  .chip {
+    min-height: 44px;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--fg-soft);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .on,
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
+  .to-form {
+    margin-top: 1.4rem;
+  }
+  .ask {
+    margin-top: 2.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+  }
+  h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .ok {
+    color: var(--color-ok);
+    font-size: 1.1rem;
+  }
 </style>

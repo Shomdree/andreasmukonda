@@ -3,12 +3,23 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import TrainingCard from "../../components/TrainingCard.astro";
 import CTASection from "../../components/CTASection.astro";
+import EmptyState from "../../components/EmptyState.astro";
 import { pageI18n } from "../../i18n/request";
+import { localizeTraining } from "../../i18n/localize";
 import { getSettings, getTrainings } from "../../lib/queries";
 
 const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const trainings = await getTrainings();
+const trainings = (await getTrainings()).map((item) => localizeTraining(item, t));
+const groups = t.trainings.domains
+  .map((domain) => ({
+    domain,
+    items: trainings.filter((item) => item.title.toLowerCase() === domain.toLowerCase()),
+  }))
+  .filter((group) => group.items.length > 0);
+const groupedIds = new Set(groups.flatMap((group) => group.items.map((item) => item.id)));
+const rest = trainings.filter((item) => !groupedIds.has(item.id));
+const orderHref = `${href("/commander")}?service=formation-professionnelle`;
 ---
 
 <BaseLayout
@@ -17,28 +28,104 @@ const trainings = await getTrainings();
   description={t.seo.trainingsDescription}
   canonicalPath="/formations"
 >
-  <section class="section">
+  <section class="section catalog">
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/formations"), label: t.nav.trainings }]} />
-      <h1 class="display">{t.trainings.title}</h1>
-      <p class="lead">{t.trainings.lead}</p>
-      <p class="lead">{t.trainings.follow}</p>
-      <h2>{t.trainings.domainsTitle}</h2>
-      <ul>{t.trainings.domains.map((item) => <li>{item}</li>)}</ul>
-      <h2>{t.trainings.whoTitle}</h2>
-      <p>{t.trainings.whoLead}</p>
-      <ul>{t.trainings.who.map((item) => <li>{item}</li>)}</ul>
-      <h2>{t.trainings.interestTitle}</h2>
-      <p>{t.trainings.interest}</p>
-      {trainings.map((training) => <TrainingCard training={training} />)}
+      <header class="intro">
+        <h1 class="display">{t.trainings.title}</h1>
+        <p class="lead">{t.trainings.lead}</p>
+        <p class="lead">{t.trainings.follow}</p>
+        <p class="cta-row">
+          <a class="btn btn-primary" href={orderHref}>{t.trainings.cta}</a>
+        </p>
+      </header>
+      <div class="domains">
+        <h2>{t.trainings.domainsTitle}</h2>
+        <ul>
+          {t.trainings.domains.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <section class="who">
+        <h2>{t.trainings.whoTitle}</h2>
+        <p>{t.trainings.whoLead}</p>
+        <ul>{t.trainings.who.map((item) => <li>{item}</li>)}</ul>
+      </section>
+      {
+        groups.map((group) => (
+          <section class="group">
+            <h2>{group.domain}</h2>
+            {group.items.map((training) => <TrainingCard training={training} />)}
+          </section>
+        ))
+      }
+      {
+        rest.length > 0 && (
+          <section class="group">
+            {groups.length > 0 && <h2>{t.catalog.details}</h2>}
+            {rest.map((training) => <TrainingCard training={training} />)}
+          </section>
+        )
+      }
+      {trainings.length === 0 && <EmptyState title={t.trainings.interest} />}
     </div>
   </section>
-  <CTASection title={t.trainings.interestTitle} text={t.trainings.interest} primaryHref={href("/contact")} primaryLabel={t.trainings.cta} />
+  <CTASection title={t.trainings.interestTitle} text={t.trainings.interest} primaryHref={orderHref} primaryLabel={t.trainings.cta} />
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
-  .lead { color: var(--fg-soft); margin: 0.5rem 0 1rem; }
-  h2 { margin: 2rem 0 1rem; font-size: 1.15rem; }
-  ul { color: var(--fg-soft); padding-left: 1.1rem; }
+  .catalog {
+    padding-top: clamp(1.6rem, 4vw, 3.2rem);
+  }
+  .intro {
+    max-width: 40rem;
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 7vw, 4.2rem);
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .lead {
+    color: var(--fg-soft);
+    margin: 0.55rem 0 0;
+    font-size: 1.05rem;
+  }
+  .cta-row {
+    margin: 1.2rem 0 0;
+  }
+  h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  .domains ul,
+  .who ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.8rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    color: var(--fg-soft);
+  }
+  .domains li,
+  .who li {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .domains,
+  .who,
+  .group {
+    margin-top: 1.6rem;
+  }
+  .who p {
+    color: var(--fg-soft);
+    margin-bottom: 0.8rem;
+  }
 </style>

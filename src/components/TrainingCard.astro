@@ -6,37 +6,71 @@ import { localizeTraining, trainingStatusLabel } from "../i18n/localize";
 type Props = { training: TrainingItem };
 const { t, href } = pageI18n(Astro.locals);
 const training = localizeTraining(Astro.props.training, t);
+const details = [training.level, training.format, training.duration].filter(Boolean).join(" · ");
+const orderHref = `${href("/commander")}?service=formation-professionnelle&formation=${encodeURIComponent(training.slug)}`;
 ---
 
 <article class="card" data-reveal="up">
-  <p class="kicker">{trainingStatusLabel(training.statusLabel, t)}</p>
-  <h3 class="display">
-    <a href={href(`/formations/${training.slug}`)}>{training.title}</a>
-  </h3>
-  <p>{training.excerpt}</p>
-  <p class="meta">{training.format} · {training.duration}</p>
+  <div>
+    <p class="kicker">{trainingStatusLabel(training.statusLabel, t)}</p>
+    <h3 class="display">
+      <a href={href(`/formations/${training.slug}`)}>{training.title}</a>
+    </h3>
+    <p class="benefit">{training.excerpt}</p>
+  </div>
+  {details && <p class="meta">{details}</p>}
+  <p class="actions">
+    <a class="btn btn-ghost" href={href(`/formations/${training.slug}`)}>{t.trainings.view}</a>
+    <a class="btn btn-primary" href={orderHref}>{t.trainings.cta}</a>
+  </p>
 </article>
 
 <style>
   .card {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.7rem;
+    padding: 1.15rem 0;
+    border-top: 1px solid var(--line);
+    min-width: 0;
   }
   h3 {
-    font-size: 1.45rem;
+    font-size: clamp(1.25rem, 3vw, 1.7rem);
+    margin: 0.2rem 0 0.45rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
   }
   a {
     color: inherit;
     text-decoration: none;
   }
-  a:hover {
+  h3 a:hover {
     color: var(--color-ember);
   }
-  p {
+  .benefit {
     color: var(--fg-soft);
+    margin: 0;
+    max-width: 40rem;
   }
   .meta {
     color: var(--mute);
     font-size: 0.9rem;
+    margin: 0;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 0.2rem 0 0;
+  }
+  @media (min-width: 880px) {
+    .card {
+      grid-template-columns: minmax(0, 1.4fr) auto auto;
+      align-items: center;
+      gap: 1.2rem;
+      padding-block: 1.35rem;
+    }
+    .actions {
+      justify-content: flex-end;
+    }
   }
 </style>

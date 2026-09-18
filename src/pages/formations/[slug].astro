@@ -7,11 +7,15 @@ import { localizeTraining } from "../../i18n/localize";
 import { submitTraining } from "../../lib/actions";
 import { getSettings, getTraining } from "../../lib/queries";
 
-const { t, href } = pageI18n(Astro.locals);
+const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
 const found = await getTraining(Astro.params.slug ?? "");
 if (!found) return Astro.redirect(href("/"));
 const training = localizeTraining(found, t);
+const orderHref = `${href("/commander")}?service=formation-professionnelle&formation=${encodeURIComponent(training.slug)}`;
+const programParts = training.program.split(/\n+/).map((item) => item.trim()).filter(Boolean);
+const longProgram = training.program.length > 280 || programParts.length > 3;
+const hasDates = Boolean(training.startAt);
 
 let errors: Record<string, string> | undefined;
 let values: Record<string, string> | undefined;
@@ -25,6 +29,13 @@ if (Astro.request.method === "POST") {
   errors = result.errors;
   values = result.values;
 }
+
+function formatDate(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" });
+}
 ---
 
 <BaseLayout
@@ -33,7 +44,7 @@ if (Astro.request.method === "POST") {
   description={training.excerpt}
   canonicalPath={`/formations/${training.slug}`}
 >
-  <article class="section">
+  <article class="section sheet">
     <div class="container-am">
       <Breadcrumbs
         homeHref={href("/")}
@@ -46,16 +57,43 @@ if (Astro.request.method === "POST") {
       <p class="kicker">{training.level} · {training.format}</p>
       <h1 class="display">{training.title}</h1>
       <p class="lead">{training.description}</p>
+      <p class="hero-cta">
+        <a class="btn btn-primary" href={orderHref}>{t.trainings.cta}</a>
+        {!hasDates && <a class="btn btn-ghost" href={orderHref}>{t.trainings.infoCta}</a>}
+      </p>
       <dl>
-        <div><dt>{t.catalog.audience}</dt><dd>{training.audience}</dd></div>
-        <div><dt>{t.catalog.trainer}</dt><dd>{training.trainer}</dd></div>
-        <div><dt>{t.catalog.duration}</dt><dd>{training.duration}</dd></div>
-        <div><dt>{t.catalog.location}</dt><dd>{training.location}</dd></div>
-        <div><dt>{t.catalog.places}</dt><dd>{training.capacity ?? t.catalog.toConfirm}</dd></div>
-        <div><dt>{t.catalog.price}</dt><dd>{training.priceLabel}</dd></div>
+        {training.audience && <div><dt>{t.catalog.audience}</dt><dd>{training.audience}</dd></div>}
+        {training.trainer && <div><dt>{t.catalog.trainer}</dt><dd>{training.trainer}</dd></div>}
+        {training.duration && !hasDates && <div><dt>{t.catalog.duration}</dt><dd>{training.duration}</dd></div>}
+        {training.location && <div><dt>{t.catalog.location}</dt><dd>{training.location}</dd></div>}
+        {training.capacity != null && <div><dt>{t.catalog.places}</dt><dd>{training.capacity}</dd></div>}
+        {training.priceLabel && <div><dt>{t.catalog.price}</dt><dd>{training.priceLabel}</dd></div>}
+        {hasDates && (
+          <div>
+            <dt>{t.catalog.duration}</dt>
+            <dd>
+              {formatDate(training.startAt)}
+              {training.endAt ? ` — ${formatDate(training.endAt)}` : ""}
+            </dd>
+          </div>
+        )}
       </dl>
-      <h2>{t.catalog.program}</h2>
-      <p>{training.program}</p>
+      {!hasDates && <p class="note">{t.trainings.datesUnknown}</p>}
+      {
+        training.program && (
+          longProgram ? (
+            <details class="program">
+              <summary>{t.catalog.program}</summary>
+              {programParts.length > 1 ? <ul>{programParts.map((item) => <li>{item}</li>)}</ul> : <p>{training.program}</p>}
+            </details>
+          ) : (
+            <section class="learn">
+              <h2>{t.trainings.learn}</h2>
+              {programParts.length > 1 ? <ul>{programParts.map((item) => <li>{item}</li>)}</ul> : <p>{training.program}</p>}
+            </section>
+          )
+        )
+      }
       <h2 id="inscription">{t.catalog.registration}</h2>
       {
         sent ? (
@@ -63,7 +101,7 @@ if (Astro.request.method === "POST") {
         ) : training.registrationOpen ? (
           <TrainingRegistrationForm action={href(`/formations/${training.slug}`)} trainingId={training.id} errors={errors} values={values} />
         ) : (
-          <p>{t.trainings.interest} <a href={href("/contact")}>{t.nav.contact}</a>.</p>
+          <p>{t.trainings.interest} <a href={orderHref}>{t.trainings.infoCta}</a>.</p>
         )
       }
     </div>
@@ -71,9 +109,63 @@ if (Astro.request.method === "POST") {
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2rem, 7vw, 3.6rem); max-width: 18ch; }
-  .lead, dd, p { color: var(--fg-soft); }
-  dl { display: grid; gap: 0.8rem; margin: 1.4rem 0; }
-  dt { color: var(--mute); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; }
-  .ok { color: var(--color-ok); }
+  .sheet {
+    padding-top: clamp(1.6rem, 4vw, 3rem);
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.6rem);
+    max-width: 18ch;
+    overflow-wrap: anywhere;
+  }
+  .lead,
+  dd,
+  p,
+  li {
+    color: var(--fg-soft);
+  }
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 1.1rem 0 1.6rem;
+  }
+  dl {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0 0 1.2rem;
+  }
+  dt {
+    color: var(--mute);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .note {
+    margin-bottom: 1.6rem;
+  }
+  h2,
+  summary {
+    margin: 1.8rem 0 0.8rem;
+    font-size: 1.15rem;
+  }
+  .program summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .learn ul,
+  .program ul {
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.45rem;
+  }
+  .ok {
+    color: var(--color-ok);
+  }
+  @media (min-width: 760px) {
+    dl {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 </style>

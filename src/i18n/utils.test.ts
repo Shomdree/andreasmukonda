@@ -44,6 +44,12 @@ describe("i18n utils", () => {
     expect(ui("ln").hero.ctaWork).toBeTruthy();
     expect(ui("en").catalog.trainings.anglais.title).toBe("English");
     expect(ui("en").theme.light).toBe("Light");
+    expect(Object.keys(ln.portfolio)).toEqual(Object.keys(fr.portfolio));
+    expect(Object.keys(en.questions)).toEqual(Object.keys(fr.questions));
+    expect(Object.keys(ln.consultingPage)).toEqual(Object.keys(fr.consultingPage));
+    expect(Object.keys(en.trainings)).toEqual(Object.keys(fr.trainings));
+    expect(Object.keys(ln.lives)).toEqual(Object.keys(fr.lives));
+    expect(Object.keys(en.news)).toEqual(Object.keys(fr.news));
     expect(COOKIE_LOCALE).toBe("preferred_locale");
   });
 });

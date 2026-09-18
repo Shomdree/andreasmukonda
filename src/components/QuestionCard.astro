@@ -1,24 +1,51 @@
 ---
 import type { PublicQuestion } from "../lib/types";
+import { pageI18n } from "../i18n/request";
+
 type Props = { item: PublicQuestion };
+const { t } = pageI18n(Astro.locals);
+const { item } = Astro.props;
+const long = item.answer.trim().length > 220;
+const preview = long ? `${item.answer.trim().slice(0, 160).trim()}…` : item.answer;
 ---
 
 <article class="q">
-  <p class="kicker">{Astro.props.item.category} · {Astro.props.item.displayName}</p>
-  <h3>{Astro.props.item.question}</h3>
-  <p>{Astro.props.item.answer}</p>
+  <p class="kicker">{item.category} · {item.displayName}</p>
+  <h3>{item.question}</h3>
+  {
+    long ? (
+      <details>
+        <summary>{preview} <span>{t.questions.readMore}</span></summary>
+        <p>{item.answer}</p>
+      </details>
+    ) : (
+      <p>{item.answer}</p>
+    )
+  }
 </article>
 
 <style>
   .q {
     padding: 1.3rem 0;
     border-top: 1px solid var(--line);
+    min-width: 0;
   }
   h3 {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 2.6vw, 1.35rem);
     margin: 0.3rem 0 0.6rem;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
   }
-  p:last-child {
+  p:last-child,
+  details {
     color: var(--fg-soft);
+  }
+  summary {
+    cursor: pointer;
+    min-height: 44px;
+  }
+  summary span {
+    color: var(--color-ember);
+    font-weight: 650;
   }
 </style>

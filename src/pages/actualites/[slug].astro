@@ -2,12 +2,24 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { pageI18n } from "../../i18n/request";
-import { getPost, getSettings } from "../../lib/queries";
+import { getPost, getPosts, getSettings } from "../../lib/queries";
 
-const { t, href } = pageI18n(Astro.locals);
+const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
 const post = await getPost(Astro.params.slug ?? "");
 if (!post) return Astro.redirect(href("/"));
+const related = (await getPosts())
+  .filter((item) => item.id !== post.id && item.category === post.category)
+  .slice(0, 3);
+const paragraphs = post.content.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+const words = `${post.excerpt} ${post.content}`.trim().split(/\s+/).filter(Boolean).length;
+const reading = t.news.readingTime.replace("{n}", String(Math.max(1, Math.round(words / 200) || 1)));
+const date = post.publishedAt ? new Date(post.publishedAt) : null;
+const dateOk = Boolean(date && !Number.isNaN(date.getTime()));
+const dateLabel = dateOk
+  ? date!.toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" })
+  : "";
+const shareHref = `mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(`${post.title}\n${Astro.url.href}`)}`;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -20,14 +32,14 @@ const jsonLd = {
 
 <BaseLayout
   settings={settings}
-  title={`${post.title} — Actualités`}
+  title={`${post.title} — ${t.nav.news}`}
   description={post.excerpt}
   image={post.coverImage}
   canonicalPath={`/actualites/${post.slug}`}
   jsonLd={jsonLd}
 >
-  <article class="section">
-    <div class="container-am prose">
+  <article class="section reading">
+    <div class="container-am">
       <Breadcrumbs
         homeHref={href("/")}
         homeLabel={t.nav.home}
@@ -36,17 +48,94 @@ const jsonLd = {
           { href: href(`/actualites/${post.slug}`), label: post.title },
         ]}
       />
-      <p class="kicker">{post.category}</p>
+      {post.category && <p class="kicker">{post.category}</p>}
       <h1 class="display">{post.title}</h1>
-      {post.publishedAt && <time datetime={post.publishedAt}>{post.publishedAt}</time>}
-      <p class="lead">{post.excerpt}</p>
-      <p>{post.content}</p>
+      <p class="meta">
+        <span>{settings.name}</span>
+        {dateOk && <time datetime={post.publishedAt}>{dateLabel}</time>}
+        <span>{reading}</span>
+      </p>
+      {post.excerpt && <p class="lead">{post.excerpt}</p>}
+      <div class="prose">
+        {paragraphs.map((item) => <p>{item}</p>)}
+      </div>
+      <p class="share">
+        <a href={shareHref}>{t.news.share}</a>
+      </p>
+      {
+        related.length > 0 && (
+          <aside class="related">
+            <h2>{t.news.related}</h2>
+            <ul>
+              {related.map((item) => (
+                <li>
+                  <a href={href(`/actualites/${item.slug}`)}>{item.title}</a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
     </div>
   </article>
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2rem, 7vw, 3.6rem); max-width: 18ch; }
-  .lead, p, time { color: var(--fg-soft); }
-  time { display: block; margin: 0.6rem 0 1rem; }
+  .reading {
+    padding-top: clamp(1.6rem, 4vw, 3rem);
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    max-width: 18ch;
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    color: var(--mute);
+    font-size: 0.9rem;
+    margin: 0.8rem 0 1.2rem;
+  }
+  .lead {
+    color: var(--fg-soft);
+    font-size: 1.2rem;
+    line-height: 1.55;
+    max-width: 40rem;
+  }
+  .prose {
+    max-width: 42rem;
+    margin-top: 1.6rem;
+  }
+  .prose p {
+    color: var(--fg);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    margin: 0 0 1.15rem;
+    text-align: left;
+  }
+  .share {
+    margin-top: 2rem;
+  }
+  .share a {
+    color: var(--fg-soft);
+  }
+  .related {
+    margin-top: 2.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+  .related h2 {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  .related ul {
+    padding-left: 1.1rem;
+  }
+  .related a {
+    color: inherit;
+  }
 </style>

@@ -4,25 +4,21 @@ import ResponsiveImage from "./ResponsiveImage.astro";
 import { pageI18n } from "../i18n/request";
 import { localizeCategory } from "../i18n/localize";
 
-type Props = { project: PortfolioProject; featured?: boolean };
-const { project, featured } = Astro.props;
+type Props = { project: PortfolioProject; featured?: boolean; contain?: boolean };
+const { project, featured, contain } = Astro.props;
 const { t, href } = pageI18n(Astro.locals);
 const categoryName = project.category ? localizeCategory(project.category, t).name : t.catalog.project;
 ---
 
-<a class:list={["card", featured && "featured"]} href={href(`/portfolio/${project.slug}`)} data-reveal="up">
+<a class:list={["card", featured && "featured", contain && "contain"]} href={href(`/portfolio/${project.slug}`)} data-reveal="up">
   <div class="media-frame">
-    <ResponsiveImage src={project.coverImage} alt={project.coverAlt} width={800} height={1000} />
-    <div class="overlay">
-      <p class="kicker">{categoryName}</p>
-      <h3 class="display">{project.title}</h3>
-      <span>{t.catalog.viewProject}</span>
-    </div>
+    <ResponsiveImage src={project.coverImage} alt={project.coverAlt} width={800} height={1000} eager={featured} />
   </div>
   <div class="meta">
-    <p class="kicker">{categoryName}</p>
+    <p class="kicker">{categoryName}{project.year ? ` · ${project.year}` : ""}</p>
     <h3 class="display">{project.title}</h3>
-    <p>{project.excerpt}</p>
+    {project.excerpt && <p>{project.excerpt}</p>}
+    <span class="more">{t.catalog.viewProject}</span>
   </div>
 </a>
 
@@ -32,44 +28,50 @@ const categoryName = project.category ? localizeCategory(project.category, t).na
     text-decoration: none;
     display: grid;
     gap: 0.85rem;
+    min-width: 0;
   }
   .media-frame {
     position: relative;
+    background: color-mix(in srgb, var(--bg-elev) 80%, #1c2230);
   }
   .card:hover img {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
-  img {
+  .card:hover .more {
+    color: var(--color-ember);
+  }
+  .card :global(img) {
     transition: transform 320ms var(--ease-standard);
     height: 100%;
   }
-  .overlay {
-    position: absolute;
-    inset: auto 0 0;
-    padding: 1rem;
-    background: linear-gradient(transparent, rgba(8, 10, 14, 0.82));
-    opacity: 0;
-    transform: translate3d(0, 8px, 0);
-    transition: opacity 280ms var(--ease-standard), transform 280ms var(--ease-standard);
+  .contain .media-frame {
+    aspect-ratio: 4 / 5;
   }
-  .card:hover .overlay,
-  .card:focus-visible .overlay {
-    opacity: 1;
-    transform: none;
+  .contain :global(img) {
+    object-fit: contain;
+    background: transparent;
   }
   .featured .media-frame {
     aspect-ratio: 16 / 10;
   }
   h3 {
-    font-size: 1.35rem;
+    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
     margin: 0.2rem 0 0.35rem;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    overflow-wrap: anywhere;
   }
-  .meta p:last-child {
+  .meta p:last-of-type {
     color: var(--fg-soft);
   }
-  @media (max-width: 700px) {
-    .overlay {
-      display: none;
+  .more {
+    color: var(--mute);
+    font-size: 0.88rem;
+    font-weight: 650;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover img {
+      transform: none;
     }
   }
 </style>

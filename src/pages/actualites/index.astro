@@ -9,6 +9,13 @@ import { getPosts, getSettings } from "../../lib/queries";
 const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
 const posts = await getPosts();
+const [featured, second, third, ...rest] = posts;
+
+function readingTime(text: string) {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.round(words / 200) || 1);
+  return t.news.readingTime.replace("{n}", String(minutes));
+}
 ---
 
 <BaseLayout
@@ -17,20 +24,76 @@ const posts = await getPosts();
   description={t.seo.newsDescription}
   canonicalPath="/actualites"
 >
-  <section class="section">
+  <section class="section magazine">
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/actualites"), label: t.nav.news }]} />
-      <h1 class="display">{t.news.title}</h1>
-      <p class="lead">{t.news.lead}</p>
-      <div class="list">
-        {posts.length ? posts.map((post) => <ArticleCard post={post} />) : <EmptyState title={t.news.empty} />}
-      </div>
+      <header class="intro">
+        <h1 class="display">{t.news.title}</h1>
+        <p class="lead">{t.news.lead}</p>
+      </header>
+      {
+        featured && (
+          <div class="masthead">
+            <ArticleCard post={featured} variant="lead" readingTime={readingTime(`${featured.excerpt} ${featured.content}`)} />
+          </div>
+        )
+      }
+      {
+        (second || third) && (
+          <div class="secondaries">
+            {second && <ArticleCard post={second} variant="secondary" readingTime={readingTime(`${second.excerpt} ${second.content}`)} />}
+            {third && <ArticleCard post={third} variant="secondary" readingTime={readingTime(`${third.excerpt} ${third.content}`)} />}
+          </div>
+        )
+      }
+      {
+        rest.length > 0 && (
+          <div class="index">
+            {rest.map((post) => (
+              <ArticleCard post={post} readingTime={readingTime(`${post.excerpt} ${post.content}`)} />
+            ))}
+          </div>
+        )
+      }
+      {posts.length === 0 && <EmptyState title={t.news.empty} />}
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
-  .lead { color: var(--fg-soft); margin-bottom: 1.8rem; }
-  .list { display: grid; gap: 1.6rem; }
+  .magazine {
+    padding-top: clamp(1.6rem, 4vw, 3.2rem);
+  }
+  .intro {
+    max-width: 42rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    font-size: clamp(2.1rem, 7vw, 4.2rem);
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .lead {
+    color: var(--fg-soft);
+    margin: 0.8rem 0 0;
+    font-size: 1.08rem;
+  }
+  .masthead {
+    margin-bottom: 1.6rem;
+  }
+  .secondaries {
+    display: grid;
+    gap: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0.4rem;
+  }
+  @media (min-width: 800px) {
+    .secondaries {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+  }
 </style>

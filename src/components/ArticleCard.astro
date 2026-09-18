@@ -1,26 +1,71 @@
 ---
 import type { PostItem } from "../lib/types";
-type Props = { post: PostItem };
+import { pageI18n } from "../i18n/request";
+
+type Props = {
+  post: PostItem;
+  variant?: "lead" | "secondary" | "list";
+  readingTime?: string;
+};
+const { post, variant = "list", readingTime } = Astro.props;
+const { href, locale } = pageI18n(Astro.locals);
+const parsed = post.publishedAt ? new Date(post.publishedAt) : null;
+const dateOk = Boolean(parsed && !Number.isNaN(parsed.getTime()));
+const dateLabel = dateOk && parsed
+  ? parsed.toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" })
+  : "";
 ---
 
-<article>
-  <p class="kicker">{Astro.props.post.category}</p>
+<article class:list={["story", variant]} data-reveal="up">
+  <p class="kicker">{post.category}</p>
   <h3 class="display">
-    <a href={`/actualites/${Astro.props.post.slug}`}>{Astro.props.post.title}</a>
+    <a href={href(`/actualites/${post.slug}`)}>{post.title}</a>
   </h3>
-  <p>{Astro.props.post.excerpt}</p>
+  {post.excerpt && <p>{post.excerpt}</p>}
+  <p class="meta">
+    {dateOk && <time datetime={post.publishedAt}>{dateLabel}</time>}
+    {readingTime && <span>{readingTime}</span>}
+  </p>
 </article>
 
 <style>
+  .story {
+    min-width: 0;
+  }
   h3 {
-    font-size: 1.5rem;
-    margin: 0.3rem 0 0.4rem;
+    font-size: clamp(1.25rem, 3vw, 1.85rem);
+    margin: 0.3rem 0 0.45rem;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+  }
+  .lead h3 {
+    font-size: clamp(1.7rem, 5vw, 3rem);
   }
   a {
     color: inherit;
     text-decoration: none;
   }
+  a:hover {
+    color: var(--color-ember);
+  }
   p {
     color: var(--fg-soft);
+    margin: 0;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.8rem;
+    color: var(--mute);
+    font-size: 0.86rem;
+    margin-top: 0.55rem;
+  }
+  .secondary,
+  .lead {
+    padding-bottom: 1.2rem;
+  }
+  .list {
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--line);
   }
 </style>

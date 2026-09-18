@@ -14,7 +14,9 @@ const { locale, t, href } = pageI18n(Astro.locals);
 const settings = await getSettings().catch(() => defaultSettings);
 const services = await getServices();
 const trainings = await getTrainings();
-const selectedSlug = Astro.url.searchParams.get("service");
+const selectedSlug = Astro.url.searchParams.get("service")
+  ?? (Astro.url.searchParams.get("formation") ? "formation-professionnelle" : null);
+const selectedTraining = Astro.url.searchParams.get("formation");
 const reference = Astro.url.searchParams.get("ref");
 let errors: Record<string, string> | undefined;
 let values: Record<string, string> | undefined;
@@ -94,6 +96,7 @@ const wa2 = whatsappUrl(settings.whatsappSecondary, orderText);
                   services={services}
                   trainings={trainings}
                   selectedSlug={selectedSlug}
+                  selectedTraining={selectedTraining}
                   errors={errors}
                   values={values}
                 />
