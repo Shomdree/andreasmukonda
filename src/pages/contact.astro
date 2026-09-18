@@ -19,10 +19,14 @@ let values: Record<string, string> | undefined;
 let sent = Astro.url.searchParams.get("ok") === "1";
 
 if (Astro.request.method === "POST") {
-  const result = await submitContact(Astro.request, await Astro.request.formData());
-  if (result.ok) return Astro.redirect(`${href("/contact")}?ok=1`);
-  errors = result.errors;
-  values = result.values;
+  try {
+    const result = await submitContact(Astro.request, await Astro.request.formData());
+    if (result.ok) return Astro.redirect(`${href("/contact")}?ok=1`);
+    errors = result.errors;
+    values = result.values;
+  } catch {
+    errors = { form: t.contact.error };
+  }
 }
 
 const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
