@@ -15,8 +15,10 @@ export function observeReveal(root: ParentNode = document): () => void {
   const nodes = [...root.querySelectorAll<HTMLElement>("[data-reveal], [data-stagger]")];
   if (!nodes.length) return () => undefined;
 
+  const show = (node: Element) => node.classList.add("is-in");
+
   if (reducedMotion() || typeof IntersectionObserver === "undefined") {
-    for (const node of nodes) node.classList.add("is-in");
+    for (const node of nodes) show(node);
     return () => undefined;
   }
 
@@ -24,15 +26,37 @@ export function observeReveal(root: ParentNode = document): () => void {
     (entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
-        entry.target.classList.add("is-in");
+        show(entry.target);
         io.unobserve(entry.target);
       }
     },
-    { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
+    { threshold: 0.01, rootMargin: "64px 0px" },
   );
 
   for (const node of nodes) io.observe(node);
-  return () => io.disconnect();
+
+  const revealVisible = () => {
+    const vh = window.innerHeight || 0;
+    for (const node of nodes) {
+      if (node.classList.contains("is-in")) continue;
+      const rect = node.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < vh + 64) {
+        show(node);
+        io.unobserve(node);
+      }
+    }
+  };
+
+  const raf = requestAnimationFrame(revealVisible);
+  const fallback = window.setTimeout(() => {
+    for (const node of nodes) show(node);
+  }, 700);
+
+  return () => {
+    cancelAnimationFrame(raf);
+    window.clearTimeout(fallback);
+    io.disconnect();
+  };
 }
 
 export function parallaxPointer(target: HTMLElement, amplitude = 8): () => void {
