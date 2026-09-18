@@ -320,6 +320,7 @@ img {
     opacity var(--motion-slow) var(--ease-standard),
     transform var(--motion-slow) var(--ease-standard);
   transition-delay: var(--d, 0ms);
+  animation: reveal-fallback 0.5s var(--ease-standard) 0.9s forwards;
 }
 
 [data-reveal="left"] {
@@ -339,6 +340,7 @@ img {
 }
 
 [data-reveal].is-in {
+  animation: none;
   opacity: 1;
   transform: none;
 }
@@ -349,9 +351,11 @@ img {
   transition:
     opacity var(--motion-slow) var(--ease-standard),
     transform var(--motion-slow) var(--ease-standard);
+  animation: reveal-fallback 0.5s var(--ease-standard) 0.9s forwards;
 }
 
 [data-stagger].is-in > * {
+  animation: none;
   opacity: 1;
   transform: none;
 }
@@ -371,6 +375,13 @@ img {
   }
 }
 
+@keyframes reveal-fallback {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
   [data-stagger] > * {
@@ -378,6 +389,7 @@ img {
     transform: none;
     clip-path: none;
     transition: none;
+    animation: none;
   }
 }
 
