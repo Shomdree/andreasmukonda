@@ -3,14 +3,11 @@ import type { SiteSettings } from "../lib/types";
 import SocialLinks from "./SocialLinks.astro";
 import { pageI18n } from "../i18n/request";
 import { identity } from "../i18n/identity";
-import { whatsappUrl } from "../lib/whatsapp";
 
 type Props = { settings: SiteSettings };
 const { settings } = Astro.props;
 const { t, href } = pageI18n(Astro.locals);
 const year = new Date().getFullYear();
-const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
-const wa2 = whatsappUrl(settings.whatsappSecondary, t.whatsapp.generic);
 const logoSrcSet = settings.logo?.includes("/images/andreas/logo")
   ? "/images/andreas/logo.png 1x, /images/andreas/logo@2x.png 2x"
   : undefined;
@@ -40,7 +37,6 @@ const extraLinks = [
         )
       }
       {!settings.logo && <p class="display name">{identity.name}</p>}
-      <p class="roles">{t.footer.roles}</p>
     </div>
 
     <nav aria-label={t.a11y.footerNav}>
@@ -60,8 +56,6 @@ const extraLinks = [
         <a href={`mailto:${settings.email}`}>{settings.email}</a>
       )
     }
-    {wa && <a href={wa} rel="noopener noreferrer">WhatsApp {settings.phone}</a>}
-    {wa2 && <a href={wa2} rel="noopener noreferrer">WhatsApp {settings.phoneSecondary}</a>}
     {t.contact.location && <span class="meta">{t.contact.location}</span>}
   </div>
 
@@ -109,11 +103,6 @@ const extraLinks = [
   .name {
     margin: 0;
     font-size: 1.15rem;
-  }
-  .roles {
-    color: var(--fg-soft);
-    margin: 0;
-    font-size: 0.88rem;
   }
   nav {
     display: flex;

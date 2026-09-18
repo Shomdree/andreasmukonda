@@ -28,48 +28,6 @@ const { t } = pageI18n(Astro.locals);
   {variant === "menu" && <span class="caption">{t.theme.label}</span>}
 </button>
 
-<script>
-  const COOKIE = "preferred_theme";
-  const DARK = "#0E1014";
-  const LIGHT = "#F7F5F0";
-
-  function currentTheme() {
-    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-  }
-
-  function applyTheme(theme: "dark" | "light") {
-    document.documentElement.setAttribute("data-theme", theme);
-    try {
-      localStorage.setItem(COOKIE, theme);
-    } catch {
-      /* private mode */
-    }
-    document.cookie = `${COOKIE}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax`;
-    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-      meta.setAttribute("content", theme === "light" ? LIGHT : DARK);
-    });
-    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
-      const next = theme === "light" ? button.dataset.labelDark : button.dataset.labelLight;
-      if (next) button.setAttribute("aria-label", next);
-      button.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
-    });
-  }
-
-  function bootThemeToggle() {
-    applyTheme(currentTheme());
-    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
-      if (button.dataset.bound === "1") return;
-      button.dataset.bound = "1";
-      button.addEventListener("click", () => {
-        applyTheme(currentTheme() === "dark" ? "light" : "dark");
-      });
-    });
-  }
-
-  bootThemeToggle();
-  document.addEventListener("astro:page-load", bootThemeToggle);
-</script>
-
 <style>
   .theme-toggle {
     display: inline-flex;

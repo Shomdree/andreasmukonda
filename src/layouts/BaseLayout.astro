@@ -31,21 +31,7 @@ const canonicalPath = Astro.props.canonicalPath ?? path;
   <head>
     <meta charset="utf-8" />
     <meta name="theme-color" content="#0E1014" />
-    <script is:inline>
-      (function () {
-        try {
-          const match = document.cookie.match(/(?:^|; )preferred_theme=(dark|light)/);
-          let theme = match ? match[1] : localStorage.getItem("preferred_theme");
-          if (theme !== "light" && theme !== "dark") theme = "dark";
-          document.documentElement.setAttribute("data-theme", theme);
-          const color = theme === "light" ? "#F7F5F0" : "#0E1014";
-          const meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.setAttribute("content", color);
-        } catch {
-          /* private mode */
-        }
-      })();
-    </script>
+    <script is:inline src="/theme-init.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
@@ -84,8 +70,13 @@ const canonicalPath = Astro.props.canonicalPath ?? path;
     <WhatsAppButton number={settings.whatsapp} />
     <script>
       import { bootMotion } from "../lib/animations";
+      import { bootTheme } from "../lib/theme";
+      bootTheme();
       bootMotion();
-      document.addEventListener("astro:page-load", bootMotion);
+      document.addEventListener("astro:page-load", () => {
+        bootTheme();
+        bootMotion();
+      });
     </script>
   </body>
 </html>
