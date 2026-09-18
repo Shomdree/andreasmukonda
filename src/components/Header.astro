@@ -63,6 +63,7 @@ function active(match: string) {
         <span class="burger" aria-hidden="true"></span>
         <span class="sr">Menu</span>
       </summary>
+      <button type="button" class="nav-dismiss" data-nav-dismiss aria-label={t.nav.closeMenu} tabindex="-1"></button>
       <div class="sheet">
         {
           primary.map((item) => (
@@ -196,7 +197,33 @@ function active(match: string) {
     margin-left: 0.15rem;
     flex-shrink: 0;
   }
+  .nav-dismiss {
+    display: none;
+    appearance: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(8, 10, 14, 0.46);
+    cursor: pointer;
+    touch-action: none;
+  }
+  .nav-mobile[open] .nav-dismiss {
+    display: block;
+  }
+  :global(html[data-theme="light"]) .nav-dismiss {
+    background: rgba(14, 16, 20, 0.28);
+  }
+  :global(html:has(.nav-mobile[open])),
+  :global(body:has(.nav-mobile[open])) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   .nav-mobile summary {
+    position: relative;
+    z-index: 3;
     list-style: none;
     min-height: 44px;
     min-width: 44px;
@@ -229,16 +256,24 @@ function active(match: string) {
     clip: rect(0 0 0 0);
   }
   .sheet {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 0.4rem);
-    z-index: 45;
-    width: min(18rem, 86vw);
+    position: fixed;
+    top: 4rem;
+    right: 0.7rem;
+    z-index: 2;
+    width: min(18rem, calc(100vw - 1.4rem));
+    max-height: calc(100dvh - 4.75rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     background: var(--bg-elev);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 0.7rem;
-    display: grid;
+    padding-bottom: max(0.7rem, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
     gap: 0.15rem;
     opacity: 0;
     transform: translate3d(0, -8px, 0);
@@ -251,6 +286,9 @@ function active(match: string) {
     opacity: 1;
     transform: none;
     pointer-events: auto;
+  }
+  .sheet > :global(*) {
+    flex-shrink: 0;
   }
   .sheet a {
     color: inherit;
@@ -315,6 +353,10 @@ function active(match: string) {
     .header-bar {
       min-height: 56px;
       gap: 0.45rem;
+    }
+    .sheet {
+      top: 3.55rem;
+      max-height: calc(100dvh - 4.2rem);
     }
   }
   @media (prefers-reduced-motion: reduce) {

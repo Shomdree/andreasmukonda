@@ -17,6 +17,23 @@ for (const device of mobiles) {
       await page.getByLabel("Ouvrir le menu").click();
       await expect(page.getByText("Langue").first()).toBeVisible();
       await expect(page.getByRole("link", { name: "À propos", exact: true }).first()).toBeVisible();
+      const sheet = page.locator("details.nav-mobile .sheet");
+      const scroll = await sheet.evaluate((el) => {
+        const style = getComputedStyle(el);
+        el.scrollTop = 160;
+        return {
+          overflowY: style.overflowY,
+          canScroll: el.scrollHeight - el.clientHeight > 8,
+          scrollTop: el.scrollTop,
+        };
+      });
+      expect(["auto", "scroll", "overlay"]).toContain(scroll.overflowY);
+      if (scroll.canScroll) expect(scroll.scrollTop).toBeGreaterThan(0);
+      await page.mouse.click(28, Math.min(device.height - 80, 520));
+      await expect(page.locator("details.nav-mobile")).not.toHaveAttribute("open");
+      await page.getByLabel("Ouvrir le menu").click();
+      await page.getByLabel("Fermer le menu").click();
+      await expect(page.locator("details.nav-mobile")).not.toHaveAttribute("open");
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       );
