@@ -1,9 +1,6 @@
 import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { AstroCookies } from "astro";
-import { createServerClient, parseCookieHeader } from "@supabase/ssr";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { AstroCookies } from "astro";
 import { readServerEnv } from "./env";
 
 function publicSupabase() {
