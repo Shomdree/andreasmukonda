@@ -13,7 +13,8 @@ import type { Locale, Messages } from "../i18n";
 import { notifyAfterSave } from "./notifications";
 import { isOrderReference, nextOrderReference } from "./order-reference";
 import { consumeRateLimit, hashedClientKey } from "./rate-limit";
-import { getServices } from "./queries";
+import { composeOrderContent, joinedFormValues, orderKindFromService } from "./order-context";
+import { getServices, getTrainings } from "./queries";
 import { spamReason } from "./spam";
 import { createCookieSupabase, createServiceSupabase } from "./supabase";
 import { uniqueAttachmentName, validateOrderAttachment, verifyAttachmentMagic } from "./uploads";
@@ -57,6 +58,8 @@ function unavailableFor(table: "orders" | "contact_messages" | string, t?: Messa
 
 function valuesFrom(data: FormData): Record<string, string> {
   const values = formDataToObject(data);
+  const features = joinedFormValues(data, "webFeatures");
+  if (features) values.webFeatures = features;
   delete values.website;
   delete values.consent;
   delete values.startedAt;
@@ -196,8 +199,18 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
   const t = messagesFor(data);
   try {
   const locale = formLocale(data);
-  const raw = { ...formDataToObject(data), consent: checkbox(data, "consent") };
-  const parsed = makeOrderSchema(t.form.errors).safeParse(raw);
+  const fields = formDataToObject(data);
+  const raw = {
+    ...fields,
+    consent: checkbox(data, "consent"),
+    webFeatures: joinedFormValues(data, "webFeatures"),
+  };
+  const catalog = await getServices().catch(() => []);
+  const trainings = await getTrainings().catch(() => []);
+  const serviceId = fields.serviceId || "";
+  const chosen = catalog.find((item) => item.id === serviceId || item.slug === serviceId);
+  const kind = orderKindFromService(chosen, serviceId);
+  const parsed = makeOrderSchema(t.form.errors, kind).safeParse(raw);
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values: valuesFrom(data) };
   const bait = spamBlock(data, t);
   if (bait) return bait;
@@ -214,12 +227,14 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
     attachmentUrl = uploaded.url;
   }
 
-  const dup = await duplicate(request, "order-sig", `${parsed.data.email}:${parsed.data.description.slice(0, 80)}`, t);
+  const serviceTitle = sanitizeText(parsed.data.serviceTitle || chosen?.title || parsed.data.projectType);
+  const { consent: _consent, ...answers } = parsed.data;
+  const composed = composeOrderContent(kind, { ...answers, serviceTitle }, t, trainings);
+  const projectType = sanitizeText(composed.projectType || parsed.data.projectType);
+  const description = sanitizeText(composed.description || parsed.data.description);
+  const dup = await duplicate(request, "order-sig", `${parsed.data.email}:${description.slice(0, 80)}`, t);
   if (dup) return dup;
 
-  const catalog = await getServices().catch(() => []);
-  const chosen = catalog.find((item) => item.id === parsed.data.serviceId || item.slug === parsed.data.serviceId);
-  const serviceTitle = sanitizeText(parsed.data.serviceTitle || chosen?.title || parsed.data.projectType);
   let lastError = unavailableFor("orders", t);
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const allocated = await allocateOrderReference(t);
@@ -236,10 +251,10 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
       email: parsed.data.email,
       phone: parsed.data.phone,
       whatsapp: parsed.data.whatsapp || null,
-      project_type: sanitizeText(parsed.data.projectType),
-      description: sanitizeText(parsed.data.description),
-      budget_range: parsed.data.budgetRange,
-      desired_deadline: parsed.data.desiredDeadline || null,
+      project_type: projectType,
+      description,
+      budget_range: kind === "training" ? null : parsed.data.budgetRange || "À discuter",
+      desired_deadline: parsed.data.desiredDeadline || parsed.data.trainingPeriod || null,
       contact_preference: parsed.data.contactPreference,
       attachment_url: attachmentUrl,
       status: "nouvelle",
@@ -262,6 +277,7 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
           WhatsApp: payload.whatsapp,
           Service: payload.service_title,
           "Type de projet": payload.project_type,
+          ...composed.fields,
           Description: payload.description,
           Budget: payload.budget_range,
           Délai: payload.desired_deadline,

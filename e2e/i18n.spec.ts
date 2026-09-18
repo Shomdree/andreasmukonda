@@ -1,4 +1,13 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function continueOrder(page: Page) {
+  await page.locator("form.js-order [data-next]:visible").click();
+}
+
+async function chooseDesign(page: Page) {
+  const value = await page.locator('#serviceId option[data-kind="design"]').first().getAttribute("value");
+  await page.selectOption("#serviceId", value || { index: 1 });
+}
 
 test("homepage FR", async ({ page }) => {
   await page.goto("/");
@@ -70,26 +79,34 @@ test("contact EN submits", async ({ page }) => {
 
 test("order LN submits", async ({ page }) => {
   await page.goto("/ln/commander");
-  await page.selectOption("#serviceId", { index: 1 });
+  await chooseDesign(page);
+  await continueOrder(page);
+  await page.selectOption("#designKind", "logo");
+  await page.fill("#displayName", "Studio Alex");
+  await page.selectOption("#designOrigin", "nouveau");
+  await continueOrder(page);
   await page.fill("#fullName", "Alex Mukendi");
   await page.fill("#email", "alex-ln-order@studio.test");
   await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "Nazali na posa ya logo mpe affiche mpo na lancement.");
+  await continueOrder(page);
   await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Tinda demande" }).click();
+  await page.locator("form.js-order [data-submit]:visible").click();
   await expect(page.getByText("Demande na yo ekomi malamu.")).toBeVisible();
 });
 
 test("order EN submits", async ({ page }) => {
   await page.goto("/en/commander");
-  await page.selectOption("#serviceId", { index: 1 });
+  await chooseDesign(page);
+  await continueOrder(page);
+  await page.selectOption("#designKind", "logo");
+  await page.fill("#displayName", "Studio Alex");
+  await page.selectOption("#designOrigin", "nouveau");
+  await continueOrder(page);
   await page.fill("#fullName", "Alex Mukendi");
   await page.fill("#email", "alex-en-order@studio.test");
   await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "We need a logo and a poster for a launch.");
+  await continueOrder(page);
   await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Send my request" }).click();
+  await page.locator("form.js-order [data-submit]:visible").click();
   await expect(page.getByText("Your request has been received.")).toBeVisible();
 });

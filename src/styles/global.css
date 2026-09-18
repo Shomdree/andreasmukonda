@@ -369,12 +369,6 @@ img {
 [data-stagger].is-in > *:nth-child(7) { transition-delay: 320ms; }
 [data-stagger].is-in > *:nth-child(8) { transition-delay: 320ms; }
 
-@media (max-width: 979px) {
-  body:not(.admin) {
-    padding-bottom: calc(4.6rem + env(safe-area-inset-bottom));
-  }
-}
-
 @keyframes reveal-fallback {
   to {
     opacity: 1;

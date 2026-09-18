@@ -23,13 +23,19 @@ for (const device of mobiles) {
       expect(overflow).toBeLessThanOrEqual(2);
     });
 
-    test("contact, commander and WhatsApp dock", async ({ page }) => {
+    test("contact, commander and WhatsApp without dock", async ({ page }) => {
       await page.goto("/contact");
       await expect(page.getByRole("heading", { name: "Parlons." })).toBeVisible();
       await expect(page.getByRole("link", { name: /\+243|WhatsApp/i }).first()).toBeVisible();
+      await expect(page.getByRole("navigation", { name: "Actions rapides" })).toHaveCount(0);
       await page.goto("/commander");
       await expect(page.getByRole("heading", { name: /Parlez-moi de votre projet/i })).toBeVisible();
-      await expect(page.getByRole("navigation", { name: "Actions rapides" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Commander" }).first()).toBeVisible();
+      await expect(page.getByRole("navigation", { name: "Actions rapides" })).toHaveCount(0);
+      const design = await page.locator('#serviceId option[data-kind="design"]').first().getAttribute("value");
+      await page.selectOption("#serviceId", design || { index: 1 });
+      await page.locator("form.js-order [data-next]:visible").click();
+      await expect(page.locator("#designKind")).toBeVisible();
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       );

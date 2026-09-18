@@ -85,8 +85,9 @@ const attachmentHref = await signedAttachmentUrl(typeof fromDb.attachment_url ==
     <div><dt>Langue</dt><dd>{visitorLocaleLabel(fromDb.locale)}</dd></div>
     <div><dt>Service</dt><dd>{fromDb.service_title}</dd></div>
     <div><dt>Projet</dt><dd>{fromDb.project_type}</dd></div>
-    <div><dt>Description</dt><dd>{fromDb.description}</dd></div>
-    <div><dt>Budget déclaré</dt><dd>{fromDb.budget_range}</dd></div>
+    <div><dt>Détails de la demande</dt><dd>{fromDb.description}</dd></div>
+    <div><dt>Budget déclaré</dt><dd>{fromDb.budget_range || "—"}</dd></div>
+    <div><dt>Délai souhaité</dt><dd>{fromDb.desired_deadline || "—"}</dd></div>
     <div><dt>Fichier</dt><dd>{attachmentHref ? <a href={attachmentHref} rel="noopener noreferrer" target="_blank">Télécharger (lien temporaire)</a> : (fromDb.attachment_url || "—")}</dd></div>
   </dl>
   <form method="post" class="form">

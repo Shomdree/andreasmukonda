@@ -1,6 +1,7 @@
 ---
 import type { SiteSettings } from "../lib/types";
 import SocialLinks from "./SocialLinks.astro";
+import NavIcon from "./NavIcon.astro";
 import { pageI18n } from "../i18n/request";
 import { identity } from "../i18n/identity";
 
@@ -13,10 +14,10 @@ const logoSrcSet = settings.logo?.includes("/images/andreas/logo")
   : undefined;
 
 const extraLinks = [
-  { href: href("/contact"), label: t.nav.contact },
-  { href: href("/consulting"), label: t.nav.consulting },
-  { href: href("/questions"), label: t.nav.questions },
-  { href: href("/actualites"), label: t.nav.news },
+  { href: href("/contact"), label: t.nav.contact, icon: "contact" as const },
+  { href: href("/consulting"), label: t.nav.consulting, icon: "consulting" as const },
+  { href: href("/questions"), label: t.nav.questions, icon: "questions" as const },
+  { href: href("/actualites"), label: t.nav.news, icon: "news" as const },
 ];
 ---
 
@@ -41,7 +42,10 @@ const extraLinks = [
 
     <nav aria-label={t.a11y.footerNav}>
       {extraLinks.map((item) => (
-        <a href={item.href}>{item.label}</a>
+        <a href={item.href}>
+          <NavIcon name={item.icon} />
+          {item.label}
+        </a>
       ))}
     </nav>
 
@@ -118,7 +122,20 @@ const extraLinks = [
     min-height: 44px;
     display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
     padding-inline: 0.35rem;
+  }
+  nav a :global(.nav-ico) {
+    flex-shrink: 0;
+    opacity: 0.82;
+    transition:
+      opacity var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
+  nav a:hover :global(.nav-ico),
+  nav a:focus-visible :global(.nav-ico) {
+    opacity: 1;
+    transform: translateY(-1px);
   }
   nav a:hover,
   .legal a:hover,

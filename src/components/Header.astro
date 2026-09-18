@@ -2,6 +2,7 @@
 import type { SiteSettings } from "../lib/types";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import ThemeToggle from "./ThemeToggle.astro";
+import NavIcon from "./NavIcon.astro";
 import { pageI18n } from "../i18n/request";
 
 type Props = { settings: SiteSettings };
@@ -70,10 +71,10 @@ function active(match: string) {
             </a>
           ))
         }
-        <a href={href("/consulting")}>{t.nav.consulting}</a>
-        <a href={href("/questions")}>{t.nav.questions}</a>
-        <a href={href("/actualites")}>{t.nav.news}</a>
-        <a href={href("/contact")}>{t.nav.contact}</a>
+        <a href={href("/consulting")}><NavIcon name="consulting" />{t.nav.consulting}</a>
+        <a href={href("/questions")}><NavIcon name="questions" />{t.nav.questions}</a>
+        <a href={href("/actualites")}><NavIcon name="news" />{t.nav.news}</a>
+        <a href={href("/contact")}><NavIcon name="contact" />{t.nav.contact}</a>
         <a class="btn btn-primary" href={href("/commander")}>{t.nav.primaryCta}</a>
         <ThemeToggle variant="menu" />
         <LanguageSwitcher locale={locale} path={path} t={t} variant="mobile" />
@@ -257,8 +258,21 @@ function active(match: string) {
     min-height: 44px;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
     padding: 0 0.6rem;
     border-radius: 8px;
+  }
+  .sheet a :global(.nav-ico) {
+    flex-shrink: 0;
+    opacity: 0.82;
+    transition:
+      opacity var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
+  .sheet a:hover :global(.nav-ico),
+  .sheet a[aria-current="page"] :global(.nav-ico) {
+    opacity: 1;
+    transform: translateY(-1px);
   }
   .sheet a:hover,
   .sheet a[aria-current="page"] {
@@ -289,8 +303,12 @@ function active(match: string) {
     }
   }
   @media (max-width: 979px) {
-    .header-cta {
+    .header-cta .arrow {
       display: none;
+    }
+    .header-cta {
+      padding-inline: 0.75rem;
+      font-size: 0.9rem;
     }
   }
   @media (max-width: 420px) {

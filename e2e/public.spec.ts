@@ -1,4 +1,36 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function continueOrder(page: Page) {
+  await page.locator("form.js-order [data-next]:visible").click();
+}
+
+async function fillOrderContact(page: Page, email: string) {
+  await page.fill("#fullName", "Alex Mukendi");
+  await page.fill("#email", email);
+  await page.fill("#phone", "0990000000");
+}
+
+async function sendOrder(page: Page) {
+  await page.check("input[name=consent]");
+  await page.locator("form.js-order [data-submit]:visible").click();
+}
+
+async function chooseService(page: Page, kind: "design" | "web" | "training" | "generic") {
+  const value = await page.locator(`#serviceId option[data-kind="${kind}"]`).first().getAttribute("value");
+  await page.selectOption("#serviceId", value || { index: 1 });
+}
+
+async function completeDesignOrder(page: Page, email: string) {
+  await chooseService(page, "design");
+  await continueOrder(page);
+  await page.selectOption("#designKind", "logo");
+  await page.fill("#displayName", "Studio Alex");
+  await page.selectOption("#designOrigin", "nouveau");
+  await continueOrder(page);
+  await fillOrderContact(page, email);
+  await continueOrder(page);
+  await sendOrder(page);
+}
 
 test("homepage", async ({ page }) => {
   await page.goto("/");
@@ -38,17 +70,45 @@ test("contact validation", async ({ page }) => {
 
 test("demande de commande", async ({ page }) => {
   await page.goto("/commander");
-  await page.selectOption("#serviceId", { index: 1 });
-  await page.fill("#fullName", "Alex Mukendi");
-  await page.fill("#email", "alex@studio.test");
-  await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "Nous avons besoin d'un logo et d'une affiche pour un lancement.");
-  await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Envoyer ma demande" }).click();
+  await completeDesignOrder(page, "alex@studio.test");
   await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
   await expect(page.getByText(/Référence : AM-\d{4}-\d{4}/)).toBeVisible();
   await expect(page.getByRole("link", { name: /WhatsApp/i }).first()).toBeVisible();
+});
+
+test("commande site web", async ({ page }) => {
+  await page.goto("/commander");
+  await chooseService(page, "web");
+  await continueOrder(page);
+  await page.selectOption("#webType", "vitrine");
+  await page.selectOption("#webExists", "nouveau");
+  await page.selectOption("#webDomain", "non");
+  await page.selectOption("#webHosting", "non");
+  await page.locator('input[name=webFeatures][value=presenter]').check();
+  await page.locator('input[name=webFeatures][value=contact]').check();
+  await page.selectOption("#webContent", "aide");
+  await page.selectOption("#webIdentity", "non");
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-web@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
+  await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
+});
+
+test("commande formation", async ({ page }) => {
+  await page.goto("/commander");
+  await chooseService(page, "training");
+  await continueOrder(page);
+  await page.selectOption("#trainingPick", "unsure");
+  await page.selectOption("#trainingLevel", "debutant");
+  await page.selectOption("#trainingGoal", "travail");
+  await page.selectOption("#trainingFormat", "presentiel");
+  await page.selectOption("#trainingAudience", "individuelle");
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-training@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
+  await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
 });
 
 test("question", async ({ page }) => {
@@ -123,13 +183,7 @@ test("contact duplicate is rejected", async ({ page }) => {
 
 test("order rejects missing service", async ({ page }) => {
   await page.goto("/commander");
-  await page.fill("#fullName", "Alex Mukendi");
-  await page.fill("#email", "alex@studio.test");
-  await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "Nous avons besoin d'un logo et d'une affiche pour un lancement.");
-  await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Envoyer ma demande" }).click();
+  await continueOrder(page);
   await expect(page.getByText(/Choisissez un service/i)).toBeVisible();
 });
 
@@ -147,64 +201,51 @@ test("contact rejects empty message", async ({ page }) => {
 
 test("order rejects missing contact", async ({ page }) => {
   await page.goto("/commander");
-  await page.selectOption("#serviceId", { index: 1 });
+  await chooseService(page, "design");
+  await continueOrder(page);
+  await page.selectOption("#designKind", "logo");
+  await page.fill("#displayName", "Studio Alex");
+  await page.selectOption("#designOrigin", "nouveau");
+  await continueOrder(page);
   await page.fill("#fullName", "");
   await page.fill("#email", "pas-un-email");
-  await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "Nous avons besoin d'un logo et d'une affiche pour un lancement.");
-  await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Envoyer ma demande" }).click();
-  await expect(page.getByText(/Indiquez votre nom|email valide/i).first()).toBeVisible();
+  await continueOrder(page);
+  await expect(page.locator("#fullName")).toBeFocused();
 });
 
 test("order rejects empty project", async ({ page }) => {
   await page.goto("/commander");
-  await page.selectOption("#serviceId", { index: 1 });
-  await page.fill("#fullName", "Alex Mukendi");
-  await page.fill("#email", "alex@studio.test");
-  await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "");
-  await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Envoyer ma demande" }).click();
-  await expect(page.getByText(/message un peu plus long/i)).toBeVisible();
+  await chooseService(page, "design");
+  await continueOrder(page);
+  await continueOrder(page);
+  await expect(page.locator("#designKind")).toBeFocused();
 });
 
 test("order rejects invalid attachment", async ({ page }) => {
   await page.goto("/commander");
-  await page.selectOption("#serviceId", { index: 1 });
-  await page.fill("#fullName", "Alex Mukendi");
-  await page.fill("#email", "alex-file@studio.test");
-  await page.fill("#phone", "0990000000");
-  await page.fill("#projectType", "Logo");
-  await page.fill("#description", "Nous avons besoin d'un logo et d'une affiche pour un lancement.");
+  await chooseService(page, "design");
+  await continueOrder(page);
+  await page.selectOption("#designKind", "logo");
+  await page.fill("#displayName", "Studio Alex");
+  await page.selectOption("#designOrigin", "nouveau");
   await page.setInputFiles("#attachment", {
     name: "setup.exe",
     mimeType: "application/x-msdownload",
     buffer: Buffer.from([0x4d, 0x5a, 0x90, 0x00]),
   });
-  await page.check("input[name=consent]");
-  await page.getByRole("button", { name: "Envoyer ma demande" }).click();
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-file@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
   await expect(page.getByText(/Formats acceptés|n'a pas pu être envoyé|type de fichier n’est pas accepté/i)).toBeVisible();
 });
 
 test("order duplicate is rejected", async ({ page }) => {
   await page.goto("/commander");
-  const fill = async () => {
-    await page.selectOption("#serviceId", { index: 1 });
-    await page.fill("#fullName", "Alex Mukendi");
-    await page.fill("#email", "alex-order-dup@studio.test");
-    await page.fill("#phone", "0990000000");
-    await page.fill("#projectType", "Logo");
-    await page.fill("#description", "Nous avons besoin d'un logo identique pour tester le doublon de commande.");
-    await page.check("input[name=consent]");
-    await page.getByRole("button", { name: "Envoyer ma demande" }).click();
-  };
-  await fill();
+  await completeDesignOrder(page, "alex-order-dup@studio.test");
   await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
   await page.goto("/commander");
-  await fill();
+  await completeDesignOrder(page, "alex-order-dup@studio.test");
   await expect(page.getByText(/déjà été envoyée/i)).toBeVisible();
 });
 

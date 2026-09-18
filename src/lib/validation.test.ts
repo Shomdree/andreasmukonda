@@ -98,4 +98,19 @@ describe("form validation", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("still accepts a generic order payload", () => {
+    const result = orderSchema.safeParse({
+      serviceId: "s-media",
+      fullName: "Alex Mukendi",
+      email: "alex@studio.test",
+      phone: "0990000000",
+      projectType: "Reportage",
+      description: "Nous avons besoin d'une couverture photo pour un lancement.",
+      budgetRange: "À discuter",
+      contactPreference: "whatsapp",
+      consent: true,
+    });
+    expect(result.success).toBe(true);
+  });
 });

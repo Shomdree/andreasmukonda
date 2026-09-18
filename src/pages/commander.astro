@@ -6,13 +6,14 @@ import UnavailableNotice from "../components/UnavailableNotice.astro";
 import { pageI18n } from "../i18n/request";
 import { submitOrder } from "../lib/actions";
 import { isUnavailableMessage } from "../lib/env";
-import { getServices, getSettings } from "../lib/queries";
+import { getServices, getSettings, getTrainings } from "../lib/queries";
 import { defaultSettings } from "../content/defaults";
 import { whatsappUrl, orderWhatsAppMessage } from "../lib/whatsapp";
 
 const { locale, t, href } = pageI18n(Astro.locals);
 const settings = await getSettings().catch(() => defaultSettings);
 const services = await getServices();
+const trainings = await getTrainings();
 const selectedSlug = Astro.url.searchParams.get("service");
 const reference = Astro.url.searchParams.get("ref");
 let errors: Record<string, string> | undefined;
@@ -91,6 +92,7 @@ const wa2 = whatsappUrl(settings.whatsappSecondary, orderText);
                 <OrderForm
                   action={href("/commander")}
                   services={services}
+                  trainings={trainings}
                   selectedSlug={selectedSlug}
                   errors={errors}
                   values={values}
