@@ -1,0 +1,16 @@
+---
+type Props = { title?: string; text?: string };
+---
+
+<div class="err" role="alert">
+  <p class="display">{Astro.props.title ?? "Un incident est survenu."}</p>
+  <p>{Astro.props.text ?? "Réessayez dans un instant, ou revenez à l'accueil."}</p>
+  <a class="btn btn-ghost" href="/">Retour à l'accueil</a>
+</div>
+
+<style>
+  .err {
+    padding: 2rem 0;
+    max-width: 36rem;
+  }
+</style>

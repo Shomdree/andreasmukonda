@@ -1,0 +1,91 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import WhatsAppButton from "../components/WhatsAppButton.astro";
+import SEOHead from "../components/SEOHead.astro";
+import { pageI18n } from "../i18n/request";
+import { localeHtml } from "../i18n/config";
+import { getSettings } from "../lib/queries";
+import { analyticsSnippet } from "../lib/analytics";
+import type { SiteSettings } from "../lib/types";
+
+type Props = {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalPath?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  settings?: SiteSettings;
+};
+
+const { locale, path, t } = pageI18n(Astro.locals);
+const settings = Astro.props.settings ?? (await getSettings());
+const analytics = analyticsSnippet();
+const canonicalPath = Astro.props.canonicalPath ?? path;
+---
+
+<!doctype html>
+<html lang={localeHtml[locale]} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="theme-color" content="#0E1014" />
+    <script is:inline>
+      (function () {
+        try {
+          const match = document.cookie.match(/(?:^|; )preferred_theme=(dark|light)/);
+          let theme = match ? match[1] : localStorage.getItem("preferred_theme");
+          if (theme !== "light" && theme !== "dark") theme = "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+          const color = theme === "light" ? "#F7F5F0" : "#0E1014";
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", color);
+        } catch {
+          /* private mode */
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/images/andreas/mark.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <ClientRouter fallback="swap" />
+    <SEOHead
+      title={Astro.props.title ?? t.seo.homeTitle}
+      description={Astro.props.description ?? t.seo.homeDescription}
+      image={Astro.props.image ?? "/images/andreas/og.jpg"}
+      path={canonicalPath}
+      locale={locale}
+      jsonLd={Astro.props.jsonLd}
+    />
+    {analytics && (
+      <script defer is:inline src={analytics.src} data-domain={analytics.domain}></script>
+    )}
+  </head>
+  <body>
+    <noscript>
+      <style>
+        [data-reveal],
+        [data-stagger] > * {
+          opacity: 1 !important;
+          transform: none !important;
+          animation: none !important;
+        }
+      </style>
+    </noscript>
+    <a class="skip-link" href="#contenu">{t.a11y.skip}</a>
+    <Header settings={settings} />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer settings={settings} />
+    <WhatsAppButton number={settings.whatsapp} />
+    <script>
+      import { bootMotion } from "../lib/animations";
+      bootMotion();
+      document.addEventListener("astro:page-load", bootMotion);
+    </script>
+  </body>
+</html>

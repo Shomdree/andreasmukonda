@@ -1,0 +1,81 @@
+---
+import FormGuard from "./FormGuard.astro";
+import { pageI18n } from "../i18n/request";
+
+type Props = {
+  action: string;
+  errors?: Record<string, string>;
+  values?: Record<string, string>;
+};
+const { t, locale } = pageI18n(Astro.locals);
+const e = Astro.props.errors ?? {};
+const v = Astro.props.values ?? {};
+---
+
+<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload>
+  {e.form && <p class="banner" role="alert">{e.form}</p>}
+  <FormGuard />
+  <input type="hidden" name="locale" value={locale} />
+  <div class="field">
+    <label for="fullName">{t.form.name}</label>
+    <input id="fullName" name="fullName" required maxlength="80" value={v.fullName ?? ""} autocomplete="name" />
+    {e.fullName && <p class="error">{e.fullName}</p>}
+  </div>
+  <div class="field">
+    <label for="email">{t.form.email}</label>
+    <input id="email" name="email" type="email" required maxlength="120" value={v.email ?? ""} autocomplete="email" />
+    {e.email && <p class="error">{e.email}</p>}
+  </div>
+  <div class="field">
+    <label for="phone">{t.form.phone}</label>
+    <input id="phone" name="phone" type="tel" required inputmode="tel" maxlength="30" value={v.phone ?? ""} autocomplete="tel" />
+    {e.phone && <p class="error">{e.phone}</p>}
+  </div>
+  <div class="field">
+    <label for="subject">{t.form.subject}</label>
+    <input id="subject" name="subject" required maxlength="120" value={v.subject ?? ""} />
+    {e.subject && <p class="error">{e.subject}</p>}
+  </div>
+  <div class="field">
+    <label for="message">{t.form.message}</label>
+    <textarea id="message" name="message" required maxlength="4000">{v.message ?? ""}</textarea>
+    {e.message && <p class="error">{e.message}</p>}
+  </div>
+  <div class="field">
+    <label for="preferredContact">{t.form.preferredContact}</label>
+    <select id="preferredContact" name="preferredContact">
+      <option value="whatsapp" selected={v.preferredContact !== "email" && v.preferredContact !== "telephone"}>WhatsApp</option>
+      <option value="email" selected={v.preferredContact === "email"}>{t.form.email}</option>
+      <option value="telephone" selected={v.preferredContact === "telephone"}>{t.form.phone}</option>
+    </select>
+  </div>
+  <label class="check">
+    <input type="checkbox" name="consent" required />
+    {t.form.consent}
+  </label>
+  {e.consent && <p class="error">{e.consent}</p>}
+  <button class="btn btn-primary" type="submit" data-loading-label={t.form.sending}>{t.contact.cta}</button>
+</form>
+
+<style>
+  .stack {
+    display: grid;
+    gap: 1rem;
+    max-width: 36rem;
+  }
+  .banner {
+    color: var(--color-danger);
+  }
+  .check {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    color: var(--fg-soft);
+    font-size: 0.92rem;
+  }
+  .check input {
+    margin-top: 0.25rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+</style>

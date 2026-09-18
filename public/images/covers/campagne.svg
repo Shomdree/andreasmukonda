@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <rect width="1200" height="1500" fill="#0E1014"/>
+  <rect x="0" y="0" width="400" height="1500" fill="#4F63FF"/>
+  <rect x="400" y="500" width="800" height="200" fill="#F5A623"/>
+  <text x="440" y="300" fill="#F7F5F0" font-size="72" font-family="Georgia,serif">CAMPAGNE</text>
+</svg>

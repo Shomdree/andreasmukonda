@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { pageI18n } from "../../i18n/request";
+import { localizeService } from "../../i18n/localize";
+import { getService, getSettings } from "../../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const found = await getService(Astro.params.slug ?? "");
+if (!found) return Astro.redirect(href("/"));
+const service = localizeService(found, t);
+const ctaHref = service.ctaHref.startsWith("/") ? href(service.ctaHref) : service.ctaHref;
+---
+
+<BaseLayout
+  settings={settings}
+  title={`${service.title} — ${t.nav.services}`}
+  description={service.excerpt}
+  canonicalPath={`/services/${service.slug}`}
+>
+  <article class="section">
+    <div class="container-am">
+      <Breadcrumbs
+        homeHref={href("/")}
+        homeLabel={t.nav.home}
+        items={[
+          { href: href("/services"), label: t.nav.services },
+          { href: href(`/services/${service.slug}`), label: service.title },
+        ]}
+      />
+      <p class="kicker">{service.priceLabel} · {service.turnaround}</p>
+      <h1 class="display">{service.title}</h1>
+      <p class="lead">{service.description}</p>
+      <h2>{t.catalog.benefits}</h2>
+      <ul>{service.benefits.map((b) => <li>{b}</li>)}</ul>
+      <h2>{t.catalog.deliverables}</h2>
+      <ul>{service.deliverables.map((b) => <li>{b}</li>)}</ul>
+      <p class="actions">
+        <a class="btn btn-primary" href={ctaHref}>{service.ctaLabel}</a>
+        <a class="btn btn-ghost" href={href("/contact")}>{t.nav.contact}</a>
+      </p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.2rem, 7vw, 4rem); max-width: 16ch; }
+  .lead, li { color: var(--fg-soft); }
+  h2 { margin-top: 1.6rem; font-size: 1.05rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.8rem; }
+</style>

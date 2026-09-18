@@ -1,0 +1,55 @@
+---
+import "../styles/global.css";
+import AdminSidebar from "../components/admin/AdminSidebar.astro";
+import AdminHeader from "../components/admin/AdminHeader.astro";
+import { requireAdmin } from "../lib/auth";
+
+type Props = { title: string; email?: string };
+
+const admin = await requireAdmin(Astro.request, Astro.cookies);
+if (!admin) return Astro.redirect("/admin/login");
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{Astro.props.title} — Admin</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="admin">
+    <a class="skip-link" href="#admin-main">Aller au contenu</a>
+    <div class="shell">
+      <AdminSidebar />
+      <div class="main">
+        <AdminHeader title={Astro.props.title} email={Astro.props.email} />
+        <div id="admin-main" class="pad">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  .admin {
+    background: #0b0d12;
+  }
+  .shell {
+    display: grid;
+  }
+  .main {
+    min-width: 0;
+  }
+  .pad {
+    padding: 1.1rem 1rem 3rem;
+  }
+  @media (min-width: 900px) {
+    .shell {
+      grid-template-columns: 240px 1fr;
+      min-height: 100dvh;
+    }
+  }
+</style>

@@ -1,0 +1,118 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ServiceCard from "../../components/ServiceCard.astro";
+import CTASection from "../../components/CTASection.astro";
+import { pageI18n } from "../../i18n/request";
+import { identity } from "../../i18n/identity";
+import { getServices, getSettings } from "../../lib/queries";
+import { siteUrl } from "../../lib/env";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const services = await getServices();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: identity.name,
+  url: `${siteUrl()}${href("/services")}`,
+  areaServed: "CD",
+  description: t.seo.servicesDescription,
+};
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.servicesTitle}
+  description={t.seo.servicesDescription}
+  canonicalPath="/services"
+  jsonLd={jsonLd}
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/services"), label: t.nav.services }]} />
+      <h1 class="display">{t.servicesPage.title}</h1>
+      <p class="lead">{t.servicesPage.lead}</p>
+      <p class="lead">{t.servicesPage.follow}</p>
+      <p class="lead">{t.servicesPage.close}</p>
+
+      <article class="block" id="design" data-reveal="up">
+        <p class="kicker">{t.servicesPage.designTitle}</p>
+        <h2 class="display">{t.servicesPage.designHeading}</h2>
+        <p>{t.servicesPage.designBody}</p>
+        <p>{t.servicesPage.designListLabel}</p>
+        <ul>{t.servicesPage.designItems.map((item) => <li>{item}</li>)}</ul>
+        <p><strong>{t.servicesPage.price}</strong></p>
+        <a class="btn btn-primary" href={href("/commander")}>{t.servicesPage.designCta}</a>
+      </article>
+
+      <article class="block" id="web" data-reveal="up">
+        <p class="kicker">{t.servicesPage.webTitle}</p>
+        <h2 class="display">{t.servicesPage.webHeading}</h2>
+        <p>{t.servicesPage.webBody}</p>
+        <p>{t.servicesPage.webFollow}</p>
+        <p>{t.servicesPage.webListLabel}</p>
+        <ul>{t.servicesPage.webItems.map((item) => <li>{item}</li>)}</ul>
+        <p><strong>{t.servicesPage.price}</strong></p>
+        <a class="btn btn-primary" href={href("/commander")}>{t.servicesPage.webCta}</a>
+      </article>
+
+      <article class="block" id="training" data-reveal="up">
+        <p class="kicker">{t.servicesPage.trainingTitle}</p>
+        <h2 class="display">{t.servicesPage.trainingHeading}</h2>
+        <p>{t.servicesPage.trainingBody}</p>
+        <p>{t.servicesPage.trainingFollow}</p>
+        <p>{t.servicesPage.trainingListLabel}</p>
+        <ul>{t.trainings.domains.map((item) => <li>{item}</li>)}</ul>
+        <a class="btn btn-ghost" href={href("/formations")}>{t.servicesPage.trainingCta}</a>
+      </article>
+
+      <article class="block" id="consulting" data-reveal="up">
+        <p class="kicker">{t.servicesPage.consultingTitle}</p>
+        <h2 class="display">{t.servicesPage.consultingHeading}</h2>
+        <p>{t.servicesPage.consultingBody}</p>
+        <p>{t.servicesPage.consultingFollow}</p>
+        <a class="btn btn-ghost" href={href("/consulting")}>{t.servicesPage.consultingCta}</a>
+      </article>
+
+      <article class="block" id="media" data-reveal="up">
+        <p class="kicker">{t.servicesPage.mediaTitle}</p>
+        <h2 class="display">{t.servicesPage.mediaHeading}</h2>
+        <p>{t.servicesPage.mediaBody}</p>
+        <ul>{t.servicesPage.mediaItems.map((item) => <li>{item}</li>)}</ul>
+        <a class="btn btn-ghost" href={href("/commander")}>{t.servicesPage.mediaCta}</a>
+      </article>
+
+      {services.map((service, i) => (
+        <div id={service.slug}>
+          <ServiceCard service={service} index={i} />
+        </div>
+      ))}
+    </div>
+  </section>
+  <CTASection
+    title={t.cta.title}
+    text={t.cta.lead}
+    primaryHref={href("/commander")}
+    primaryLabel={t.servicesPage.designCta}
+    secondaryHref={href("/contact")}
+    secondaryLabel={t.nav.contact}
+  />
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.6rem); color: var(--fg); }
+  h2 { margin: 0.3rem 0 0.8rem; font-size: clamp(1.4rem, 4vw, 2.2rem); color: var(--fg); }
+  .lead { color: var(--fg-soft); margin: 0.6rem 0; max-width: 38rem; }
+  .block {
+    margin: 2rem 0;
+    display: grid;
+    gap: 0.6rem;
+    color: var(--fg-soft);
+    scroll-margin-top: 5.75rem;
+  }
+  .block .kicker { color: var(--color-ember); }
+  .block p, .block li { color: var(--fg-soft); }
+  .block strong { color: var(--fg); }
+  ul { padding-left: 1.1rem; }
+</style>

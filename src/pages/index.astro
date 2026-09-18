@@ -1,0 +1,264 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import PortfolioGrid from "../components/PortfolioGrid.astro";
+import CTASection from "../components/CTASection.astro";
+import EcosystemGrid from "../components/EcosystemGrid.astro";
+import Portrait from "../components/Portrait.astro";
+import { pageI18n } from "../i18n/request";
+import { identity } from "../i18n/identity";
+import { getProjects, getSettings } from "../lib/queries";
+import { personJsonLd } from "../lib/person-jsonld";
+import { whatsappUrl } from "../lib/whatsapp";
+
+const { locale, t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const studio = settings.aboutPortrait || settings.portrait;
+const projects = await getProjects({ featured: true });
+const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
+const showStudio = Boolean(studio) && !studio.includes("placeholder");
+const serviceCards = [
+  { id: "service-design", title: t.homeServices.designTitle, lead: t.homeServices.designLead, body: t.homeServices.designBody, cta: t.homeServices.designCta, href: `${href("/services")}#design` },
+  { id: "service-web", title: t.homeServices.webTitle, lead: t.homeServices.webLead, body: t.homeServices.webBody, cta: t.homeServices.webCta, href: href("/commander") },
+  { id: "service-training", title: t.homeServices.trainingTitle, lead: t.homeServices.trainingLead, body: t.homeServices.trainingBody, cta: t.homeServices.trainingCta, href: href("/formations") },
+  { id: "service-consulting", title: t.homeServices.consultingTitle, lead: t.homeServices.consultingLead, body: t.homeServices.consultingBody, cta: t.homeServices.consultingCta, href: href("/consulting") },
+  { id: "service-media", title: t.homeServices.mediaTitle, lead: t.homeServices.mediaLead, body: t.homeServices.mediaBody, cta: t.homeServices.mediaCta, href: `${href("/services")}#media` },
+];
+const ribbon = serviceCards.map((card) => ({ label: card.title, href: `#${card.id}` }));
+const poles = [
+  { brand: t.gsi.academiaTitle, title: t.gsi.academiaLead, text: t.gsi.academiaBody, href: href("/formations"), cta: t.homeServices.trainingCta },
+  { brand: t.gsi.businessTitle, title: t.gsi.businessLead, text: t.gsi.businessBody, href: href("/consulting"), cta: t.homeServices.consultingCta },
+  { brand: t.gsi.designTitle, title: t.gsi.designLead, text: t.gsi.designBody, href: href("/services"), cta: t.homeServices.designCta },
+  { brand: t.gsi.mediaTitle, title: t.gsi.mediaLead, text: t.gsi.mediaBody, href: href("/lives"), cta: t.homeServices.mediaCta },
+];
+---
+
+<BaseLayout settings={settings} title={t.seo.homeTitle} description={t.seo.homeDescription} canonicalPath="/" jsonLd={personJsonLd(settings, locale)}>
+  <Hero settings={settings} />
+
+  <section class="section ribbon" id="expertises" aria-label={t.homeServices.title}>
+    <div class="marquee">
+      <div class="track">
+        {
+          [0, 1, 2].map((copy) =>
+            ribbon.map((item) => (
+              <a
+                class:list={["item", copy > 0 && "clone"]}
+                href={item.href}
+                tabindex={copy === 0 ? undefined : -1}
+                aria-hidden={copy === 0 ? undefined : "true"}
+              >
+                {item.label}
+              </a>
+            )),
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-reveal="up">
+    <div class="container-am">
+      <SectionHeading title={t.intro.title} text={`${t.intro.body} ${t.intro.follow}`} />
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container-am">
+      <SectionHeading title={t.homeServices.title} />
+      <div class="help">
+        {serviceCards.map((card, i) => (
+          <article class="help-card" id={card.id} data-reveal="up" style={`--d:${i * 70}ms`}>
+            <h3 class="display">{card.title}</h3>
+            <p class="lead-card">{card.lead}</p>
+            <p>{card.body}</p>
+            <a class="btn btn-ghost" href={card.href}>{card.cta}</a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-am about" data-reveal="up">
+      {
+        showStudio && (
+            <div class="about-photo" data-reveal="scale">
+            <Portrait src={studio} alt={t.about.photoAlt} sizes="(max-width: 879px) 78vw, 320px" />
+          </div>
+        )
+      }
+      <div>
+        <p class="kicker">{t.nav.about}</p>
+        <h2 class="display">{t.homeAbout.title}</h2>
+        <p>{t.homeAbout.p1}</p>
+        <p>{t.homeAbout.p2}</p>
+        <p>{t.homeAbout.p3}</p>
+        <p>{t.homeAbout.p4}</p>
+        <a class="btn btn-ghost" href={href("/a-propos")}>{t.homeAbout.cta}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container-am">
+      <SectionHeading title={t.gsi.title} text={t.gsi.lead} />
+      <EcosystemGrid hub={identity.gsi} branches={poles} />
+    </div>
+  </section>
+
+  {
+    projects.length > 0 && (
+      <section class="section">
+        <div class="container-am">
+          <SectionHeading title={t.portfolio.title} text={t.portfolio.lead} />
+          <PortfolioGrid projects={projects.slice(0, 4)} />
+          <p class="more"><a class="btn btn-ghost" href={href("/portfolio")}>{t.hero.ctaWork}</a></p>
+        </div>
+      </section>
+    )
+  }
+
+  <CTASection
+    title={t.cta.title}
+    text={t.cta.lead}
+    primaryHref={href("/commander")}
+    primaryLabel={t.cta.start}
+    secondaryHref={wa ?? href("/contact")}
+    secondaryLabel={t.cta.whatsapp}
+  />
+</BaseLayout>
+
+<style>
+  .ribbon {
+    padding-block: 0.35rem;
+    border-block: 1px solid var(--line);
+    background: var(--bg);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee {
+    overflow: hidden;
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    gap: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    animation: marquee 28s linear infinite;
+  }
+  .track .item {
+    color: var(--fg);
+    text-decoration: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    transition:
+      color var(--motion-fast) var(--ease-standard),
+      background-color var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
+  .track .item:hover,
+  .track .item:focus-visible {
+    color: var(--color-ember);
+    background: color-mix(in srgb, var(--color-ember) 14%, transparent);
+    transform: translateY(-2px) scale(1.06);
+  }
+  .ribbon:hover .track,
+  .ribbon:focus-within .track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    to {
+      transform: translate3d(-33.333%, 0, 0);
+    }
+  }
+  .help {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .help-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.15rem;
+    background: var(--bg-elev);
+    scroll-margin-top: 5.75rem;
+  }
+  .help-card h3 {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+    color: var(--fg);
+  }
+  .lead-card {
+    font-weight: 650;
+    color: var(--fg);
+    margin-bottom: 0.5rem;
+  }
+  .more {
+    margin-top: 1.5rem;
+  }
+  .about {
+    display: grid;
+    gap: 1.6rem;
+  }
+  .about-photo {
+    width: min(280px, 78vw);
+    margin-inline: auto;
+    border-radius: 24px 8px 28px 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    aspect-ratio: 4 / 5;
+    --pos: 50% 18%;
+  }
+  .about h2 {
+    font-size: clamp(1.7rem, 6vw, 3rem);
+    max-width: 22ch;
+    margin: 0.4rem 0 1rem;
+  }
+  .about p {
+    color: var(--fg-soft);
+    max-width: 40rem;
+    margin-bottom: 1rem;
+  }
+  .alt {
+    background: var(--bg-elev);
+  }
+  @media (min-width: 800px) {
+    .help {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 880px) {
+    .about:has(.about-photo) {
+      grid-template-columns: 0.7fr 1.3fr;
+      align-items: center;
+    }
+    .about-photo {
+      width: 100%;
+      max-width: 320px;
+      margin-inline: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+      flex-wrap: wrap;
+      width: auto;
+      justify-content: center;
+      gap: 0.7rem 1.4rem;
+    }
+    .ribbon {
+      mask-image: none;
+    }
+    .track .clone {
+      display: none;
+    }
+  }
+</style>

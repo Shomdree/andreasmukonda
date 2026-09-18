@@ -1,0 +1,22 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import DataTable from "../../../components/admin/DataTable.astro";
+import { listRows } from "../../../lib/admin";
+
+const rows = await listRows(Astro.request, Astro.cookies, "questions", { order: "created_at", limit: 100 });
+---
+
+<AdminLayout title="Questions">
+  <DataTable
+    columns={["Nom", "Catégorie", "Statut", "Publiée"]}
+    rows={rows.map((row) => ({
+      href: `/admin/questions/${row.id}`,
+      cells: [
+        String(row.full_name ?? ""),
+        String(row.category ?? ""),
+        String(row.status ?? ""),
+        row.published ? "oui" : "non",
+      ],
+    }))}
+  />
+</AdminLayout>

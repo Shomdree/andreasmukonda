@@ -1,0 +1,33 @@
+---
+type Props = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  eager?: boolean;
+  class?: string;
+};
+const loading = Astro.props.eager ? "eager" : "lazy";
+const fetchpriority = Astro.props.eager ? "high" : "auto";
+---
+
+<img
+  class:list={["responsive", Astro.props.class]}
+  src={Astro.props.src}
+  alt={Astro.props.alt}
+  width={Astro.props.width}
+  height={Astro.props.height}
+  loading={loading}
+  decoding="async"
+  fetchpriority={fetchpriority}
+/>
+
+<style>
+  .responsive {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    background: #141821;
+  }
+</style>

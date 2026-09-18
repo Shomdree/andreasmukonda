@@ -1,0 +1,60 @@
+---
+import FormGuard from "./FormGuard.astro";
+import { pageI18n } from "../i18n/request";
+
+type Props = {
+  action: string;
+  trainingId: string;
+  errors?: Record<string, string>;
+  values?: Record<string, string>;
+};
+const { t, locale } = pageI18n(Astro.locals);
+const e = Astro.props.errors ?? {};
+const v = Astro.props.values ?? {};
+---
+
+<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload>
+  {e.form && <p class="banner" role="alert">{e.form}</p>}
+  <FormGuard />
+  <input type="hidden" name="locale" value={locale} />
+  <input type="hidden" name="trainingId" value={Astro.props.trainingId} />
+  <div class="field">
+    <label for="fullName">{t.form.name}</label>
+    <input id="fullName" name="fullName" required maxlength="80" value={v.fullName ?? ""} autocomplete="name" />
+    {e.fullName && <p class="error">{e.fullName}</p>}
+  </div>
+  <div class="field">
+    <label for="email">{t.form.email}</label>
+    <input id="email" name="email" type="email" required value={v.email ?? ""} autocomplete="email" />
+    {e.email && <p class="error">{e.email}</p>}
+  </div>
+  <div class="field">
+    <label for="phone">{t.form.phone}</label>
+    <input id="phone" name="phone" type="tel" required inputmode="tel" value={v.phone ?? ""} />
+    {e.phone && <p class="error">{e.phone}</p>}
+  </div>
+  <div class="field">
+    <label for="whatsapp">WhatsApp</label>
+    <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" value={v.whatsapp ?? ""} />
+  </div>
+  <div class="field">
+    <label for="organization">{t.form.company}</label>
+    <input id="organization" name="organization" value={v.organization ?? ""} />
+  </div>
+  <div class="field">
+    <label for="message">{t.form.message}</label>
+    <textarea id="message" name="message">{v.message ?? ""}</textarea>
+  </div>
+  <label class="check">
+    <input type="checkbox" name="consent" required />
+    {t.form.consent}
+  </label>
+  {e.consent && <p class="error">{e.consent}</p>}
+  <button class="btn btn-primary" type="submit" data-loading-label={t.form.sending}>{t.trainings.cta}</button>
+</form>
+
+<style>
+  .stack { display: grid; gap: 0.9rem; max-width: 36rem; }
+  .banner { color: var(--color-danger); }
+  .check { display: flex; gap: 0.6rem; color: var(--fg-soft); }
+</style>

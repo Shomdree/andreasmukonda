@@ -1,0 +1,45 @@
+---
+type Props = { title: string; email?: string };
+---
+
+<header class="top">
+  <h1>{Astro.props.title}</h1>
+  <div class="row">
+    <a href="/" class="ghost">Voir le site</a>
+    <form method="post" action="/admin/logout">
+      <button class="ghost" type="submit">Déconnexion</button>
+    </form>
+  </div>
+</header>
+
+<style>
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+  .row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .ghost,
+  button {
+    background: none;
+    border: 0;
+    color: var(--fg-soft);
+    min-height: 44px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+type Props = {
+  columns: string[];
+  rows: { href?: string; cells: string[] }[];
+  empty?: string;
+};
+---
+
+{
+  Astro.props.rows.length === 0 ? (
+    <p class="empty">{Astro.props.empty ?? "Aucune entrée."}</p>
+  ) : (
+    <div class="wrap">
+      <table>
+        <thead>
+          <tr>
+            {Astro.props.columns.map((c) => (
+              <th>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Astro.props.rows.map((row) => (
+            <tr>
+              {row.cells.map((cell, i) => (
+                <td>
+                  {i === 0 && row.href ? <a href={row.href}>{cell}</a> : cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+<style>
+  .wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 520px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 0.7rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+  }
+  th {
+    color: var(--mute);
+    font-weight: 600;
+  }
+  a {
+    color: inherit;
+  }
+  .empty {
+    color: var(--fg-soft);
+    border: 1px dashed var(--line);
+    padding: 1.2rem;
+  }
+</style>

@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import EmptyState from "../../components/EmptyState.astro";
+import Pagination from "../../components/Pagination.astro";
+import PortfolioFilter from "../../components/PortfolioFilter.astro";
+import PortfolioGrid from "../../components/PortfolioGrid.astro";
+import CTASection from "../../components/CTASection.astro";
+import { pageI18n } from "../../i18n/request";
+import { getCategories, getProjects, getSettings } from "../../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const [projects, categories] = await Promise.all([getProjects(), getCategories()]);
+const current = Astro.url.searchParams.get("categorie");
+const page = Math.max(1, Number(Astro.url.searchParams.get("page") ?? "1"));
+const pageSize = 8;
+const filtered = current ? projects.filter((p) => p.category?.slug === current) : projects;
+const slice = filtered.slice(0, page * pageSize);
+const hasMore = slice.length < filtered.length;
+const nextHref = `${href("/portfolio")}?${new URLSearchParams({
+  ...(current ? { categorie: current } : {}),
+  page: String(page + 1),
+}).toString()}`;
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.portfolioTitle}
+  description={t.seo.portfolioDescription}
+  canonicalPath="/portfolio"
+>
+  <section class="section">
+    <div class="container-wide">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/portfolio"), label: t.nav.portfolio }]} />
+      <h1 class="display">{t.portfolio.title}</h1>
+      <p class="lead">{t.portfolio.lead}</p>
+      <p class="lead">{t.portfolio.follow}</p>
+      <ul class="topics">{t.portfolio.items.map((item) => <li>{item}</li>)}</ul>
+      <PortfolioFilter categories={categories} current={current} />
+      {slice.length ? <PortfolioGrid projects={slice} /> : <EmptyState title={t.portfolio.empty} />}
+      <Pagination hasMore={hasMore} nextHref={nextHref} label={t.catalog.seeMore} />
+    </div>
+  </section>
+  <CTASection title={t.portfolio.cta} primaryHref={href("/contact")} primaryLabel={t.nav.contact} />
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.6rem, 8vw, 5rem); margin: 0.2rem 0 0.6rem; }
+  .lead { color: var(--fg-soft); max-width: 38rem; margin-bottom: 1rem; }
+  .topics { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; color: var(--fg-soft); padding-left: 1.1rem; margin-bottom: 1.4rem; }
+</style>

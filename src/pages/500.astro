@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ErrorState from "../components/ErrorState.astro";
+import { getSettings } from "../lib/queries";
+const settings = await getSettings();
+---
+
+<BaseLayout settings={settings} title="Erreur serveur">
+  <section class="section">
+    <div class="container-am">
+      <ErrorState title="Le studio a rencontré une interruption." text="Réessayez dans un instant. Vos données de formulaire n'ont pas été perdues si un accusé a déjà été affiché." />
+    </div>
+  </section>
+</BaseLayout>

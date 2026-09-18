@@ -1,0 +1,114 @@
+---
+import { locales, localeNames, type Locale } from "../i18n/config";
+import { localizedPath } from "../i18n/utils";
+import type { Messages } from "../i18n";
+
+type Props = {
+  locale: Locale;
+  path: string;
+  t: Messages;
+  variant?: "desktop" | "mobile";
+};
+
+const { locale, path, t, variant = "desktop" } = Astro.props;
+---
+
+{
+  variant === "desktop" ? (
+    <nav class="langs-desktop" aria-label={t.lang.switchTo}>
+      {locales.map((item, index) => (
+        <>
+          {index > 0 && <span class="sep" aria-hidden="true">·</span>}
+          <a
+            href={localizedPath(item, path)}
+            hreflang={item}
+            lang={item}
+            aria-current={item === locale ? "true" : undefined}
+            aria-label={`${item.toUpperCase()} — ${t.lang[item]}${item === locale ? ` (${t.a11y.languageCurrent})` : ""}`}
+          >
+            {item.toUpperCase()}
+          </a>
+        </>
+      ))}
+    </nav>
+  ) : (
+    <div class="langs-mobile">
+      <p class="label" id="lang-menu-label">{t.lang.label}</p>
+      <nav aria-labelledby="lang-menu-label">
+        {locales.map((item) => (
+          <a
+            href={localizedPath(item, path)}
+            hreflang={item}
+            lang={item}
+            aria-current={item === locale ? "true" : undefined}
+          >
+            {localeNames[item]}
+          </a>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+<style>
+  .langs-desktop {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .langs-desktop a {
+    color: var(--fg-soft);
+    text-decoration: none;
+    min-height: 44px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.2rem;
+  }
+  .langs-desktop a[aria-current="true"] {
+    color: var(--fg);
+  }
+  .sep {
+    color: var(--mute);
+  }
+  .langs-mobile {
+    margin: 0.4rem 0;
+    padding: 0.4rem 0.2rem 0.2rem;
+    border-top: 1px solid var(--line);
+  }
+  .label {
+    margin: 0.3rem 0.6rem 0.2rem;
+    color: var(--mute);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .langs-mobile nav {
+    display: grid;
+  }
+  .langs-mobile a {
+    color: inherit;
+    text-decoration: none;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 0.6rem;
+    border-radius: 8px;
+  }
+  .langs-mobile a[aria-current="true"] {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  :global(html[data-theme="light"]) .langs-mobile a[aria-current="true"] {
+    background: rgba(14, 16, 20, 0.05);
+  }
+  @media (min-width: 980px) {
+    .langs-desktop {
+      display: inline-flex;
+    }
+  }
+</style>

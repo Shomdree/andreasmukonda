@@ -1,0 +1,89 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getSessionUser } from "../../lib/auth";
+import { countTable, listRows } from "../../lib/admin";
+import { isSupabaseConfigured } from "../../lib/env";
+import DataTable from "../../components/admin/DataTable.astro";
+import { statusLabel } from "../../lib/status";
+
+const user = await getSessionUser(Astro.request, Astro.cookies);
+const [ordersNew, reviewing, quoted, inProgress, done, questions, messages, lives] = await Promise.all([
+  countTable(Astro.request, Astro.cookies, "orders", { status: "nouvelle" }),
+  countTable(Astro.request, Astro.cookies, "orders", { status: "en_analyse" }),
+  countTable(Astro.request, Astro.cookies, "orders", { status: "devis_envoye" }),
+  countTable(Astro.request, Astro.cookies, "orders", { status: "en_production" }),
+  countTable(Astro.request, Astro.cookies, "orders", { status: "terminee" }),
+  countTable(Astro.request, Astro.cookies, "questions", { status: "nouvelle" }),
+  countTable(Astro.request, Astro.cookies, "contact_messages", { status: "nouvelle" }),
+  countTable(Astro.request, Astro.cookies, "live_items"),
+]);
+
+const recentOrders = await listRows(Astro.request, Astro.cookies, "orders", {
+  order: "created_at",
+  limit: 6,
+});
+---
+
+<AdminLayout title="Tableau de bord" email={user?.email}>
+  {
+    !isSupabaseConfigured() && (
+      <p class="note">
+        Supabase n'est pas encore branché. Le site public utilise le catalogue local (services, formations, FAQ).
+        En développement, les formulaires peuvent être stockés en mémoire processus. En production, ils échouent
+        proprement tant que Supabase n'est pas configuré.
+      </p>
+    )
+  }
+  <ul class="stats">
+    <li><a href="/admin/commandes?status=nouvelle"><strong>{ordersNew}</strong> nouvelles commandes</a></li>
+    <li><a href="/admin/commandes?status=en_analyse"><strong>{reviewing}</strong> en analyse</a></li>
+    <li><a href="/admin/commandes?status=devis_envoye"><strong>{quoted}</strong> devis envoyés</a></li>
+    <li><a href="/admin/commandes?status=en_production"><strong>{inProgress}</strong> en cours</a></li>
+    <li><a href="/admin/commandes?status=terminee"><strong>{done}</strong> terminées</a></li>
+    <li><a href="/admin/messages"><strong>{messages}</strong> nouveaux messages</a></li>
+    <li><a href="/admin/questions"><strong>{questions}</strong> nouvelles questions</a></li>
+    <li><strong>{lives}</strong> lives référencés</li>
+  </ul>
+  <h2>Dernières commandes</h2>
+  <DataTable
+    columns={["Référence", "Nom", "Statut"]}
+    rows={recentOrders.map((row) => ({
+      href: `/admin/commandes/${row.id}`,
+      cells: [String(row.reference ?? row.id), String(row.full_name ?? ""), statusLabel(String(row.status ?? ""))],
+    }))}
+    empty="Aucune commande pour le moment."
+  />
+</AdminLayout>
+
+<style>
+  .stats {
+    display: grid;
+    gap: 0.7rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+  }
+  .stats a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+  .stats li {
+    border: 1px solid var(--line);
+    padding: 0.9rem 1rem;
+    min-height: 44px;
+  }
+  .note {
+    color: var(--color-ember);
+    margin-bottom: 1.2rem;
+  }
+  h2 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  @media (min-width: 720px) {
+    .stats {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+</style>

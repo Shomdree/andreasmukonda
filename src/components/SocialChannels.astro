@@ -1,0 +1,72 @@
+---
+import type { SiteSettings } from "../lib/types";
+import SocialLinks from "./SocialLinks.astro";
+import { pageI18n } from "../i18n/request";
+import { fillNetwork } from "../i18n/localize";
+
+type Props = { settings: SiteSettings };
+const { settings } = Astro.props;
+const { t } = pageI18n(Astro.locals);
+const cards = [
+  { key: "facebook", label: "Facebook", href: settings.socialLinks.facebook },
+  { key: "instagram", label: "Instagram", href: settings.socialLinks.instagram },
+  { key: "tiktok", label: "TikTok", href: settings.socialLinks.tiktok },
+  { key: "youtube", label: "YouTube", href: settings.socialLinks.youtube },
+].filter((item) => item.href);
+---
+
+{
+  cards.length > 0 && (
+    <div class="grid">
+      {cards.map((card, i) => (
+        <article class="card" data-reveal="up" style={`--d:${i * 80}ms`}>
+          <p class="kicker">{card.label}</p>
+          <h3 class="display">{card.label}</h3>
+          <p>{fillNetwork(t.catalog.socialFind, card.label)}</p>
+          <a class="btn btn-ghost" href={card.href} target="_blank" rel="noopener noreferrer">
+            {fillNetwork(t.catalog.socialOpen, card.label)} <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </article>
+      ))}
+      <div class="all">
+        <SocialLinks links={settings.socialLinks} whatsapp={settings.whatsapp} />
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.1rem;
+    display: grid;
+    gap: 0.45rem;
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast);
+    transition-delay: var(--d, 0ms);
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--color-ember) 45%, var(--line));
+  }
+  h3 {
+    font-size: 1.3rem;
+  }
+  p {
+    color: var(--fg-soft);
+  }
+  @media (min-width: 800px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .all {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

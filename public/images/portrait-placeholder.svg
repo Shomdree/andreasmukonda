@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="900" viewBox="0 0 720 900" role="img" aria-label="Portrait placeholder">
+  <rect width="720" height="900" fill="#171A21"/>
+  <rect x="80" y="90" width="560" height="720" fill="#0E1014" stroke="#4F63FF" stroke-width="2"/>
+  <circle cx="360" cy="340" r="92" fill="none" stroke="#F7F5F0" stroke-width="3"/>
+  <path d="M210 620c40-90 320-90 360 0" fill="none" stroke="#F7F5F0" stroke-width="3"/>
+  <text x="360" y="760" text-anchor="middle" fill="#9CA3AF" font-family="Georgia,serif" font-size="22">Portrait à remplacer</text>
+</svg>

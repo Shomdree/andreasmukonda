@@ -1,0 +1,69 @@
+---
+import FormGuard from "./FormGuard.astro";
+import { pageI18n } from "../i18n/request";
+
+type Props = { action: string; errors?: Record<string, string>; values?: Record<string, string> };
+const { t, locale } = pageI18n(Astro.locals);
+const e = Astro.props.errors ?? {};
+const v = Astro.props.values ?? {};
+---
+
+<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload>
+  {e.form && <p class="banner" role="alert">{e.form}</p>}
+  <FormGuard />
+  <input type="hidden" name="locale" value={locale} />
+  <div class="field">
+    <label for="fullName">{t.form.name}</label>
+    <input id="fullName" name="fullName" required maxlength="80" value={v.fullName ?? ""} autocomplete="name" />
+  </div>
+  <div class="field">
+    <label for="phone">{t.form.phone}</label>
+    <input id="phone" name="phone" type="tel" required inputmode="tel" value={v.phone ?? ""} />
+  </div>
+  <div class="field">
+    <label for="whatsapp">WhatsApp</label>
+    <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" value={v.whatsapp ?? ""} />
+  </div>
+  <div class="field">
+    <label for="email">{t.form.email} ({t.form.optional})</label>
+    <input id="email" name="email" type="email" value={v.email ?? ""} />
+    {e.email && <p class="error">{e.email}</p>}
+  </div>
+  <div class="field">
+    <label for="organization">{t.form.company}</label>
+    <input id="organization" name="organization" value={v.organization ?? ""} />
+  </div>
+  <div class="field">
+    <label for="subject">{t.form.subject}</label>
+    <input id="subject" name="subject" required value={v.subject ?? ""} />
+  </div>
+  <div class="field">
+    <label for="description">{t.form.details}</label>
+    <textarea id="description" name="description" required>{v.description ?? ""}</textarea>
+    {e.description && <p class="error">{e.description}</p>}
+  </div>
+  <div class="field">
+    <label for="urgency">{t.form.urgency}</label>
+    <select id="urgency" name="urgency">
+      <option value="normale">{t.form.urgencyNormal}</option>
+      <option value="haute" selected={v.urgency === "haute"}>{t.form.urgencyHigh}</option>
+      <option value="critique" selected={v.urgency === "critique"}>{t.form.urgencyCritical}</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="availability">{t.form.deadline}</label>
+    <input id="availability" name="availability" value={v.availability ?? ""} />
+  </div>
+  <label class="check">
+    <input type="checkbox" name="consent" required />
+    {t.form.consent}
+  </label>
+  {e.consent && <p class="error">{e.consent}</p>}
+  <button class="btn btn-primary" type="submit" data-loading-label={t.form.sending}>{t.consultingPage.cta}</button>
+</form>
+
+<style>
+  .stack { display: grid; gap: 0.9rem; max-width: 36rem; }
+  .banner { color: var(--color-danger); }
+  .check { display: flex; gap: 0.6rem; color: var(--fg-soft); }
+</style>

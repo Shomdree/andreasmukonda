@@ -1,0 +1,110 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import CTASection from "../components/CTASection.astro";
+import EcosystemGrid from "../components/EcosystemGrid.astro";
+import Portrait from "../components/Portrait.astro";
+import { pageI18n } from "../i18n/request";
+import { identity } from "../i18n/identity";
+import { getSettings } from "../lib/queries";
+import { personJsonLd } from "../lib/person-jsonld";
+
+const { locale, t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const studio = settings.aboutPortrait || settings.portrait;
+const showPortrait = Boolean(studio) && !studio.includes("placeholder");
+const poles = [
+  { brand: t.gsi.academiaTitle, title: t.gsi.academiaLead, text: t.gsi.academiaBody, href: href("/formations") },
+  { brand: t.gsi.businessTitle, title: t.gsi.businessLead, text: t.gsi.businessBody, href: href("/consulting") },
+  { brand: t.gsi.designTitle, title: t.gsi.designLead, text: t.gsi.designBody, href: href("/services") },
+  { brand: t.gsi.mediaTitle, title: t.gsi.mediaLead, text: t.gsi.mediaBody, href: href("/lives") },
+];
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.aboutTitle}
+  description={t.seo.aboutDescription}
+  canonicalPath="/a-propos"
+  jsonLd={personJsonLd(settings, locale)}
+>
+  <article class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/a-propos"), label: t.nav.about }]} />
+      <header class="hero" data-reveal="up">
+        <p class="kicker">{t.hero.roles}</p>
+        <h1 class="display">{t.about.title}</h1>
+        <p class="lead">{t.about.intro}</p>
+        <p class="slogan">{t.about.roles}</p>
+      </header>
+      <div class="split">
+        {
+          showPortrait && (
+            <div class="frame" data-reveal="scale">
+              <Portrait src={studio} alt={t.about.photoAlt} sizes="(max-width: 879px) 78vw, 360px" />
+            </div>
+          )
+        }
+        <div class="prose" data-reveal="right">
+          <p>{t.about.p1}</p>
+          <p>{t.about.p2}</p>
+          <p>{t.about.p3}</p>
+          <h2>{t.about.whyTitle}</h2>
+          <p>{t.about.whyP1}</p>
+          <p>{t.about.whyP2}</p>
+          <p>{t.about.whyP3}</p>
+          <h2>{t.about.workTitle}</h2>
+          <p>{t.about.workP1}</p>
+          <p>{t.about.workP2}</p>
+          <p>{t.about.workP3}</p>
+          <h2>{t.about.educationTitle}</h2>
+          <p>{t.about.education}</p>
+          <h2>{t.about.publicationsTitle}</h2>
+          <p>{t.about.publicationsP1}</p>
+          <p>{t.about.publicationsP2}</p>
+          <h2>{t.about.visionTitle}</h2>
+          <p class="vision">{t.about.vision}</p>
+          <p>{t.about.visionBody}</p>
+        </div>
+      </div>
+      <div class="eco" data-reveal="up">
+        <h2>{t.about.gsiTitle}</h2>
+        <p>{t.about.gsiP1}</p>
+        <p>{t.about.gsiP2}</p>
+        <EcosystemGrid hub={identity.gsi} branches={poles} />
+      </div>
+    </div>
+  </article>
+  <CTASection
+    title={t.cta.title}
+    text={t.cta.lead}
+    primaryHref={href("/commander")}
+    primaryLabel={t.about.cta}
+    secondaryHref={href("/contact")}
+    secondaryLabel={t.nav.contact}
+  />
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2rem, 8vw, 4.2rem); margin: 0.3rem 0 0.5rem; max-width: 18ch; }
+  .lead, .slogan { color: var(--fg-soft); }
+  .slogan { margin-bottom: 2rem; max-width: 36rem; }
+  .split { display: grid; gap: 1.8rem; }
+  .frame {
+    width: min(280px, 78vw);
+    margin-inline: auto;
+    border-radius: 24px 8px 28px 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    aspect-ratio: 4 / 5;
+    --pos: 50% 18%;
+  }
+  .prose, .eco { display: grid; gap: 0.7rem; color: var(--fg-soft); }
+  .prose h2, .eco h2 { color: var(--fg); font-size: 1.2rem; margin-top: 0.8rem; }
+  .vision { color: var(--fg); font-size: 1.2rem; }
+  .eco { margin-top: 2.5rem; }
+  @media (min-width: 880px) {
+    .split:has(.frame) { grid-template-columns: 0.8fr 1.2fr; align-items: start; }
+    .frame { width: 100%; max-width: 360px; margin-inline: 0; }
+  }
+</style>

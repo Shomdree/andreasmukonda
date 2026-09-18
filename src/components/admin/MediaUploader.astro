@@ -1,0 +1,13 @@
+---
+type Props = { name: string; value?: string; label?: string };
+---
+
+<div class="field">
+  <label for={Astro.props.name}>{Astro.props.label ?? "URL média"}</label>
+  <input id={Astro.props.name} name={Astro.props.name} type="url" value={Astro.props.value ?? ""} placeholder="https://… ou /images/…" />
+  <p class="hint">Collez une URL (Storage Supabase ou fichier local). L'upload binaire se fait via le bucket après configuration.</p>
+</div>
+
+<style>
+  .hint { color: var(--mute); font-size: 0.82rem; }
+</style>

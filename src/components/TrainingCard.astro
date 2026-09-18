@@ -1,0 +1,42 @@
+---
+import type { TrainingItem } from "../lib/types";
+import { pageI18n } from "../i18n/request";
+import { localizeTraining, trainingStatusLabel } from "../i18n/localize";
+
+type Props = { training: TrainingItem };
+const { t, href } = pageI18n(Astro.locals);
+const training = localizeTraining(Astro.props.training, t);
+---
+
+<article class="card" data-reveal="up">
+  <p class="kicker">{trainingStatusLabel(training.statusLabel, t)}</p>
+  <h3 class="display">
+    <a href={href(`/formations/${training.slug}`)}>{training.title}</a>
+  </h3>
+  <p>{training.excerpt}</p>
+  <p class="meta">{training.format} · {training.duration}</p>
+</article>
+
+<style>
+  .card {
+    display: grid;
+    gap: 0.35rem;
+  }
+  h3 {
+    font-size: 1.45rem;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-ember);
+  }
+  p {
+    color: var(--fg-soft);
+  }
+  .meta {
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+</style>

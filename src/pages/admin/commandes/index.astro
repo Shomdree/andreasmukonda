@@ -1,0 +1,57 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import DataTable from "../../../components/admin/DataTable.astro";
+import { listRows } from "../../../lib/admin";
+import { orderStatuses, statusLabel } from "../../../lib/status";
+
+const q = Astro.url.searchParams.get("q")?.toLowerCase() ?? "";
+const status = Astro.url.searchParams.get("status") ?? "";
+let rows = await listRows(Astro.request, Astro.cookies, "orders", { order: "created_at", limit: 100 });
+if (q) {
+  rows = rows.filter((row) =>
+    `${row.reference} ${row.full_name} ${row.email} ${row.phone} ${row.service_title}`.toLowerCase().includes(q),
+  );
+}
+if (status) rows = rows.filter((row) => row.status === status);
+---
+
+<AdminLayout title="Commandes">
+  <form class="filters" method="get">
+    <input type="search" name="q" value={q} placeholder="Référence, nom, email, téléphone" />
+    <select name="status">
+      <option value="">Tous les statuts</option>
+      {
+        orderStatuses.map((s) => (
+          <option value={s} selected={status === s ? true : undefined}>
+            {statusLabel(s)}
+          </option>
+        ))
+      }
+    </select>
+    <button class="btn btn-ghost" type="submit">Filtrer</button>
+  </form>
+  <DataTable
+    columns={["Référence", "Client", "Statut"]}
+    rows={rows.map((row) => ({
+      href: `/admin/commandes/${row.id}`,
+      cells: [String(row.reference ?? ""), String(row.full_name ?? ""), statusLabel(String(row.status ?? ""))],
+    }))}
+  />
+</AdminLayout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  input,
+  select {
+    min-height: 44px;
+    background: var(--bg-elev);
+    color: var(--fg);
+    border: 1px solid var(--line);
+    padding: 0 0.7rem;
+  }
+</style>

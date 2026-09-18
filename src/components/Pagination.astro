@@ -1,0 +1,25 @@
+---
+type Props = {
+  page?: number;
+  hasMore?: boolean;
+  nextHref?: string;
+  label?: string;
+};
+---
+
+{
+  Astro.props.hasMore && Astro.props.nextHref && (
+    <p class="more">
+      <a class="btn btn-ghost" href={Astro.props.nextHref}>
+        {Astro.props.label ?? "Voir plus"}
+      </a>
+    </p>
+  )
+}
+
+<style>
+  .more {
+    margin-top: 2rem;
+    text-align: center;
+  }
+</style>

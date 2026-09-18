@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <rect width="1200" height="1500" fill="#141821"/>
+  <path d="M0 1100 L1200 400 L1200 1500 L0 1500 Z" fill="#4F63FF" opacity="0.4"/>
+  <text x="80" y="220" fill="#F7F5F0" font-size="64" font-family="Georgia,serif">VARIANTE</text>
+</svg>

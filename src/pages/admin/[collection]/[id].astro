@@ -1,0 +1,98 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ConfirmDialog from "../../../components/admin/ConfirmDialog.astro";
+import { collectionBySlug } from "../../../lib/admin-collections";
+import { adminClient } from "../../../lib/admin";
+
+const collection = collectionBySlug(Astro.params.collection ?? "");
+const id = Astro.params.id ?? "";
+if (!collection) return Astro.redirect("/admin");
+
+const client = await adminClient(Astro.request, Astro.cookies);
+const isNew = id === "nouveau";
+let notice = "";
+let row: Record<string, unknown> = {};
+
+if (Astro.request.method === "POST" && client) {
+  const data = await Astro.request.formData();
+  if (data.get("intent") === "delete" && !isNew) {
+    await client.from(collection.table).delete().eq("id", id);
+    return Astro.redirect(`/admin/${collection.slug}`);
+  }
+  const payload: Record<string, unknown> = {};
+  for (const field of collection.fields) {
+    if (field.type === "checkbox") payload[field.name] = data.get(field.name) === "on";
+    else payload[field.name] = String(data.get(field.name) ?? "") || null;
+  }
+  if (isNew) {
+    const { data: created, error } = await client.from(collection.table).insert(payload).select("id").maybeSingle();
+    if (!error && created?.id) return Astro.redirect(`/admin/${collection.slug}/${created.id}`);
+    notice = error?.message ?? "Création impossible sans table distante.";
+  } else {
+    const { error } = await client.from(collection.table).update(payload).eq("id", id);
+    notice = error ? error.message : "Enregistré.";
+  }
+}
+
+if (!isNew && client) {
+  const { data } = await client.from(collection.table).select("*").eq("id", id).maybeSingle();
+  row = (data as Record<string, unknown>) ?? {};
+}
+if (!isNew && !client) {
+  notice = "Édition en lecture seule tant que Supabase n'est pas configuré.";
+}
+---
+
+<AdminLayout title={isNew ? `Nouveau — ${collection.title}` : collection.title}>
+  {notice && <p class="note">{notice}</p>}
+  <form method="post" class="form">
+    {
+      collection.fields.map((field) => (
+        <div class="field">
+          {field.type === "checkbox" ? (
+            <label class="check">
+              <input type="checkbox" name={field.name} checked={Boolean(row[field.name]) || undefined} />
+              {field.label}
+            </label>
+          ) : field.type === "textarea" ? (
+            <>
+              <label for={field.name}>{field.label}</label>
+              <textarea id={field.name} name={field.name}>
+                {String(row[field.name] ?? "")}
+              </textarea>
+            </>
+          ) : field.type === "select" ? (
+            <>
+              <label for={field.name}>{field.label}</label>
+              <select id={field.name} name={field.name}>
+                {(field.options ?? []).map((opt) => (
+                  <option value={opt} selected={row[field.name] === opt ? true : undefined}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <>
+              <label for={field.name}>{field.label}</label>
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type === "url" ? "url" : field.type === "number" ? "number" : field.type === "datetime-local" ? "datetime-local" : "text"}
+                value={String(row[field.name] ?? "")}
+              />
+            </>
+          )}
+        </div>
+      ))
+    }
+    <button class="btn btn-primary" type="submit">Enregistrer</button>
+  </form>
+  {!isNew && client && <ConfirmDialog action={`/admin/${collection.slug}/${id}`} />}
+</AdminLayout>
+
+<style>
+  .form { display: grid; gap: 0.8rem; max-width: 42rem; }
+  .note { color: var(--color-ember); }
+  .check { display: flex; gap: 0.5rem; }
+</style>

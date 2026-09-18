@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import TrainingCard from "../../components/TrainingCard.astro";
+import CTASection from "../../components/CTASection.astro";
+import { pageI18n } from "../../i18n/request";
+import { getSettings, getTrainings } from "../../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const trainings = await getTrainings();
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.trainingsTitle}
+  description={t.seo.trainingsDescription}
+  canonicalPath="/formations"
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/formations"), label: t.nav.trainings }]} />
+      <h1 class="display">{t.trainings.title}</h1>
+      <p class="lead">{t.trainings.lead}</p>
+      <p class="lead">{t.trainings.follow}</p>
+      <h2>{t.trainings.domainsTitle}</h2>
+      <ul>{t.trainings.domains.map((item) => <li>{item}</li>)}</ul>
+      <h2>{t.trainings.whoTitle}</h2>
+      <p>{t.trainings.whoLead}</p>
+      <ul>{t.trainings.who.map((item) => <li>{item}</li>)}</ul>
+      <h2>{t.trainings.interestTitle}</h2>
+      <p>{t.trainings.interest}</p>
+      {trainings.map((training) => <TrainingCard training={training} />)}
+    </div>
+  </section>
+  <CTASection title={t.trainings.interestTitle} text={t.trainings.interest} primaryHref={href("/contact")} primaryLabel={t.trainings.cta} />
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.4rem); }
+  .lead { color: var(--fg-soft); margin: 0.5rem 0 1rem; }
+  h2 { margin: 2rem 0 1rem; font-size: 1.15rem; }
+  ul { color: var(--fg-soft); padding-left: 1.1rem; }
+</style>

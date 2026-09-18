@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.local
+.env.*.local
+password supabase.txt
+*password*
+.DS_Store
+Thumbs.db
+playwright-report/
+test-results/
+coverage/
+*.log
+.vercel/
+.netlify/
+.idea/
+.vscode/*
+!.vscode/extensions.json

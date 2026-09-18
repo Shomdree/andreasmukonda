@@ -1,0 +1,40 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import FAQAccordion from "../components/FAQAccordion.astro";
+import { pageI18n } from "../i18n/request";
+import { getSettings } from "../lib/queries";
+
+const { t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const items = t.faq.items.map((item) => ({ question: item.q, answer: item.a }));
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.faqTitle}
+  description={t.seo.faqDescription}
+  canonicalPath="/faq"
+  jsonLd={jsonLd}
+>
+  <section class="section">
+    <div class="container-am">
+      <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/faq"), label: t.nav.faq }]} />
+      <h1 class="display">{t.faq.title}</h1>
+      <FAQAccordion items={items} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { font-size: clamp(2.4rem, 8vw, 4.2rem); margin-bottom: 1.2rem; }
+</style>

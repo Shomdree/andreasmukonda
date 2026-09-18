@@ -1,0 +1,137 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import StatusBadge from "../../../components/admin/StatusBadge.astro";
+import { adminClient, listRows, updateRow } from "../../../lib/admin";
+import { memoryRows, insertMemoryRow } from "../../../lib/actions";
+import { allowMemoryFallback } from "../../../lib/env";
+import { signedAttachmentUrl } from "../../../lib/storage";
+import { orderStatuses, statusLabel, visitorLocaleLabel } from "../../../lib/status";
+
+const id = Astro.params.id ?? "";
+const statuses = [...orderStatuses];
+const client = await adminClient(Astro.request, Astro.cookies);
+let notice = "";
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const status = String(data.get("status") ?? "");
+  const quoted_price = String(data.get("quoted_price") ?? "");
+  const internal_note = String(data.get("internal_note") ?? "");
+  const due_date = String(data.get("due_date") ?? "");
+  const current = client
+    ? ((await client.from("orders").select("status").eq("id", id).maybeSingle()).data as { status?: string } | null)
+    : allowMemoryFallback()
+      ? (memoryRows("orders").find((row) => String(row.id) === id) as { status?: string } | undefined)
+      : null;
+  await updateRow(Astro.request, Astro.cookies, "orders", id, {
+    status,
+    quoted_price: quoted_price || null,
+    internal_note,
+    due_date: due_date || null,
+    updated_at: new Date().toISOString(),
+  });
+  if (current && current.status !== status) {
+    const historyNote = String(data.get("history_note") ?? "");
+    if (historyNote && client) {
+      const { data: latest } = await client
+        .from("order_status_history")
+        .select("id")
+        .eq("order_id", id)
+        .order("changed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (latest?.id) {
+        await client.from("order_status_history").update({ note: historyNote }).eq("id", latest.id);
+      }
+    } else if (historyNote && allowMemoryFallback()) {
+      insertMemoryRow("order_status_history", {
+        id: crypto.randomUUID(),
+        order_id: id,
+        old_status: current.status,
+        new_status: status,
+        note: historyNote,
+        changed_at: new Date().toISOString(),
+      });
+    }
+  }
+  notice = "Enregistré.";
+}
+
+const fromDb = client
+  ? ((await client.from("orders").select("*").eq("id", id).maybeSingle()).data as Record<string, unknown> | null)
+  : allowMemoryFallback()
+    ? memoryRows("orders").find((row) => String(row.id) === id) ?? null
+    : null;
+
+if (!fromDb) return Astro.redirect("/admin/commandes");
+const history = client
+  ? await listRows(Astro.request, Astro.cookies, "order_status_history", { eq: { order_id: id }, order: "changed_at" })
+  : allowMemoryFallback()
+    ? memoryRows("order_status_history").filter((row) => String(row.order_id) === id)
+    : [];
+const attachmentHref = await signedAttachmentUrl(typeof fromDb.attachment_url === "string" ? fromDb.attachment_url : null);
+---
+
+<AdminLayout title={`Commande ${fromDb.reference ?? ""}`}>
+  {notice && <p class="ok" role="status">{notice}</p>}
+  <p><StatusBadge status={String(fromDb.status ?? "")} /></p>
+  <dl>
+    <div><dt>Référence</dt><dd>{fromDb.reference}</dd></div>
+    <div><dt>Client</dt><dd>{fromDb.full_name}</dd></div>
+    <div><dt>Organisation</dt><dd>{fromDb.organization || "—"}</dd></div>
+    <div><dt>Email</dt><dd>{fromDb.email}</dd></div>
+    <div><dt>Téléphone</dt><dd>{fromDb.phone}</dd></div>
+    <div><dt>WhatsApp</dt><dd>{fromDb.whatsapp || "—"}</dd></div>
+    <div><dt>Langue</dt><dd>{visitorLocaleLabel(fromDb.locale)}</dd></div>
+    <div><dt>Service</dt><dd>{fromDb.service_title}</dd></div>
+    <div><dt>Projet</dt><dd>{fromDb.project_type}</dd></div>
+    <div><dt>Description</dt><dd>{fromDb.description}</dd></div>
+    <div><dt>Budget déclaré</dt><dd>{fromDb.budget_range}</dd></div>
+    <div><dt>Fichier</dt><dd>{attachmentHref ? <a href={attachmentHref} rel="noopener noreferrer" target="_blank">Télécharger (lien temporaire)</a> : (fromDb.attachment_url || "—")}</dd></div>
+  </dl>
+  <form method="post" class="form">
+    <div class="field">
+      <label for="status">Statut</label>
+      <select id="status" name="status">
+        {statuses.map((s) => (
+          <option value={s} selected={fromDb.status === s ? true : undefined}>
+            {statusLabel(s)}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div class="field">
+      <label for="quoted_price">Prix proposé</label>
+      <input id="quoted_price" name="quoted_price" value={String(fromDb.quoted_price ?? "")} />
+    </div>
+    <div class="field">
+      <label for="due_date">Date prévue</label>
+      <input id="due_date" name="due_date" type="date" value={String(fromDb.due_date ?? "")} />
+    </div>
+    <div class="field">
+      <label for="internal_note">Note interne</label>
+      <textarea id="internal_note" name="internal_note">{String(fromDb.internal_note ?? "")}</textarea>
+    </div>
+    <div class="field">
+      <label for="history_note">Commentaire de statut</label>
+      <input id="history_note" name="history_note" />
+    </div>
+    <button class="btn btn-primary" type="submit">Enregistrer</button>
+  </form>
+  <h2>Historique</h2>
+  <ul>
+    {history.map((h) => (
+      <li>
+        {statusLabel(String(h.old_status ?? ""))} → {statusLabel(String(h.new_status ?? ""))} — {String(h.changed_at ?? "")}
+      </li>
+    ))}
+  </ul>
+</AdminLayout>
+
+<style>
+  dl { display: grid; gap: 0.6rem; margin: 1rem 0; }
+  dt { color: var(--mute); font-size: 0.8rem; }
+  dd { color: var(--fg-soft); white-space: pre-wrap; }
+  .form { display: grid; gap: 0.8rem; max-width: 40rem; }
+  .ok { color: var(--color-ok); }
+</style>

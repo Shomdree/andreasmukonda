@@ -1,0 +1,358 @@
+---
+import type { SiteSettings } from "../lib/types";
+import Portrait from "./Portrait.astro";
+import SocialLinks from "./SocialLinks.astro";
+import { pageI18n } from "../i18n/request";
+import { identity } from "../i18n/identity";
+import { whatsappUrl } from "../lib/whatsapp";
+
+type Props = { settings: SiteSettings };
+const { settings } = Astro.props;
+const { t, href } = pageI18n(Astro.locals);
+const showPortrait = Boolean(settings.portrait) && !settings.portrait.includes("placeholder");
+const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
+---
+
+<section class="hero">
+  <div class="orbs" aria-hidden="true">
+    <span class="orb o1"></span>
+    <span class="orb o2"></span>
+  </div>
+  <div class="container-wide wrap">
+    <div class="copy">
+      <p class="kicker mention">{t.hero.name}</p>
+      <p class="name">{identity.name}</p>
+      <p class="roles">{t.hero.roles}</p>
+      <h1 class="display slogan">
+        <span>{t.hero.title}</span>
+      </h1>
+      <p class="sub">{t.hero.lead}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href={href("/portfolio")}>
+          {t.hero.ctaWork} <span class="arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn-ghost" href={href("/commander")}>{t.hero.ctaTogether}</a>
+      </div>
+      {
+        wa && (
+          <p class="wa">
+            <a href={wa} rel="noopener noreferrer">{t.hero.ctaWhatsapp}</a>
+          </p>
+        )
+      }
+      <SocialLinks links={settings.socialLinks} whatsapp={settings.whatsapp} compact />
+    </div>
+    <div class="visual" data-parallax>
+      <div class="halo" aria-hidden="true"></div>
+      <span class="shape s1" aria-hidden="true"></span>
+      <span class="shape s2" aria-hidden="true"></span>
+      <span class="shape s3" aria-hidden="true"></span>
+      <span class="shape s4" aria-hidden="true"></span>
+      {
+        showPortrait ? (
+          <div class="portrait">
+            <Portrait src={settings.portrait} alt={t.about.photoAlt} eager live sizes="(max-width: 899px) 68vw, 420px" />
+          </div>
+        ) : (
+          <div class="portrait mark" aria-hidden="true">
+            <span>{settings.monogram}</span>
+          </div>
+        )
+      }
+    </div>
+  </div>
+  <p class="scroll">
+    <a href="#expertises">Découvrir</a>
+    <span aria-hidden="true">↓</span>
+  </p>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: clip;
+    padding-block: clamp(1.2rem, 4vw, 4.2rem) clamp(1.4rem, 4vw, 2.4rem);
+  }
+  .orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.55;
+  }
+  .o1 {
+    width: min(42vw, 280px);
+    height: min(42vw, 280px);
+    background: rgba(79, 99, 255, 0.28);
+    top: -8%;
+    right: 4%;
+    animation: orb 16s ease-in-out infinite;
+  }
+  .o2 {
+    width: min(36vw, 220px);
+    height: min(36vw, 220px);
+    background: rgba(245, 166, 35, 0.18);
+    left: -6%;
+    bottom: 8%;
+    animation: orb 20s ease-in-out infinite reverse;
+  }
+  .wrap {
+    display: grid;
+    gap: 1.4rem;
+    align-items: center;
+  }
+  .mention {
+    animation: rise 600ms var(--ease-standard) both;
+  }
+  .name {
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    margin-top: 0.55rem;
+    animation: rise 650ms var(--ease-standard) 60ms both;
+  }
+  .roles {
+    color: var(--fg-soft);
+    margin: 0.45rem 0 1rem;
+    animation: rise 650ms var(--ease-standard) 90ms both;
+  }
+  .slogan {
+    font-size: clamp(1.7rem, 7.4vw, 4.4rem);
+    max-width: min(22ch, 100%);
+  }
+  .wa {
+    margin: 0 0 1rem;
+    animation: rise 700ms var(--ease-standard) 240ms both;
+  }
+  .wa a {
+    color: var(--fg-soft);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .slogan span {
+    display: block;
+    overflow: hidden;
+    animation: clip-up 700ms var(--ease-emphasized) both;
+  }
+  .slogan span:last-child {
+    animation-delay: 120ms;
+  }
+  .sub {
+    color: var(--fg-soft);
+    max-width: 34rem;
+    margin: 1rem 0 1.4rem;
+    animation: rise 700ms var(--ease-standard) 180ms both;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    animation: rise 700ms var(--ease-standard) 220ms both;
+  }
+  .visual {
+    position: relative;
+    width: min(240px, 68vw);
+    justify-self: center;
+    animation: portrait-in 850ms var(--ease-emphasized) both;
+  }
+  .halo {
+    position: absolute;
+    inset: -18% -12%;
+    background: radial-gradient(circle at 50% 40%, rgba(79, 99, 255, 0.34), transparent 62%);
+    animation: halo 16s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .portrait {
+    position: relative;
+    z-index: 1;
+    border-radius: 28px 8px 32px 12px;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: transparent;
+    --pos: 50% 18%;
+  }
+  .mark {
+    display: grid;
+    place-items: center;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 12vw, 7rem);
+    letter-spacing: -0.08em;
+  }
+  .shape {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    border: 1px solid rgba(247, 245, 240, 0.28);
+  }
+  .s1 {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    top: 8%;
+    right: 4%;
+    animation: float 12s ease-in-out infinite;
+  }
+  .s2 {
+    width: 42px;
+    height: 1px;
+    bottom: 18%;
+    left: -8%;
+    animation: float 14s ease-in-out infinite reverse;
+  }
+  .s3 {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    bottom: 8%;
+    right: 12%;
+    animation: float 18s ease-in-out infinite;
+  }
+  .s4 {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    top: 22%;
+    left: -4%;
+    background: var(--color-ember);
+    border: 0;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .scroll {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    margin: 1.6rem auto 0;
+    text-align: center;
+    color: var(--mute);
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    animation: rise 800ms var(--ease-standard) 400ms both;
+  }
+  .scroll a {
+    color: inherit;
+    text-decoration: none;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.4rem;
+  }
+  .scroll span {
+    display: block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 20px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes clip-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 100%, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes portrait-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes halo {
+    50% {
+      transform: translate3d(6px, -8px, 0) scale(1.06);
+      opacity: 0.85;
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translate3d(0, 8px, 0);
+    }
+  }
+  @keyframes bob {
+    50% {
+      transform: translate3d(0, 4px, 0);
+    }
+  }
+  @keyframes orb {
+    50% {
+      transform: translate3d(18px, 12px, 0) scale(1.08);
+    }
+  }
+  @keyframes pulse {
+    50% {
+      transform: scale(1.35);
+      opacity: 0.45;
+    }
+  }
+  @media (max-width: 899px) {
+    .visual {
+      order: -1;
+    }
+    .slogan {
+      max-width: min(22ch, 100%);
+    }
+    .copy {
+      text-align: left;
+    }
+  }
+  @media (max-width: 420px) {
+    .actions .btn {
+      flex: 1 1 calc(50% - 0.7rem);
+    }
+    .scroll {
+      margin-top: 1.1rem;
+    }
+  }
+  @media (min-width: 900px) {
+    .wrap {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 2rem;
+    }
+    .visual {
+      justify-self: end;
+      width: min(420px, 100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mention,
+    .name,
+    .roles,
+    .slogan span,
+    .sub,
+    .actions,
+    .visual,
+    .halo,
+    .shape,
+    .orb,
+    .scroll,
+    .scroll span {
+      animation: none;
+    }
+  }
+</style>

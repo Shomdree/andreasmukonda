@@ -1,0 +1,88 @@
+---
+const path = Astro.url.pathname;
+const links = [
+  ["/admin", "Tableau de bord"],
+  ["/admin/portfolio", "Portfolio"],
+  ["/admin/services", "Services"],
+  ["/admin/formations", "Formations"],
+  ["/admin/lives", "Lives"],
+  ["/admin/commandes", "Commandes"],
+  ["/admin/messages", "Messages"],
+  ["/admin/questions", "Questions"],
+  ["/admin/temoignages", "Témoignages"],
+  ["/admin/actualites", "Actualités"],
+  ["/admin/faq", "FAQ"],
+  ["/admin/parametres", "Paramètres"],
+];
+---
+
+<aside class="side">
+  <a class="brand" href="/admin">AM Admin</a>
+  <details class="mobile">
+    <summary>Navigation</summary>
+    <nav>
+      {links.map(([href, label]) => (
+        <a href={href} aria-current={path === href || (href !== "/admin" && path.startsWith(href)) ? "page" : undefined}>
+          {label}
+        </a>
+      ))}
+    </nav>
+  </details>
+  <nav class="desk">
+    {links.map(([href, label]) => (
+      <a href={href} aria-current={path === href || (href !== "/admin" && path.startsWith(href)) ? "page" : undefined}>
+        {label}
+      </a>
+    ))}
+  </nav>
+</aside>
+
+<style>
+  .side {
+    border-bottom: 1px solid var(--line);
+    padding: 0.8rem 1rem;
+    background: #10131a;
+  }
+  .brand {
+    font-family: var(--font-display);
+    color: inherit;
+    text-decoration: none;
+    font-size: 1.2rem;
+  }
+  nav {
+    display: grid;
+    margin-top: 0.6rem;
+  }
+  a {
+    color: var(--fg-soft);
+    text-decoration: none;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  a[aria-current="page"] {
+    color: var(--fg);
+  }
+  .desk {
+    display: none;
+  }
+  summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  @media (min-width: 900px) {
+    .side {
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+      padding: 1.2rem;
+    }
+    .mobile {
+      display: none;
+    }
+    .desk {
+      display: grid;
+    }
+  }
+</style>

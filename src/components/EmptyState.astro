@@ -1,0 +1,17 @@
+---
+type Props = { title: string; text?: string };
+---
+
+<div class="empty">
+  <p class="display">{Astro.props.title}</p>
+  {Astro.props.text && <p>{Astro.props.text}</p>}
+</div>
+
+<style>
+  .empty {
+    border: 1px dashed var(--line);
+    padding: 2rem 1.2rem;
+    text-align: center;
+    color: var(--fg-soft);
+  }
+</style>

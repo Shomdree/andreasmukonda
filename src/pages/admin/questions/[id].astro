@@ -1,0 +1,65 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { adminClient } from "../../../lib/admin";
+import { memoryRows } from "../../../lib/actions";
+import { visitorLocaleLabel } from "../../../lib/status";
+
+const id = Astro.params.id ?? "";
+const client = await adminClient(Astro.request, Astro.cookies);
+let notice = "";
+
+if (Astro.request.method === "POST" && client) {
+  const data = await Astro.request.formData();
+  const published = data.get("published") === "on";
+  const status = String(data.get("status"));
+  await client
+    .from("questions")
+    .update({
+      answer: String(data.get("answer") ?? ""),
+      status,
+      published: published && status === "publiee",
+      answered_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  notice = "Enregistré. Une question n'est publique que si le statut est « publiée ».";
+}
+
+const row = client
+  ? ((await client.from("questions").select("*").eq("id", id).maybeSingle()).data as Record<string, unknown> | null)
+  : memoryRows("questions").find((item) => String(item.id) === id) ?? null;
+if (!row) return Astro.redirect("/admin/questions");
+---
+
+<AdminLayout title="Question">
+  {notice && <p class="ok">{notice}</p>}
+  <p><strong>{row.full_name}</strong> · {row.category} · {visitorLocaleLabel(row.locale)}</p>
+  <blockquote>{row.question}</blockquote>
+  <form method="post" class="form">
+    <div class="field">
+      <label for="answer">Réponse</label>
+      <textarea id="answer" name="answer">{String(row.answer ?? "")}</textarea>
+    </div>
+    <div class="field">
+      <label for="status">Statut</label>
+      <select id="status" name="status">
+        {["nouvelle", "lue", "repondue", "archivee", "publiee"].map((s) => (
+          <option value={s} selected={row.status === s ? true : undefined}>
+            {s}
+          </option>
+        ))}
+      </select>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="published" checked={Boolean(row.published) || undefined} />
+      Publier (uniquement après relecture — jamais automatique)
+    </label>
+    <button class="btn btn-primary" type="submit">Enregistrer</button>
+  </form>
+</AdminLayout>
+
+<style>
+  blockquote { color: var(--fg-soft); }
+  .form { display: grid; gap: 0.8rem; max-width: 40rem; }
+  .ok { color: var(--color-ok); }
+  .check { display: flex; gap: 0.5rem; }
+</style>

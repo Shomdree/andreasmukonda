@@ -1,0 +1,47 @@
+---
+type Props = {
+  variant: "contact" | "order";
+  message: string;
+  primaryHref?: string | null;
+  secondaryHref?: string | null;
+};
+
+const { message, primaryHref, secondaryHref } = Astro.props;
+---
+
+<div class="fail" role="alert">
+  <p>{message}</p>
+  <div class="row">
+    {
+      primaryHref && (
+        <a class="btn btn-primary" href={primaryHref} rel="noopener noreferrer">
+          WhatsApp
+        </a>
+      )
+    }
+    {
+      secondaryHref && (
+        <a class="btn btn-ghost" href={secondaryHref} rel="noopener noreferrer">
+          WhatsApp
+        </a>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .fail {
+    display: grid;
+    gap: 0.8rem;
+    max-width: 36rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-ember) 45%, var(--line));
+    border-radius: 14px;
+    color: var(--fg);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+</style>
