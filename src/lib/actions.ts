@@ -6,6 +6,7 @@ import {
   SERVICE_UNAVAILABLE,
   allowMemoryFallback,
   logServerError,
+  readServerEnv,
 } from "./env";
 import { parseLocale, ui } from "../i18n";
 import type { Locale, Messages } from "../i18n";
@@ -420,7 +421,9 @@ async function insertRow(table: string, payload: Record<string, unknown>, knownI
     memoryStore.set(table, list);
     return { ok: true, id: String(row.id) };
   }
-  logServerError(`insert:${table}`, "supabase_unconfigured");
+  const hasUrl = Boolean(readServerEnv("PUBLIC_SUPABASE_URL"));
+  const hasService = Boolean(readServerEnv("SUPABASE_SERVICE_ROLE_KEY"));
+  logServerError(`insert:${table}`, !hasUrl ? "missing_url" : !hasService ? "missing_service_role" : "client_init");
   return { ok: false, error: unavailableFor(table, t) };
 }
 

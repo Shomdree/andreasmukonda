@@ -1,5 +1,5 @@
 import { identity } from "../i18n/identity";
-import { logServerError, siteUrl } from "./env";
+import { logServerError, readServerEnv, siteUrl } from "./env";
 
 export type NotificationPayload = {
   type: "order" | "question" | "registration" | "consultation" | "contact";
@@ -32,9 +32,7 @@ const DEFAULT_FROM = "Andreas Mukonda <beth.t@example.com>";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function secret(name: "EMAIL_PROVIDER_API_KEY" | "EMAIL_FROM" | "ADMIN_EMAIL"): string {
-  const fromVite = import.meta.env[name];
-  const fromNode = typeof process !== "undefined" ? process.env[name] : undefined;
-  return String(fromVite ?? fromNode ?? "").trim();
+  return readServerEnv(name);
 }
 
 export function escapeHtml(value: string): string {
