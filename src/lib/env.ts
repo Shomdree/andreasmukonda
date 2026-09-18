@@ -1,13 +1,19 @@
+export function readServerEnv(name: string): string {
+  const fromVite = (import.meta.env as Record<string, string | undefined>)[name];
+  const fromNode = typeof process !== "undefined" ? process.env[name] : undefined;
+  return String(fromVite ?? fromNode ?? "").trim();
+}
+
 export function isSupabaseConfigured(): boolean {
-  return Boolean(import.meta.env.PUBLIC_SUPABASE_URL && import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+  return Boolean(readServerEnv("PUBLIC_SUPABASE_URL") && readServerEnv("PUBLIC_SUPABASE_ANON_KEY"));
 }
 
 export function siteUrl(): string {
-  return (import.meta.env.PUBLIC_SITE_URL || "http://localhost:4321").replace(/\/$/, "");
+  return (readServerEnv("PUBLIC_SITE_URL") || "http://localhost:4321").replace(/\/$/, "");
 }
 
 export function envWhatsApp(): string {
-  return (import.meta.env.PUBLIC_WHATSAPP_NUMBER || "").replace(/\D/g, "");
+  return readServerEnv("PUBLIC_WHATSAPP_NUMBER").replace(/\D/g, "");
 }
 
 /** Mémoire processus : uniquement `astro dev`, jamais un build de production. */

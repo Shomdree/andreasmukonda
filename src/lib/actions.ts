@@ -99,6 +99,7 @@ function spamBlock(data: FormData, t?: Messages): ActionResult<never> | null {
 
 export async function submitContact(request: Request, data: FormData): Promise<ActionResult<{ id: string }>> {
   const t = messagesFor(data);
+  try {
   const locale = formLocale(data);
   const raw = { ...formDataToObject(data), consent: checkbox(data, "consent") };
   const parsed = makeContactSchema(t.form.errors).safeParse(raw);
@@ -137,6 +138,10 @@ export async function submitContact(request: Request, data: FormData): Promise<A
     },
   });
   return { ok: true, data: { id: inserted.id } };
+  } catch {
+    logServerError("contact", "throw");
+    return { ok: false, errors: { form: t.form.unavailableContact }, values: valuesFrom(data) };
+  }
 }
 
 export async function submitQuestion(request: Request, data: FormData): Promise<ActionResult<{ id: string }>> {
@@ -392,16 +397,21 @@ async function insertRow(table: string, payload: Record<string, unknown>, knownI
   const id = knownId ?? crypto.randomUUID();
   const client = persistClient();
   if (client) {
-    const { error } = await client.from(table).insert({ id, ...payload });
-    if (!error) return { ok: true, id };
-    if (payload.locale && (error.code === "42703" || /locale/i.test(error.message))) {
-      const { locale: _locale, ...rest } = payload;
-      const retry = await client.from(table).insert({ id, ...rest });
-      if (!retry.error) return { ok: true, id };
+    try {
+      const { error } = await client.from(table).insert({ id, ...payload });
+      if (!error) return { ok: true, id };
+      if (payload.locale && (error.code === "42703" || /locale/i.test(error.message))) {
+        const { locale: _locale, ...rest } = payload;
+        const retry = await client.from(table).insert({ id, ...rest });
+        if (!retry.error) return { ok: true, id };
+      }
+      const unique = error.code === "23505" || /duplicate|unique/i.test(error.message);
+      logServerError(`insert:${table}`, error.code || "db");
+      return { ok: false, error: unique ? (t?.form.errors.generic ?? FORM_ERROR) : unavailableFor(table, t), unique };
+    } catch {
+      logServerError(`insert:${table}`, "throw");
+      return { ok: false, error: unavailableFor(table, t) };
     }
-    const unique = error.code === "23505" || /duplicate|unique/i.test(error.message);
-    logServerError(`insert:${table}`, error.code || "db");
-    return { ok: false, error: unique ? (t?.form.errors.generic ?? FORM_ERROR) : unavailableFor(table, t), unique };
   }
   if (allowMemoryFallback()) {
     const row = { id, ...payload, created_at: new Date().toISOString() };

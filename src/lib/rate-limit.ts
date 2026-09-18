@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { createServiceSupabase } from "./supabase";
+import { logServerError } from "./env";
 
 type Bucket = { count: number; resetAt: number };
 
@@ -31,12 +32,16 @@ export function hashedClientKey(request: Request, suffix: string): string {
 export async function consumeRateLimit(id: string, limit: number, windowMs: number): Promise<boolean> {
   const supabase = createServiceSupabase();
   if (supabase) {
-    const { data, error } = await supabase.rpc("consume_form_rate_limit", {
-      p_id: id,
-      p_limit: limit,
-      p_window_seconds: Math.max(1, Math.ceil(windowMs / 1000)),
-    });
-    if (!error && typeof data === "boolean") return data;
+    try {
+      const { data, error } = await supabase.rpc("consume_form_rate_limit", {
+        p_id: id,
+        p_limit: limit,
+        p_window_seconds: Math.max(1, Math.ceil(windowMs / 1000)),
+      });
+      if (!error && typeof data === "boolean") return data;
+    } catch {
+      logServerError("rate-limit", "rpc");
+    }
   }
   return rateLimit(id, limit, windowMs);
 }
