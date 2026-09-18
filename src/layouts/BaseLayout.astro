@@ -65,6 +65,16 @@ const canonicalPath = Astro.props.canonicalPath ?? path;
     )}
   </head>
   <body>
+    <noscript>
+      <style>
+        [data-reveal],
+        [data-stagger] > * {
+          opacity: 1 !important;
+          transform: none !important;
+          animation: none !important;
+        }
+      </style>
+    </noscript>
     <a class="skip-link" href="#contenu">{t.a11y.skip}</a>
     <Header settings={settings} />
     <main id="contenu">
