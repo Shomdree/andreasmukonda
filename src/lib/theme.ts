@@ -39,6 +39,9 @@ export function restoreTheme(): void {
 
 export function bootTheme(): void {
   restoreTheme();
+  if (typeof window !== "undefined" && (window as Window & { __amThemeBound?: boolean }).__amThemeBound) {
+    return;
+  }
   if (bound) return;
   bound = true;
   document.addEventListener("click", (event) => {
