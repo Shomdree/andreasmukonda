@@ -7,10 +7,11 @@ import { pageI18n } from "../i18n/request";
 import { submitOrder } from "../lib/actions";
 import { isUnavailableMessage } from "../lib/env";
 import { getServices, getSettings } from "../lib/queries";
+import { defaultSettings } from "../content/defaults";
 import { whatsappUrl, orderWhatsAppMessage } from "../lib/whatsapp";
 
 const { locale, t, href } = pageI18n(Astro.locals);
-const settings = await getSettings();
+const settings = await getSettings().catch(() => defaultSettings);
 const services = await getServices();
 const selectedSlug = Astro.url.searchParams.get("service");
 const reference = Astro.url.searchParams.get("ref");
@@ -18,16 +19,23 @@ let errors: Record<string, string> | undefined;
 let values: Record<string, string> | undefined;
 
 if (Astro.request.method === "POST") {
-  const result = await submitOrder(Astro.request, await Astro.request.formData());
-  if (result.ok) {
+  let result: Awaited<ReturnType<typeof submitOrder>> | undefined;
+  try {
+    result = await submitOrder(Astro.request, await Astro.request.formData());
+  } catch {
+    errors = { form: t.form.unavailableOrder };
+  }
+  if (result?.ok) {
     const params = new URLSearchParams({
       ref: result.data.reference,
       projet: result.data.serviceTitle || "projet",
     });
     return Astro.redirect(`${href("/commander")}?${params.toString()}`);
   }
-  errors = result.errors;
-  values = result.values;
+  if (result && !result.ok) {
+    errors = result.errors;
+    values = result.values;
+  }
 }
 
 const orderText = reference ? orderWhatsAppMessage(reference, locale) : t.whatsapp.generic;

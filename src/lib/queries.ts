@@ -10,7 +10,7 @@ import {
   catalogTrainings as demoTrainings,
 } from "../content/demo";
 import { defaultSettings } from "../content/defaults";
-import { envWhatsApp, isSupabaseConfigured } from "./env";
+import { envWhatsApp, isSupabaseConfigured, logServerError } from "./env";
 import { createBrowserSupabase } from "./supabase";
 import type {
   FaqItem,
@@ -125,8 +125,13 @@ export async function getServices(): Promise<ServiceItem[]> {
   return fallback(async () => {
     const supabase = createBrowserSupabase();
     if (!supabase) return demoServices;
-    const { data } = await supabase.from("services").select("*").eq("published", true).order("sort_order");
-    return (data ?? []).map(mapService);
+    const { data, error } = await supabase.from("services").select("*").eq("published", true).order("sort_order");
+    if (error) {
+      logServerError("query:services", error.code || "db");
+      return demoServices;
+    }
+    const rows = (data ?? []).map(mapService);
+    return rows.length ? rows : demoServices;
   }, demoServices);
 }
 

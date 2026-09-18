@@ -13,6 +13,7 @@ import type { Locale, Messages } from "../i18n";
 import { notifyAfterSave } from "./notifications";
 import { isOrderReference, nextOrderReference } from "./order-reference";
 import { consumeRateLimit, hashedClientKey } from "./rate-limit";
+import { getServices } from "./queries";
 import { spamReason } from "./spam";
 import { createCookieSupabase, createServiceSupabase } from "./supabase";
 import { uniqueAttachmentName, validateOrderAttachment, verifyAttachmentMagic } from "./uploads";
@@ -193,6 +194,7 @@ export async function submitQuestion(request: Request, data: FormData): Promise<
 
 export async function submitOrder(request: Request, data: FormData): Promise<ActionResult<{ reference: string; serviceTitle: string }>> {
   const t = messagesFor(data);
+  try {
   const locale = formLocale(data);
   const raw = { ...formDataToObject(data), consent: checkbox(data, "consent") };
   const parsed = makeOrderSchema(t.form.errors).safeParse(raw);
@@ -215,7 +217,9 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
   const dup = await duplicate(request, "order-sig", `${parsed.data.email}:${parsed.data.description.slice(0, 80)}`, t);
   if (dup) return dup;
 
-  const serviceTitle = sanitizeText(parsed.data.serviceTitle || parsed.data.projectType);
+  const catalog = await getServices().catch(() => []);
+  const chosen = catalog.find((item) => item.id === parsed.data.serviceId || item.slug === parsed.data.serviceId);
+  const serviceTitle = sanitizeText(parsed.data.serviceTitle || chosen?.title || parsed.data.projectType);
   let lastError = unavailableFor("orders", t);
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const allocated = await allocateOrderReference(t);
@@ -257,8 +261,12 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
           Téléphone: payload.phone,
           WhatsApp: payload.whatsapp,
           Service: payload.service_title,
+          "Type de projet": payload.project_type,
           Description: payload.description,
           Budget: payload.budget_range,
+          Délai: payload.desired_deadline,
+          "Contact préféré": payload.contact_preference,
+          Fichier: payload.attachment_url,
         },
       });
       return { ok: true, data: { reference, serviceTitle } };
@@ -267,6 +275,10 @@ export async function submitOrder(request: Request, data: FormData): Promise<Act
     if (!inserted.unique) break;
   }
   return { ok: false, errors: { form: lastError }, values: valuesFrom(data) };
+  } catch {
+    logServerError("order", "throw");
+    return { ok: false, errors: { form: t.form.unavailableOrder }, values: valuesFrom(data) };
+  }
 }
 
 export async function submitTraining(request: Request, data: FormData): Promise<ActionResult<{ id: string }>> {
@@ -457,13 +469,14 @@ export function removeMemoryRow(table: string, id: string): boolean {
 async function allocateOrderReference(t?: Messages): Promise<{ ok: true; reference: string } | { ok: false; error: string }> {
   const client = createServiceSupabase();
   if (client) {
-    const rpc = await client.rpc("next_order_reference");
-    if (!rpc.error && typeof rpc.data === "string" && isOrderReference(rpc.data)) {
-      return { ok: true, reference: rpc.data };
-    }
-    logServerError("order.reference", rpc.error?.code || "rpc");
-    if (!allowMemoryFallback()) {
-      return { ok: false, error: unavailableFor("orders", t) };
+    try {
+      const rpc = await client.rpc("next_order_reference");
+      if (!rpc.error && typeof rpc.data === "string" && isOrderReference(rpc.data)) {
+        return { ok: true, reference: rpc.data };
+      }
+      logServerError("order.reference", rpc.error?.code || "rpc");
+    } catch {
+      logServerError("order.reference", "throw");
     }
   } else if (!allowMemoryFallback()) {
     logServerError("order.reference", "supabase_unconfigured");
