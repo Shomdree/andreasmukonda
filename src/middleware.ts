@@ -120,3 +120,4 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
     throw new Error("page_render");
   }
+});
