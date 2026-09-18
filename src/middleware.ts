@@ -2,7 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import { COOKIE_LOCALE } from "./i18n/config";
 import { isLocale, stripLocalePrefix } from "./i18n/utils";
 import { requireAdmin } from "./lib/auth";
-import { siteUrl } from "./lib/env";
+import { readServerEnv, siteUrl } from "./lib/env";
 
 const securityHeaders: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
@@ -23,10 +23,20 @@ function withSecurity(response: Response): Response {
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value);
   }
-  const supabaseHost = import.meta.env.PUBLIC_SUPABASE_URL
-    ? new URL(import.meta.env.PUBLIC_SUPABASE_URL).origin
-    : "";
-  const analytics = import.meta.env.PUBLIC_ANALYTICS_SRC || "";
+  let supabaseHost = "";
+  try {
+    const supabaseUrl = readServerEnv("PUBLIC_SUPABASE_URL");
+    if (supabaseUrl) supabaseHost = new URL(supabaseUrl).origin;
+  } catch {
+    supabaseHost = "";
+  }
+  const analytics = readServerEnv("PUBLIC_ANALYTICS_SRC");
+  let analyticsOrigin = "";
+  try {
+    if (analytics) analyticsOrigin = ` ${new URL(analytics, siteUrl()).origin}`;
+  } catch {
+    analyticsOrigin = "";
+  }
   response.headers.set(
     "Content-Security-Policy",
     [
@@ -35,7 +45,7 @@ function withSecurity(response: Response): Response {
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       `connect-src 'self' ${supabaseHost}`.trim(),
-      `script-src 'self'${analytics ? ` ${new URL(analytics, siteUrl()).origin}` : ""}`,
+      `script-src 'self'${analyticsOrigin}`,
       "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://www.facebook.com https://www.tiktok.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
