@@ -240,6 +240,9 @@ export const en = {
     result: "The result",
     openWork: "View the full work",
     close: "Close",
+    logosTitle: "Logos",
+    logosLead: "Brand marks and visual identities are shown here, apart from the posters, so they stay easy to browse.",
+    logosMore: "See all logos",
   },
   lives: {
     title: "Find my content and live sessions.",

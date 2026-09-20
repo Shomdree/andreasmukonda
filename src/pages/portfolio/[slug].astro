@@ -7,6 +7,7 @@ import { pageI18n } from "../../i18n/request";
 import { localizeProject } from "../../i18n/localize";
 import { getProject, getSettings } from "../../lib/queries";
 import { isPosterProject } from "../../content/poster-catalog";
+import { isLogoProject } from "../../content/logo-catalog";
 import { publicFileExists } from "../../lib/public-file";
 
 const { t, href, locale } = pageI18n(Astro.locals);
@@ -17,7 +18,8 @@ const project = localizeProject(found, t, locale);
 const categoryName = project.category?.name ?? t.catalog.project;
 const showImage = publicFileExists(project.coverImage);
 const gallery = project.gallery.filter((item) => publicFileExists(item.url));
-const orderHref = isPosterProject(project)
+const markWork = isPosterProject(project) || isLogoProject(project);
+const orderHref = markWork
   ? `${href("/commander")}?service=design-graphique`
   : `${href("/commander")}?service=${project.category?.slug ?? "identite-visuelle"}`;
 const chapters = [
@@ -47,7 +49,7 @@ const jsonLd = {
   jsonLd={jsonLd}
 >
   <article class="work">
-    <div class="hero media-frame">
+    <div class:list={["hero", "media-frame", isLogoProject(project) && "logo-hero"]}>
       {
         showImage ? (
           <ResponsiveImage
@@ -144,6 +146,17 @@ const jsonLd = {
   .hero :global(img) {
     object-fit: contain;
     height: 100%;
+  }
+  .logo-hero {
+    aspect-ratio: 1 / 1;
+    max-width: min(34rem, 100%);
+    max-height: none;
+    margin-inline: auto;
+    background: color-mix(in srgb, var(--bg) 78%, #fff);
+    padding: 1.4rem;
+  }
+  .logo-hero :global(img) {
+    background: transparent;
   }
   h1 {
     font-size: clamp(2rem, 7vw, 3.8rem);

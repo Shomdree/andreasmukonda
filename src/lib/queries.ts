@@ -11,6 +11,7 @@ import {
 } from "../content/demo";
 import { withPrintCatalog } from "../content/print-catalog";
 import { withPosterCatalog } from "../content/poster-catalog";
+import { withLogoCatalog } from "../content/logo-catalog";
 import { defaultSettings } from "../content/defaults";
 import { envWhatsApp, isSupabaseConfigured, logServerError } from "./env";
 import { createBrowserSupabase } from "./supabase";
@@ -104,8 +105,13 @@ export async function getCategories(): Promise<PortfolioCategory[]> {
   }, demoCategories);
 }
 
+function withPortfolioCatalog(projects: PortfolioProject[]): PortfolioProject[] {
+  return withLogoCatalog(withPosterCatalog(projects));
+}
+
 export async function getProjects(options?: { featured?: boolean }): Promise<PortfolioProject[]> {
-  const demo = options?.featured ? demoProjects.filter((p) => p.featured) : demoProjects;
+  const catalog = withPortfolioCatalog(demoProjects);
+  const demo = options?.featured ? catalog.filter((p) => p.featured) : catalog;
   return fallback(async () => {
     const supabase = createBrowserSupabase();
     if (!supabase) return demo;
@@ -117,7 +123,7 @@ export async function getProjects(options?: { featured?: boolean }): Promise<Por
     if (options?.featured) query = query.eq("featured", true);
     const { data } = await query;
     const rows = (data ?? []).map(mapProject);
-    const merged = withPosterCatalog(rows.length ? rows : demoProjects);
+    const merged = withPortfolioCatalog(rows.length ? rows : demoProjects);
     return options?.featured ? merged.filter((p) => p.featured) : merged;
   }, demo);
 }

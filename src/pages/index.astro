@@ -3,19 +3,23 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import SectionHeading from "../components/SectionHeading.astro";
 import PortfolioGrid from "../components/PortfolioGrid.astro";
+import LogoWall from "../components/LogoWall.astro";
 import CTASection from "../components/CTASection.astro";
 import EcosystemGrid from "../components/EcosystemGrid.astro";
 import Portrait from "../components/Portrait.astro";
 import { pageI18n } from "../i18n/request";
 import { identity } from "../i18n/identity";
 import { getProjects, getSettings } from "../lib/queries";
+import { isLogoProject } from "../content/logo-catalog";
 import { personJsonLd } from "../lib/person-jsonld";
 import { whatsappUrl } from "../lib/whatsapp";
 
 const { locale, t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
 const studio = settings.aboutPortrait || settings.portrait;
-const projects = await getProjects({ featured: true });
+const allProjects = await getProjects();
+const projects = allProjects.filter((item) => item.featured);
+const logos = allProjects.filter((item) => isLogoProject(item));
 const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
 const showStudio = Boolean(studio) && !studio.includes("placeholder");
 const serviceCards = [
@@ -115,6 +119,18 @@ const poles = [
           <SectionHeading title={t.portfolio.title} text={t.portfolio.lead} />
           <PortfolioGrid projects={projects.slice(0, 4)} />
           <p class="more"><a class="btn btn-ghost" href={href("/portfolio")}>{t.hero.ctaWork}</a></p>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    logos.length > 0 && (
+      <section class="section alt" id="logos">
+        <div class="container-am">
+          <SectionHeading title={t.portfolio.logosTitle} text={t.portfolio.logosLead} />
+          <LogoWall logos={logos} limit={10} />
+          <p class="more"><a class="btn btn-ghost" href={`${href("/portfolio")}#logos`}>{t.portfolio.logosMore}</a></p>
         </div>
       </section>
     )

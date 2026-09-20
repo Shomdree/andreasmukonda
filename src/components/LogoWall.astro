@@ -1,0 +1,94 @@
+---
+import type { PortfolioProject } from "../lib/types";
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { pageI18n } from "../i18n/request";
+import { localizeProject } from "../i18n/localize";
+import { publicFileExists } from "../lib/public-file";
+
+type Props = { logos: PortfolioProject[]; limit?: number };
+const { limit } = Astro.props;
+const { t, href, locale } = pageI18n(Astro.locals);
+const logos = Astro.props.logos
+  .map((item) => localizeProject(item, t, locale))
+  .filter((item) => publicFileExists(item.coverImage));
+const visible = typeof limit === "number" ? logos.slice(0, limit) : logos;
+---
+
+{
+  visible.length > 0 && (
+    <ul class="marks">
+      {visible.map((logo) => (
+        <li>
+          <a class="mark" href={href(`/portfolio/${logo.slug}`)} data-reveal="up">
+            <span class="tile">
+              <ResponsiveImage
+                src={logo.coverImage}
+                alt={logo.coverAlt}
+                width={720}
+                height={720}
+                sizes="(max-width: 639px) 44vw, (max-width: 1099px) 22vw, 180px"
+              />
+            </span>
+            <span class="name">{logo.title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .marks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mark {
+    color: inherit;
+    text-decoration: none;
+    display: grid;
+    gap: 0.55rem;
+    min-width: 0;
+  }
+  .tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 0.85rem;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 82%, #fff);
+    overflow: hidden;
+  }
+  .tile :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+  }
+  .name {
+    font-size: 0.92rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  .mark:hover .name {
+    color: var(--color-ember);
+  }
+  @media (min-width: 720px) {
+    .marks {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.1rem;
+    }
+  }
+  @media (min-width: 1100px) {
+    .marks {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  :global([data-theme="dark"]) .tile {
+    background: color-mix(in srgb, var(--bg-elev) 88%, #fff);
+  }
+</style>

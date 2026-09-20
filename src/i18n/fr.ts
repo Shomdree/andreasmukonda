@@ -253,6 +253,9 @@ export const fr = {
     result: "Le résultat",
     openWork: "Voir l’œuvre entière",
     close: "Fermer",
+    logosTitle: "Logos",
+    logosLead: "Les marques et identités visuelles sont présentées ici, à part des affiches, pour rester faciles à parcourir.",
+    logosMore: "Voir tous les logos",
   },
   lives: {
     title: "Retrouvez mes contenus et mes interventions.",

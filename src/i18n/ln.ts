@@ -248,6 +248,9 @@ export const ln = {
     result: "Résultat",
     openWork: "Tala œuvre mobimba",
     close: "Kanga",
+    logosTitle: "Ba logos",
+    logosLead: "Ba marques mpe ba identités visuelles emonanaka awa, na esika ya bango, mpo ezala pete mpo na kotambola.",
+    logosMore: "Tala ba logos nyonso",
   },
   lives: {
     title: "Zwa ba contenus mpe ba interventions na ngai.",

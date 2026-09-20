@@ -6,8 +6,10 @@ import Pagination from "../../components/Pagination.astro";
 import PortfolioFilter from "../../components/PortfolioFilter.astro";
 import PortfolioGrid from "../../components/PortfolioGrid.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
+import LogoWall from "../../components/LogoWall.astro";
 import CTASection from "../../components/CTASection.astro";
 import { pageI18n } from "../../i18n/request";
+import { isLogoProject } from "../../content/logo-catalog";
 import { getCategories, getProjects, getSettings } from "../../lib/queries";
 
 const { t, href } = pageI18n(Astro.locals);
@@ -16,7 +18,10 @@ const [projects, categories] = await Promise.all([getProjects(), getCategories()
 const current = Astro.url.searchParams.get("categorie");
 const page = Math.max(1, Number(Astro.url.searchParams.get("page") ?? "1"));
 const pageSize = 8;
-const filtered = current ? projects.filter((p) => p.category?.slug === current) : projects;
+const logos = projects.filter((item) => isLogoProject(item));
+const posters = projects.filter((item) => !isLogoProject(item));
+const showLogos = !current || current === "branding";
+const filtered = current === "branding" ? [] : current ? posters.filter((p) => p.category?.slug === current) : posters;
 const spotlight = !current ? filtered.find((item) => item.featured) : undefined;
 const rest = spotlight ? filtered.filter((item) => item.id !== spotlight.id) : filtered;
 const slice = rest.slice(0, page * pageSize);
@@ -44,13 +49,25 @@ const nextHref = `${href("/portfolio")}?${new URLSearchParams({
       </header>
       <PortfolioFilter categories={categories} current={current} />
       {
+        showLogos && logos.length > 0 && (
+          <section class="logos" id="logos">
+            <header class="logos-intro">
+              <p class="kicker">{t.catalog.categories.branding}</p>
+              <h2 class="display">{t.portfolio.logosTitle}</h2>
+              <p>{t.portfolio.logosLead}</p>
+            </header>
+            <LogoWall logos={logos} />
+          </section>
+        )
+      }
+      {
         spotlight && (
           <div class="spotlight">
             <ProjectCard project={spotlight} featured contain />
           </div>
         )
       }
-      {slice.length ? <PortfolioGrid projects={slice} variant="gallery" /> : !spotlight && <EmptyState title={t.portfolio.empty} />}
+      {slice.length ? <PortfolioGrid projects={slice} variant="gallery" /> : !spotlight && !showLogos && <EmptyState title={t.portfolio.empty} />}
       <Pagination hasMore={hasMore} nextHref={nextHref} label={t.catalog.seeMore} />
     </div>
   </section>
@@ -98,6 +115,24 @@ const nextHref = `${href("/portfolio")}?${new URLSearchParams({
     background: var(--color-ember);
     border-radius: 1px;
     vertical-align: 0.15rem;
+  }
+  .logos {
+    margin: 0 0 2.8rem;
+    padding-bottom: 2.2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .logos-intro {
+    max-width: 38rem;
+    margin-bottom: 1.3rem;
+  }
+  .logos h2 {
+    font-size: clamp(1.6rem, 4vw, 2.3rem);
+    margin: 0.15rem 0 0.55rem;
+    letter-spacing: -0.03em;
+  }
+  .logos p {
+    color: var(--fg-soft);
+    margin: 0;
   }
   .spotlight {
     margin: 0 0 2.4rem;

@@ -1,6 +1,7 @@
 import type { PortfolioCategory, PortfolioProject, ServiceItem, TrainingItem } from "../lib/types";
 import type { Messages } from "./types";
 import { posterCatalogEn, posterCatalogFr, posterCatalogLn } from "../content/poster-copy";
+import { logoCatalogEn, logoCatalogFr, logoCatalogLn } from "../content/logo-copy";
 
 type TrainingCopy = Messages["catalog"]["trainings"][keyof Messages["catalog"]["trainings"]];
 type ServiceCopy = Messages["catalog"]["services"][keyof Messages["catalog"]["services"]];
@@ -12,12 +13,18 @@ const posterByLocale: Record<string, Record<string, PosterCopy>> = {
   ln: posterCatalogLn,
 };
 
+const logoByLocale: Record<string, Record<string, PosterCopy>> = {
+  fr: logoCatalogFr,
+  en: logoCatalogEn,
+  ln: logoCatalogLn,
+};
+
 function pick(map: Record<string, string>, key: string, fallback: string): string {
   return map[key] ?? fallback;
 }
 
 export function localizeProject(item: PortfolioProject, t: Messages, locale: string): PortfolioProject {
-  const copy = posterByLocale[locale]?.[item.slug];
+  const copy = posterByLocale[locale]?.[item.slug] ?? logoByLocale[locale]?.[item.slug];
   if (!copy) {
     return {
       ...item,
