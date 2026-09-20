@@ -1,4 +1,6 @@
 ---
+import { hasOptimizedPublicVariants, publicImageBase } from "../lib/public-file";
+
 type Props = {
   src: string;
   alt: string;
@@ -6,21 +8,55 @@ type Props = {
   height: number;
   eager?: boolean;
   class?: string;
+  sizes?: string;
 };
-const loading = Astro.props.eager ? "eager" : "lazy";
-const fetchpriority = Astro.props.eager ? "high" : "auto";
+const { src, alt, width, height, eager } = Astro.props;
+const loading = eager ? "eager" : "lazy";
+const fetchpriority = eager ? "high" : "auto";
+const base = publicImageBase(src);
+const optimized = hasOptimizedPublicVariants(src);
+const sizes = Astro.props.sizes ?? "(max-width: 700px) 92vw, 360px";
 ---
 
-<img
-  class:list={["responsive", Astro.props.class]}
-  src={Astro.props.src}
-  alt={Astro.props.alt}
-  width={Astro.props.width}
-  height={Astro.props.height}
-  loading={loading}
-  decoding="async"
-  fetchpriority={fetchpriority}
-/>
+{
+  optimized ? (
+    <picture>
+      <source
+        type="image/avif"
+        srcset={`${base}-480.avif 480w, ${base}-720.avif 720w, ${base}-960.avif 960w`}
+        sizes={sizes}
+      />
+      <source
+        type="image/webp"
+        srcset={`${base}-480.webp 480w, ${base}-720.webp 720w, ${base}-960.webp 960w`}
+        sizes={sizes}
+      />
+      <img
+        class:list={["responsive", Astro.props.class]}
+        src={`${base}-720.jpg`}
+        srcset={`${base}-480.jpg 480w, ${base}-720.jpg 720w, ${base}-960.jpg 960w`}
+        sizes={sizes}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchpriority}
+      />
+    </picture>
+  ) : (
+    <img
+      class:list={["responsive", Astro.props.class]}
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding="async"
+      fetchpriority={fetchpriority}
+    />
+  )
+}
 
 <style>
   .responsive {
@@ -28,6 +64,6 @@ const fetchpriority = Astro.props.eager ? "high" : "auto";
     height: auto;
     display: block;
     object-fit: cover;
-    background: #141821;
+    background: color-mix(in srgb, var(--bg-elev) 80%, #1c2230);
   }
 </style>

@@ -1,14 +1,27 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-export function publicFileExists(src: string): boolean {
-  if (!src.startsWith("/")) return false;
+export function publicPath(src: string): string {
+  if (!src.startsWith("/")) return "";
   const clean = src.split("?")[0] ?? "";
-  let decoded = clean;
   try {
-    decoded = decodeURI(clean);
+    return decodeURI(clean);
   } catch {
-    decoded = clean;
+    return clean;
   }
+}
+
+export function publicFileExists(src: string): boolean {
+  const decoded = publicPath(src);
+  if (!decoded) return false;
   return existsSync(resolve(process.cwd(), "public", decoded.replace(/^\//, "")));
+}
+
+export function publicImageBase(src: string): string {
+  return publicPath(src).replace(/\.(jpe?g|png|webp|avif)$/i, "");
+}
+
+export function hasOptimizedPublicVariants(src: string): boolean {
+  const base = publicImageBase(src);
+  return Boolean(base) && publicFileExists(`${base}-720.webp`);
 }

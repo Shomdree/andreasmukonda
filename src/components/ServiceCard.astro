@@ -18,7 +18,13 @@ const showImage = visual && publicFileExists(service.coverImage);
   {
     showImage ? (
       <a class="media" href={detailsHref}>
-        <ResponsiveImage src={service.coverImage} alt={service.title} width={800} height={1000} />
+        <ResponsiveImage
+          src={service.coverImage}
+          alt={service.title}
+          width={720}
+          height={1018}
+          sizes="(max-width: 719px) 92vw, (max-width: 1079px) 45vw, 360px"
+        />
       </a>
     ) : null
   }

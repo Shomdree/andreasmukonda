@@ -38,7 +38,14 @@ const showImage = publicFileExists(service.coverImage);
       {
         showImage ? (
           <figure class="cover">
-            <ResponsiveImage src={service.coverImage} alt={service.title} width={1200} height={1500} eager />
+            <ResponsiveImage
+              src={service.coverImage}
+              alt={service.title}
+              width={960}
+              height={1358}
+              sizes="(max-width: 40rem) 92vw, 36rem"
+              eager
+            />
           </figure>
         ) : null
       }
