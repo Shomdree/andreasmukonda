@@ -10,6 +10,7 @@ import {
   catalogTrainings as demoTrainings,
 } from "../content/demo";
 import { withPrintCatalog } from "../content/print-catalog";
+import { withPosterCatalog } from "../content/poster-catalog";
 import { defaultSettings } from "../content/defaults";
 import { envWhatsApp, isSupabaseConfigured, logServerError } from "./env";
 import { createBrowserSupabase } from "./supabase";
@@ -98,14 +99,16 @@ export async function getCategories(): Promise<PortfolioCategory[]> {
     const supabase = createBrowserSupabase();
     if (!supabase) return demoCategories;
     const { data } = await supabase.from("portfolio_categories").select("*").order("name");
-    return (data ?? []).map((row) => ({ id: row.id, name: row.name, slug: row.slug }));
+    const rows = (data ?? []).map((row) => ({ id: row.id, name: row.name, slug: row.slug }));
+    return rows.length ? rows : demoCategories;
   }, demoCategories);
 }
 
 export async function getProjects(options?: { featured?: boolean }): Promise<PortfolioProject[]> {
+  const demo = options?.featured ? demoProjects.filter((p) => p.featured) : demoProjects;
   return fallback(async () => {
     const supabase = createBrowserSupabase();
-    if (!supabase) return demoProjects;
+    if (!supabase) return demo;
     let query = supabase
       .from("portfolio_projects")
       .select("*, portfolio_categories(*), portfolio_media(*)")
@@ -113,8 +116,10 @@ export async function getProjects(options?: { featured?: boolean }): Promise<Por
       .order("sort_order");
     if (options?.featured) query = query.eq("featured", true);
     const { data } = await query;
-    return (data ?? []).map(mapProject);
-  }, options?.featured ? demoProjects.filter((p) => p.featured) : demoProjects);
+    const rows = (data ?? []).map(mapProject);
+    const merged = withPosterCatalog(rows.length ? rows : demoProjects);
+    return options?.featured ? merged.filter((p) => p.featured) : merged;
+  }, demo);
 }
 
 export async function getProject(slug: string): Promise<PortfolioProject | undefined> {

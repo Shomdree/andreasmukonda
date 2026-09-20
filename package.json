@@ -20,6 +20,7 @@
     "test:e2e": "playwright test",
     "test:supabase": "node scripts/supabase-smoke.mjs",
     "optimize:services": "node scripts/optimize-service-images.mjs",
+    "optimize:posters": "node scripts/optimize-poster-images.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -1,11 +1,38 @@
-import type { PortfolioCategory, ServiceItem, TrainingItem } from "../lib/types";
+import type { PortfolioCategory, PortfolioProject, ServiceItem, TrainingItem } from "../lib/types";
 import type { Messages } from "./types";
+import { posterCatalogEn, posterCatalogFr, posterCatalogLn } from "../content/poster-copy";
 
 type TrainingCopy = Messages["catalog"]["trainings"][keyof Messages["catalog"]["trainings"]];
 type ServiceCopy = Messages["catalog"]["services"][keyof Messages["catalog"]["services"]];
+type PosterCopy = { title: string; excerpt: string; description: string };
+
+const posterByLocale: Record<string, Record<string, PosterCopy>> = {
+  fr: posterCatalogFr,
+  en: posterCatalogEn,
+  ln: posterCatalogLn,
+};
 
 function pick(map: Record<string, string>, key: string, fallback: string): string {
   return map[key] ?? fallback;
+}
+
+export function localizeProject(item: PortfolioProject, t: Messages, locale: string): PortfolioProject {
+  const copy = posterByLocale[locale]?.[item.slug];
+  if (!copy) {
+    return {
+      ...item,
+      category: item.category ? localizeCategory(item.category, t) : item.category,
+    };
+  }
+  return {
+    ...item,
+    title: copy.title,
+    excerpt: copy.excerpt,
+    description: copy.description,
+    coverAlt: copy.title,
+    gallery: item.gallery.map((shot) => ({ ...shot, alt: copy.title })),
+    category: item.category ? localizeCategory(item.category, t) : item.category,
+  };
 }
 
 export function localizeCategory(category: PortfolioCategory, t: Messages): PortfolioCategory {

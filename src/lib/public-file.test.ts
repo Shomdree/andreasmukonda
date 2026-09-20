@@ -11,6 +11,8 @@ describe("public files", () => {
   it("finds the print cover and its lighter variants", () => {
     expect(publicFileExists("/images/services/impression-affiches.jpg")).toBe(true);
     expect(hasOptimizedPublicVariants("/images/services/impression-affiches.jpg")).toBe(true);
+    expect(publicFileExists("/images/portfolio/aff-001.jpg")).toBe(true);
+    expect(hasOptimizedPublicVariants("/images/portfolio/aff-001.jpg")).toBe(true);
     expect(hasOptimizedPublicVariants("/images/missing.jpg")).toBe(false);
   });
 });

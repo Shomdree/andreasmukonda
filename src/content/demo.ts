@@ -10,6 +10,7 @@ import type {
   TrainingItem,
 } from "../lib/types";
 import { catalogPrintServices } from "./print-catalog";
+import { catalogPosterProjects } from "./poster-catalog";
 
 export const catalogCategories: PortfolioCategory[] = [
   { id: "cat-design", name: "Design", slug: "design" },
@@ -20,7 +21,7 @@ export const catalogCategories: PortfolioCategory[] = [
   { id: "cat-medias", name: "Médias", slug: "medias" },
 ];
 
-export const catalogProjects: PortfolioProject[] = [];
+export const catalogProjects: PortfolioProject[] = catalogPosterProjects;
 
 const cover = (seed: string) => `/images/covers/${seed}.svg`;
 

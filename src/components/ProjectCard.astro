@@ -2,18 +2,32 @@
 import type { PortfolioProject } from "../lib/types";
 import ResponsiveImage from "./ResponsiveImage.astro";
 import { pageI18n } from "../i18n/request";
-import { localizeCategory } from "../i18n/localize";
+import { localizeProject } from "../i18n/localize";
+import { publicFileExists } from "../lib/public-file";
 
 type Props = { project: PortfolioProject; featured?: boolean; contain?: boolean };
-const { project, featured, contain } = Astro.props;
-const { t, href } = pageI18n(Astro.locals);
-const categoryName = project.category ? localizeCategory(project.category, t).name : t.catalog.project;
+const { featured, contain } = Astro.props;
+const { t, href, locale } = pageI18n(Astro.locals);
+const project = localizeProject(Astro.props.project, t, locale);
+const categoryName = project.category?.name ?? t.catalog.project;
+const showImage = publicFileExists(project.coverImage);
 ---
 
 <a class:list={["card", featured && "featured", contain && "contain"]} href={href(`/portfolio/${project.slug}`)} data-reveal="up">
-  <div class="media-frame">
-    <ResponsiveImage src={project.coverImage} alt={project.coverAlt} width={800} height={1000} eager={featured} />
-  </div>
+  {
+    showImage ? (
+      <div class="media-frame">
+        <ResponsiveImage
+          src={project.coverImage}
+          alt={project.coverAlt}
+          width={720}
+          height={1018}
+          eager={featured}
+          sizes={featured ? "(max-width: 700px) 92vw, 1100px" : "(max-width: 719px) 92vw, (max-width: 1099px) 45vw, 360px"}
+        />
+      </div>
+    ) : null
+  }
   <div class="meta">
     <p class="kicker">{categoryName}{project.year ? ` · ${project.year}` : ""}</p>
     <h3 class="display">{project.title}</h3>

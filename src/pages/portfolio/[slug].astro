@@ -4,14 +4,22 @@ import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import CTASection from "../../components/CTASection.astro";
 import ResponsiveImage from "../../components/ResponsiveImage.astro";
 import { pageI18n } from "../../i18n/request";
-import { localizeCategory } from "../../i18n/localize";
+import { localizeProject } from "../../i18n/localize";
 import { getProject, getSettings } from "../../lib/queries";
+import { isPosterProject } from "../../content/poster-catalog";
+import { publicFileExists } from "../../lib/public-file";
 
-const { t, href } = pageI18n(Astro.locals);
+const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const project = await getProject(Astro.params.slug ?? "");
-if (!project) return Astro.redirect(href("/"));
-const categoryName = project.category ? localizeCategory(project.category, t).name : t.catalog.project;
+const found = await getProject(Astro.params.slug ?? "");
+if (!found) return Astro.redirect(href("/"));
+const project = localizeProject(found, t, locale);
+const categoryName = project.category?.name ?? t.catalog.project;
+const showImage = publicFileExists(project.coverImage);
+const gallery = project.gallery.filter((item) => publicFileExists(item.url));
+const orderHref = isPosterProject(project)
+  ? `${href("/commander")}?service=design-graphique`
+  : `${href("/commander")}?service=${project.category?.slug ?? "identite-visuelle"}`;
 const chapters = [
   { title: t.portfolio.need, text: project.challenge || project.description },
   { title: t.portfolio.approach, text: project.solution },
@@ -34,13 +42,24 @@ const jsonLd = {
   settings={settings}
   title={`${project.title} — ${t.nav.portfolio}`}
   description={project.excerpt}
-  image={project.coverImage}
+  image={showImage ? project.coverImage : undefined}
   canonicalPath={`/portfolio/${project.slug}`}
   jsonLd={jsonLd}
 >
   <article class="work">
     <div class="hero media-frame">
-      <ResponsiveImage src={project.coverImage} alt={project.coverAlt} width={1600} height={900} eager />
+      {
+        showImage ? (
+          <ResponsiveImage
+            src={project.coverImage}
+            alt={project.coverAlt}
+            width={960}
+            height={1358}
+            sizes="100vw"
+            eager
+          />
+        ) : null
+      }
     </div>
     <div class="section">
       <div class="container-am">
@@ -78,16 +97,16 @@ const jsonLd = {
           ))
         }
         {
-          project.gallery.length > 0 && (
+          gallery.length > 0 && (
             <>
               <h2>{t.catalog.projectGallery}</h2>
               <div class="gallery">
-                {project.gallery.map((item, index) => {
+                {gallery.map((item, index) => {
                   const popId = `work-${index}`;
                   return (
                     <>
                       <button type="button" class="shot media-frame" popovertarget={popId} aria-label={t.portfolio.openWork}>
-                        <ResponsiveImage src={item.url} alt={item.alt} width={1000} height={1250} />
+                        <ResponsiveImage src={item.url} alt={item.alt} width={720} height={1018} sizes="(max-width: 799px) 92vw, 28rem" />
                       </button>
                       <div id={popId} popover="auto" class="work-pop">
                         <button type="button" class="close" popovertarget={popId} popovertargetaction="hide">
@@ -107,7 +126,7 @@ const jsonLd = {
   </article>
   <CTASection
     title={t.portfolio.cta}
-    primaryHref={`${href("/commander")}?service=${project.category?.slug ?? "identite-visuelle"}`}
+    primaryHref={orderHref}
     primaryLabel={t.portfolio.similarCta}
     secondaryHref={href("/portfolio")}
     secondaryLabel={t.nav.portfolio}
