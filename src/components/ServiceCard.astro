@@ -1,19 +1,31 @@
 ---
 import type { ServiceItem } from "../lib/types";
+import ResponsiveImage from "./ResponsiveImage.astro";
 import { pageI18n } from "../i18n/request";
 import { localizeService } from "../i18n/localize";
+import { publicFileExists } from "../lib/public-file";
 
-type Props = { service: ServiceItem; index?: number };
-const { index = 0 } = Astro.props;
+type Props = { service: ServiceItem; index?: number; visual?: boolean };
+const { index = 0, visual = false } = Astro.props;
 const { t, href } = pageI18n(Astro.locals);
 const service = localizeService(Astro.props.service, t);
 const detailsHref = href(`/services/${service.slug}`);
 const ctaHref = service.ctaHref.startsWith("/") ? href(service.ctaHref) : service.ctaHref;
+const showImage = visual && publicFileExists(service.coverImage);
 ---
 
-<article class="card" data-reveal="up" style={`--d:${Math.min(index * 80, 320)}ms`}>
+<article class:list={["card", visual && "visual"]} data-reveal="up" style={`--d:${Math.min(index * 80, 320)}ms`}>
+  {
+    showImage ? (
+      <a class="media" href={detailsHref}>
+        <ResponsiveImage src={service.coverImage} alt={service.title} width={800} height={1000} />
+      </a>
+    ) : null
+  }
   <p class="kicker">{service.priceLabel}</p>
-  <h3 class="display">{service.title}</h3>
+  <h3 class="display">
+    <a href={detailsHref}>{service.title}</a>
+  </h3>
   <p>{service.excerpt}</p>
   <div class="row">
     <a href={detailsHref}>{t.catalog.details}</a>
@@ -55,10 +67,38 @@ const ctaHref = service.ctaHref.startsWith("/") ? href(service.ctaHref) : servic
     border-color: color-mix(in srgb, var(--color-ember) 50%, var(--line));
     background: rgba(255, 255, 255, 0.04);
   }
+  .visual {
+    padding: 0 0 1.15rem;
+  }
+  .media {
+    display: block;
+    margin: 0 0 0.85rem;
+    background: color-mix(in srgb, var(--bg-elev) 80%, #1c2230);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+  .media :global(img) {
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+  }
   h3 {
     font-size: 1.55rem;
     margin: 0.25rem 0 0.5rem;
     color: var(--fg);
+  }
+  h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  h3 a:hover {
+    color: var(--color-ember);
+  }
+  .visual .kicker,
+  .visual h3,
+  .visual p,
+  .visual .row {
+    padding-inline: 1rem;
   }
   p {
     color: var(--fg-soft);

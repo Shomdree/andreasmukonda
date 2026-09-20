@@ -1,3 +1,4 @@
+import { printCatalogLn } from "../content/print-catalog";
 import type { Messages } from "./types";
 
 export const ln = {
@@ -148,6 +149,7 @@ export const ln = {
       "supports imprimés",
     ],
     designCta: "Tuna devis",
+    printTitle: "Ba supports imprimés mpe personnalisés",
     webTitle: "Sites web & solutions numériques",
     webHeading: "Tia activité na yo na internet na ndenge ya malamu.",
     webBody: "Ozali na posa ya site mpo na kolakisa activité, organisation to services na yo ?",
@@ -797,6 +799,7 @@ export const ln = {
         priceLabel: "Na devis",
         ctaLabel: "Tuna prestation",
       },
+      ...printCatalogLn,
     },
   },
   a11y: {

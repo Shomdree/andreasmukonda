@@ -16,6 +16,7 @@ import {
   TRAINING_FORMATS,
   TRAINING_GOALS,
   TRAINING_LEVELS,
+  designKindFromService,
   orderKindFromService,
   selectedList,
 } from "../lib/order-context";
@@ -38,6 +39,8 @@ const v = Astro.props.values ?? {};
 const services = Astro.props.services.map((item) => localizeService(item, t));
 const trainings = (Astro.props.trainings ?? []).map((item) => localizeTraining(item, t));
 const selected = v.serviceId || services.find((s) => s.slug === Astro.props.selectedSlug)?.id;
+const selectedService = services.find((s) => s.id === selected);
+const presetDesignKind = v.designKind || designKindFromService(selectedService);
 const selectedTraining = v.trainingPick || Astro.props.selectedTraining || "";
 const features = selectedList(v.webFeatures);
 const lab = (map: Record<string, string>, key: string) => map[key] ?? key;
@@ -78,7 +81,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         <option value="">{t.form.choose}</option>
         {
           services.map((s) => (
-            <option value={s.id} selected={selected === s.id} data-title={s.title} data-kind={orderKindFromService(s)}>
+            <option value={s.id} selected={selected === s.id} data-title={s.title} data-kind={orderKindFromService(s)} data-design-kind={designKindFromService(s)}>
               {s.title}
             </option>
           ))
@@ -101,7 +104,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         <select id="designKind" name="designKind">
           <option value="">{t.form.choose}</option>
           {DESIGN_KINDS.map((key) => (
-            <option value={key} selected={v.designKind === key}>{lab(designKinds, key)}</option>
+            <option value={key} selected={presetDesignKind === key}>{lab(designKinds, key)}</option>
           ))}
         </select>
         {e.designKind && <p class="error">{e.designKind}</p>}
@@ -448,6 +451,12 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
       if (hiddenTitle && option) hiddenTitle.value = option.text.trim();
     };
 
+    const applyDesignPreset = (force = false) => {
+      const designSelect = form.querySelector<HTMLSelectElement>("#designKind");
+      const preset = select?.selectedOptions[0]?.dataset.designKind || "";
+      if (designSelect && preset && (force || !designSelect.value)) designSelect.value = preset;
+    };
+
     const applyWhen = () => {
       form.querySelectorAll<HTMLElement>("[data-when-name]").forEach((node) => {
         const name = node.dataset.whenName || "";
@@ -578,6 +587,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
     form.querySelector("[data-change-service]")?.addEventListener("click", () => showStep(0));
     select?.addEventListener("change", () => {
       syncTitle();
+      applyDesignPreset(true);
       applyKind();
     });
     form.addEventListener("change", applyWhen);
@@ -587,6 +597,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
     });
 
     syncTitle();
+    applyDesignPreset();
     showStep(current);
   }
 </script>

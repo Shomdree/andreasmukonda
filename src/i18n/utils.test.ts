@@ -50,6 +50,8 @@ describe("i18n utils", () => {
     expect(Object.keys(en.trainings)).toEqual(Object.keys(fr.trainings));
     expect(Object.keys(ln.lives)).toEqual(Object.keys(fr.lives));
     expect(Object.keys(en.news)).toEqual(Object.keys(fr.news));
+    expect(Object.keys(ln.servicesPage)).toEqual(Object.keys(fr.servicesPage));
+    expect(Object.keys(en.servicesPage)).toEqual(Object.keys(fr.servicesPage));
     expect(COOKIE_LOCALE).toBe("preferred_locale");
   });
 });

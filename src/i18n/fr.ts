@@ -1,3 +1,5 @@
+import { printCatalogFr } from "../content/print-catalog";
+
 export const fr = {
   nav: {
     home: "Accueil",
@@ -146,6 +148,7 @@ export const fr = {
       "supports imprimés",
     ],
     designCta: "Demander un devis",
+    printTitle: "Supports imprimés et personnalisés",
     webTitle: "Sites web & solutions numériques",
     webHeading: "Votre présence en ligne commence par un outil adapté.",
     webBody: "Vous avez besoin d’un site pour présenter votre activité, votre organisation ou vos services ?",
@@ -801,6 +804,7 @@ export const fr = {
         priceLabel: "Sur devis",
         ctaLabel: "Demander une prestation",
       },
+      ...printCatalogFr,
     },
   },
   a11y: {

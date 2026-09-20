@@ -9,6 +9,7 @@ import type {
   Testimonial,
   TrainingItem,
 } from "../lib/types";
+import { catalogPrintServices } from "./print-catalog";
 
 export const catalogCategories: PortfolioCategory[] = [
   { id: "cat-design", name: "Design", slug: "design" },
@@ -137,6 +138,7 @@ export const catalogServices: ServiceItem[] = [
     ctaLabel: "Réserver une prestation",
     ctaHref: "/commander?service=photographie-medias",
   },
+  ...catalogPrintServices,
 ];
 
 export const catalogTrainings: TrainingItem[] = [

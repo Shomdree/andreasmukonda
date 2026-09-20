@@ -32,6 +32,19 @@ test("editorial pages keep their titles and a useful action", async ({ page }) =
   await expect(page.getByRole("button", { name: "Poser ma question" })).toBeVisible();
 });
 
+test("print services keep their titles and presentations", async ({ page }) => {
+  await page.goto("/services");
+  await expect(page.getByRole("heading", { name: /Supports imprimés et personnalisés/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Création d’affiches" }).first()).toBeVisible();
+  await page.goto("/services/creation-d-affiches");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Création d’affiches");
+  await expect(page.getByText(/Une affiche réunit votre message/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Demander un devis" }).first()).toHaveAttribute(
+    "href",
+    /commander\?service=creation-d-affiches/,
+  );
+});
+
 test("editorial pages exist in English and Lingala", async ({ page }) => {
   await page.goto("/en/portfolio");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/A few projects/i);

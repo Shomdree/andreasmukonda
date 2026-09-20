@@ -9,6 +9,7 @@ import {
   catalogTestimonials as demoTestimonials,
   catalogTrainings as demoTrainings,
 } from "../content/demo";
+import { withPrintCatalog } from "../content/print-catalog";
 import { defaultSettings } from "../content/defaults";
 import { envWhatsApp, isSupabaseConfigured, logServerError } from "./env";
 import { createBrowserSupabase } from "./supabase";
@@ -131,7 +132,7 @@ export async function getServices(): Promise<ServiceItem[]> {
       return demoServices;
     }
     const rows = (data ?? []).map(mapService);
-    return rows.length ? rows : demoServices;
+    return withPrintCatalog(rows.length ? rows : demoServices);
   }, demoServices);
 }
 

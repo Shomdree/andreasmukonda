@@ -10,6 +10,8 @@ describe("order context", () => {
     expect(orderKindFromService({ id: "s-formation", slug: "formation-professionnelle" })).toBe("training");
     expect(orderKindFromService({ id: "s-consulting", slug: "consulting-accompagnement" })).toBe("generic");
     expect(orderKindFromService({ id: "s-media", slug: "photographie-medias" })).toBe("generic");
+    expect(orderKindFromService({ id: "s-imp-001", slug: "creation-d-affiches" })).toBe("design");
+    expect(orderKindFromService({ id: "s-imp-015", slug: "t-shirts-personnalises" })).toBe("design");
   });
 
   it("composes a readable design request", () => {

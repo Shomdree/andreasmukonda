@@ -1,5 +1,8 @@
+import { designKindFromService, isPrintService } from "../content/print-catalog";
 import type { Messages } from "../i18n";
 import type { ServiceItem } from "./types";
+
+export { designKindFromService, isPrintService };
 
 export type OrderKind = "design" | "web" | "training" | "generic";
 
@@ -94,7 +97,15 @@ export function orderKindFromService(item?: Pick<ServiceItem, "id" | "slug"> | n
   const id = (item?.id || fallbackId).toLowerCase();
   const slug = (item?.slug || fallbackId).toLowerCase();
   const blob = `${id} ${slug}`;
-  if (id === "s-design" || slug === "design-graphique" || slug.includes("design-graphique")) return "design";
+  if (
+    id === "s-design" ||
+    slug === "design-graphique" ||
+    slug.includes("design-graphique") ||
+    isPrintService(item) ||
+    isPrintService({ id: fallbackId, slug: fallbackId })
+  ) {
+    return "design";
+  }
   if (id === "s-web" || slug === "sites-web-solutions-numeriques" || slug.includes("sites-web") || slug.includes("solutions-numeriques")) {
     return "web";
   }

@@ -1,3 +1,4 @@
+import { printCatalogEn } from "../content/print-catalog";
 import type { Messages } from "./types";
 
 export const en = {
@@ -148,6 +149,7 @@ export const en = {
       "print materials",
     ],
     designCta: "Request a quote",
+    printTitle: "Printed and personalized items",
     webTitle: "Websites & Digital Solutions",
     webHeading: "Build an online presence that works for you.",
     webBody: "Do you need a website to present your activity, organization or services?",
@@ -789,6 +791,7 @@ export const en = {
         priceLabel: "On request",
         ctaLabel: "Request a session",
       },
+      ...printCatalogEn,
     },
   },
   a11y: {
