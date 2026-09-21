@@ -50,6 +50,7 @@ const canonicalPath = Astro.props.canonicalPath ?? path;
     {analytics && (
       <script defer is:inline src={analytics.src} data-domain={analytics.domain}></script>
     )}
+    <slot name="head" />
   </head>
   <body>
     <noscript>

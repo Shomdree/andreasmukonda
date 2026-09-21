@@ -63,8 +63,8 @@ function active(match: string) {
         <span class="burger" aria-hidden="true"></span>
         <span class="sr">Menu</span>
       </summary>
-      <button type="button" class="nav-dismiss" data-nav-dismiss aria-label={t.nav.closeMenu} tabindex="-1"></button>
-      <div class="sheet">
+      <button type="button" class="nav-dismiss" data-nav-dismiss data-nav-layer="dismiss" aria-label={t.nav.closeMenu} tabindex="-1"></button>
+      <div class="sheet" data-nav-layer="sheet">
         {
           primary.map((item) => (
             <a href={item.href} aria-current={active(item.match) ? "page" : undefined}>
@@ -89,9 +89,13 @@ function active(match: string) {
     position: sticky;
     top: 0;
     z-index: 40;
+    transform: none;
+    filter: none;
+    perspective: none;
+    contain: none;
+    will-change: auto;
     background: color-mix(in srgb, var(--bg) 92%, transparent);
     border-bottom: 1px solid transparent;
-    animation: header-in 520ms var(--ease-standard) both;
     transition:
       background-color var(--motion-normal) var(--ease-standard),
       box-shadow var(--motion-normal) var(--ease-standard),
@@ -202,24 +206,28 @@ function active(match: string) {
     appearance: none;
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 70;
     margin: 0;
     border: 0;
     padding: 0;
     background: rgba(8, 10, 14, 0.46);
     cursor: pointer;
     touch-action: none;
+    pointer-events: none;
+    visibility: hidden;
   }
+  :global(html.nav-open) .nav-dismiss,
   .nav-mobile[open] .nav-dismiss {
     display: block;
+    pointer-events: auto;
+    visibility: visible;
   }
   :global(html[data-theme="light"]) .nav-dismiss {
     background: rgba(14, 16, 20, 0.28);
   }
-  :global(html:has(.nav-mobile[open])),
-  :global(body:has(.nav-mobile[open])) {
-    overflow: hidden;
-    overscroll-behavior: none;
+  :global(html.nav-open) .site-header,
+  :global(html:has(.nav-mobile[open])) .site-header {
+    z-index: 80;
   }
   .nav-mobile summary {
     position: relative;
@@ -257,11 +265,11 @@ function active(match: string) {
   }
   .sheet {
     position: fixed;
-    top: 4rem;
+    top: var(--header-h, 4rem);
     right: 0.7rem;
-    z-index: 2;
+    z-index: 90;
     width: min(18rem, calc(100vw - 1.4rem));
-    max-height: calc(100dvh - 4.75rem);
+    max-height: calc(100dvh - var(--header-h, 4rem) - 0.75rem);
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -278,14 +286,17 @@ function active(match: string) {
     opacity: 0;
     transform: translate3d(0, -8px, 0);
     pointer-events: none;
+    visibility: hidden;
     transition:
       opacity 240ms var(--ease-standard),
       transform 240ms var(--ease-standard);
   }
+  :global(html.nav-open) .sheet,
   .nav-mobile[open] .sheet {
     opacity: 1;
     transform: none;
     pointer-events: auto;
+    visibility: visible;
   }
   .sheet > :global(*) {
     flex-shrink: 0;
@@ -320,12 +331,6 @@ function active(match: string) {
   :global(html[data-theme="light"]) .sheet a[aria-current="page"] {
     background: rgba(14, 16, 20, 0.05);
   }
-  @keyframes header-in {
-    from {
-      opacity: 0;
-      transform: translate3d(0, -12px, 0);
-    }
-  }
   @media (min-width: 980px) {
     .nav-desktop {
       display: flex;
@@ -355,8 +360,8 @@ function active(match: string) {
       gap: 0.45rem;
     }
     .sheet {
-      top: 3.55rem;
-      max-height: calc(100dvh - 4.2rem);
+      top: var(--header-h, 3.55rem);
+      max-height: calc(100dvh - var(--header-h, 3.55rem) - 0.65rem);
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -367,7 +372,8 @@ function active(match: string) {
       transition: none;
     }
     .nav-mobile .sheet,
-    .nav-mobile[open] .sheet {
+    .nav-mobile[open] .sheet,
+    :global(html.nav-open) .sheet {
       opacity: 1;
       transform: none;
     }

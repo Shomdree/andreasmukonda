@@ -31,9 +31,19 @@ for (const device of mobiles) {
       if (scroll.canScroll) expect(scroll.scrollTop).toBeGreaterThan(0);
       await page.mouse.click(28, Math.min(device.height - 80, 520));
       await expect(page.locator("details.nav-mobile")).not.toHaveAttribute("open");
+      await expect(page.locator("html")).not.toHaveClass(/nav-open/);
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
       await page.getByLabel("Ouvrir le menu").click();
-      await page.getByLabel("Fermer le menu").click();
+      const sheetBox = await sheet.boundingBox();
+      expect(sheetBox, "menu stays in the viewport after a long scroll").toBeTruthy();
+      expect(sheetBox.y).toBeGreaterThanOrEqual(0);
+      expect(sheetBox.y).toBeLessThan(device.height * 0.45);
+      await expect(page.getByRole("link", { name: "À propos", exact: true }).first()).toBeVisible();
+      await page.locator("[data-nav-dismiss]").click({ position: { x: 12, y: 200 }, force: true });
       await expect(page.locator("details.nav-mobile")).not.toHaveAttribute("open");
+      expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe("fixed");
+      await page.getByRole("link", { name: "Commander" }).first().click();
+      await expect(page).toHaveURL(/commander/);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       );

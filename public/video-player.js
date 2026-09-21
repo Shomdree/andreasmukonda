@@ -36,6 +36,11 @@
     });
   }
 
+  function isPlaying(card) {
+    var mount = card.querySelector("[data-video-mount]");
+    return Boolean(mount && !mount.hidden && mount.firstChild);
+  }
+
   function stopOthers(current) {
     document.querySelectorAll("[data-video-card], [data-live-card]").forEach(function (card) {
       if (card === current) return;
@@ -91,7 +96,6 @@
     frame.allow =
       "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
     frame.allowFullscreen = true;
-    frame.loading = "lazy";
     frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
     frame.setAttribute("style", "width:100%;height:100%;border:0;background:#000;display:block");
     mount.replaceChildren(frame);
@@ -107,6 +111,10 @@
       var card = trigger.closest("[data-video-card], [data-live-card]");
       if (!card) return;
       if (!card.getAttribute("data-embed") && !card.getAttribute("data-file")) return;
+      if (isPlaying(card)) {
+        event.preventDefault();
+        return;
+      }
       event.preventDefault();
       play(card, trigger.getAttribute("data-player-title") || card.getAttribute("data-title") || "Video");
     },

@@ -9,6 +9,7 @@ import { pageI18n } from "../i18n/request";
 import { localizeLive } from "../i18n/localize";
 import { isCatalogVideo } from "../content/video-catalog";
 import { getLives, getSettings } from "../lib/queries";
+import { hasOptimizedPublicVariants, publicImageBase } from "../lib/public-file";
 
 const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
@@ -22,6 +23,9 @@ const groups = [
 ].filter((group) => group.items.length > 0);
 const featuredVideo = videos[0];
 const otherVideos = videos.slice(1);
+const featuredPoster = featuredVideo?.thumbnailUrl ?? "";
+const featuredPosterBase = featuredPoster ? publicImageBase(featuredPoster) : "";
+const featuredPosterOptimized = Boolean(featuredPoster && hasOptimizedPublicVariants(featuredPoster));
 const featuredLive = groups[0]?.items[0];
 const restGroups = groups.map((group) => ({
   ...group,
@@ -35,6 +39,17 @@ const restGroups = groups.map((group) => ({
   description={t.seo.livesDescription}
   canonicalPath="/lives"
 >
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://www.tiktok.com" crossorigin="anonymous" />
+    <link rel="dns-prefetch" href="https://www.tiktok.com" />
+    {
+      featuredPosterOptimized ? (
+        <link rel="preload" as="image" type="image/avif" href={`${featuredPosterBase}-720.avif`} fetchpriority="high" />
+      ) : featuredPoster ? (
+        <link rel="preload" as="image" href={featuredPoster} fetchpriority="high" />
+      ) : null
+    }
+  </Fragment>
   <section class="section library">
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/lives"), label: t.nav.lives }]} />
