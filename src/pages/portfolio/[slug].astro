@@ -9,6 +9,7 @@ import { getProject, getSettings } from "../../lib/queries";
 import { isPosterProject } from "../../content/poster-catalog";
 import { isLogoProject } from "../../content/logo-catalog";
 import { publicFileExists } from "../../lib/public-file";
+import VideoPlayer from "../../components/VideoPlayer.astro";
 
 const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
@@ -19,6 +20,7 @@ const categoryName = project.category?.name ?? t.catalog.project;
 const showImage = publicFileExists(project.coverImage);
 const gallery = project.gallery.filter((item) => publicFileExists(item.url));
 const markWork = isPosterProject(project) || isLogoProject(project);
+const videoUrl = project.videoUrl?.trim() || "";
 const orderHref = markWork
   ? `${href("/commander")}?service=design-graphique`
   : `${href("/commander")}?service=${project.category?.slug ?? "identite-visuelle"}`;
@@ -49,20 +51,33 @@ const jsonLd = {
   jsonLd={jsonLd}
 >
   <article class="work">
-    <div class:list={["hero", "media-frame", isLogoProject(project) && "logo-hero"]}>
-      {
-        showImage ? (
-          <ResponsiveImage
-            src={project.coverImage}
-            alt={project.coverAlt}
-            width={960}
-            height={1358}
-            sizes="100vw"
+    {
+      videoUrl ? (
+        <div class="hero video-hero">
+          <VideoPlayer
+            url={videoUrl}
+            title={project.title}
+            poster={showImage ? project.coverImage : undefined}
+            playLabel={t.lives.playVideo}
+            playerTitle={t.catalog.videoPlayer}
             eager
           />
-        ) : null
-      }
-    </div>
+        </div>
+      ) : (
+        <div class:list={["hero", "media-frame", isLogoProject(project) && "logo-hero"]}>
+          {showImage ? (
+            <ResponsiveImage
+              src={project.coverImage}
+              alt={project.coverAlt}
+              width={960}
+              height={1358}
+              sizes="100vw"
+              eager
+            />
+          ) : null}
+        </div>
+      )
+    }
     <div class="section">
       <div class="container-am">
         <Breadcrumbs
@@ -142,6 +157,11 @@ const jsonLd = {
   .hero {
     aspect-ratio: 16 / 9;
     max-height: 64vh;
+  }
+  .video-hero {
+    aspect-ratio: auto;
+    max-height: none;
+    background: transparent;
   }
   .hero :global(img) {
     object-fit: contain;

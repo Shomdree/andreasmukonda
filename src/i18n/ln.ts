@@ -263,6 +263,10 @@ export const ln = {
     liveTitle: "Na live",
     replayTitle: "Ba replays",
     openPlatform: "Fungola na plateforme",
+    playVideo: "Tala vidéo",
+    videosTitle: "Ba vidéos",
+    videosLead: "Ba vidéos ya misala ezali awa, pamba na ba lives, mpo ete etala malamu.",
+    videosKicker: "Vidéo",
   },
   questions: {
     title: "Ozali na motuna ?",

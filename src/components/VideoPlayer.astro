@@ -1,0 +1,163 @@
+---
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { publicFileExists } from "../lib/public-file";
+import { resolveVideo } from "../lib/video-embed";
+
+type Props = {
+  url: string;
+  title: string;
+  playLabel: string;
+  playerTitle: string;
+  poster?: string;
+  featured?: boolean;
+  eager?: boolean;
+};
+
+const { url, title, playLabel, playerTitle, featured, eager } = Astro.props;
+const video = resolveVideo(url);
+const fallbackPoster = Astro.props.poster?.trim() || "";
+const poster = fallbackPoster || video.poster || "";
+const localPoster = poster.startsWith("/") && publicFileExists(poster);
+const remotePoster = /^https?:\/\//i.test(poster);
+const hasPoster = localPoster || remotePoster;
+const localFile = video.kind === "file" && video.src.startsWith("/");
+const fileReady = video.kind !== "file" || !localFile || publicFileExists(video.src);
+const canPlayHere = fileReady && (video.kind === "iframe" || video.kind === "file");
+const embed = canPlayHere && video.kind === "iframe" ? video.embedSrc ?? "" : "";
+const file = canPlayHere && video.kind === "file" ? video.src : "";
+const hasCopy = Astro.slots.has("default");
+---
+
+<div
+  class:list={["video", featured && "featured"]}
+  data-video-card
+  data-embed={embed}
+  data-file={file}
+  data-mime={file && video.mime ? video.mime : ""}
+  data-title={playerTitle}
+  aria-label={title}
+>
+  <div class:list={["stage", "media-frame", video.aspect]}>
+    <div class="poster" data-video-poster>
+      {
+        hasPoster ? (
+          <ResponsiveImage
+            src={poster}
+            alt=""
+            width={video.aspect === "portrait" ? 720 : featured ? 1280 : 800}
+            height={video.aspect === "portrait" ? 1280 : featured ? 720 : 450}
+            eager={eager}
+            sizes={featured ? "(max-width: 899px) 92vw, 58vw" : "(max-width: 819px) 92vw, 44vw"}
+          />
+        ) : (
+          <span class="blank"></span>
+        )
+      }
+      {
+        canPlayHere ? (
+          <button type="button" class="play-hit" data-video-play data-player-title={playerTitle} aria-label={playLabel}>
+            <span class="play-mark" aria-hidden="true"></span>
+          </button>
+        ) : (
+          <a class="play-hit" href={url} rel="noopener noreferrer" aria-label={playLabel}>
+            <span class="play-mark" aria-hidden="true"></span>
+          </a>
+        )
+      }
+    </div>
+    <div class="mount" data-video-mount hidden></div>
+  </div>
+  {hasCopy && (
+    <div class="copy">
+      <slot />
+    </div>
+  )}
+</div>
+
+<style>
+  .video {
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #10131a;
+  }
+  .stage.portrait {
+    aspect-ratio: 9 / 16;
+    width: min(100%, 22rem);
+    max-height: min(78vh, 36rem);
+    margin-inline: auto;
+  }
+  .poster,
+  .mount,
+  .blank {
+    position: absolute;
+    inset: 0;
+  }
+  .poster :global(img),
+  .poster :global(picture) {
+    width: 100%;
+    height: 100%;
+  }
+  .poster :global(img) {
+    object-fit: contain;
+    background: #10131a;
+  }
+  .blank {
+    background: #10131a;
+  }
+  .play-hit {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+  }
+  .play-mark {
+    width: 4.2rem;
+    height: 4.2rem;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-ember) 92%, #000);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-ember) 22%, transparent);
+    clip-path: none;
+    position: relative;
+  }
+  .play-mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0.7rem 0 0.7rem 1.15rem;
+    border-color: transparent transparent transparent #10131a;
+    transform: translateX(0.18rem);
+  }
+  .copy {
+    min-width: 0;
+  }
+  .featured {
+    gap: 1.1rem;
+  }
+  @media (min-width: 900px) {
+    .featured {
+      grid-template-columns: 1.25fr 0.9fr;
+      align-items: center;
+      gap: 2rem;
+    }
+    .featured .stage.portrait {
+      width: min(100%, 18rem);
+    }
+  }
+</style>

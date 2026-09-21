@@ -255,6 +255,10 @@ export const en = {
     liveTitle: "Live",
     replayTitle: "Replays",
     openPlatform: "Open on the platform",
+    playVideo: "Play video",
+    videosTitle: "Videos",
+    videosLead: "Videos of completed work are presented here, apart from the lives, so they stay easy to browse.",
+    videosKicker: "Video",
   },
   questions: {
     title: "Have a question? Ask me.",

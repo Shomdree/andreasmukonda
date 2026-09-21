@@ -1,7 +1,9 @@
 ---
 import type { LiveItem } from "../lib/types";
-import ResponsiveImage from "./ResponsiveImage.astro";
+import VideoPlayer from "./VideoPlayer.astro";
 import { pageI18n } from "../i18n/request";
+import { resolveVideo } from "../lib/video-embed";
+import { isCatalogVideo } from "../content/video-catalog";
 
 type Props = { live: LiveItem; featured?: boolean };
 const { live, featured } = Astro.props;
@@ -11,38 +13,34 @@ const labels = {
   "en-direct": t.catalog.liveNow,
   replay: t.catalog.liveReplay,
 };
-const cta = live.status === "replay" ? t.catalog.watchReplay : t.catalog.watchLive;
+const resolved = resolveVideo(live.url);
+const canPlayHere = Boolean(resolved.embedSrc) || resolved.kind === "file";
+const workVideo = isCatalogVideo(live);
+const cta = workVideo
+  ? t.lives.playVideo
+  : live.status === "replay"
+    ? t.catalog.watchReplay
+    : live.status === "en-direct"
+      ? t.catalog.watchLive
+      : t.lives.playVideo;
+const kicker = workVideo ? t.lives.videosKicker : labels[live.status];
 const dateLocale = locale === "en" ? "en-GB" : "fr-FR";
-
-function embedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) {
-      return `https://www.youtube-nocookie.com/embed/${u.searchParams.get("v")}`;
-    }
-    if (u.hostname === "youtu.be") {
-      return `https://www.youtube-nocookie.com/embed${u.pathname}`;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-const embed = embedUrl(live.url);
+const defaultThumb = "/images/covers/campagne.svg";
+const poster = live.thumbnailUrl && live.thumbnailUrl !== defaultThumb ? live.thumbnailUrl : resolved.poster ?? live.thumbnailUrl;
+const platform = live.platform || resolved.platform;
 ---
 
-<article
-  class:list={["live", featured && "featured"]}
-  data-live-card
-  data-embed={embed ?? ""}
-  data-thumb={live.thumbnailUrl}
-  data-title={t.catalog.videoPlayer}
->
-  <div class="stage media-frame thumb">
-    <ResponsiveImage src={live.thumbnailUrl} alt="" width={featured ? 1280 : 800} height={featured ? 720 : 450} eager={featured} />
-  </div>
-  <div class="copy">
-    <p class="kicker">{labels[live.status]} · {live.platform}</p>
+<article class="live">
+  <VideoPlayer
+    url={live.url}
+    title={live.title}
+    poster={poster}
+    playLabel={canPlayHere ? cta : t.lives.openPlatform}
+    playerTitle={t.catalog.videoPlayer}
+    featured={featured}
+    eager={featured}
+  >
+    <p class="kicker">{kicker}{platform ? ` · ${platform}` : ""}</p>
     <h3 class="display">{live.title}</h3>
     {live.description && <p>{live.description}</p>}
     {
@@ -57,32 +55,21 @@ const embed = embedUrl(live.url);
     }
     <p class="actions">
       <a
-        class="btn btn-primary play"
+        class="btn btn-primary"
         href={live.url}
         rel="noopener noreferrer"
-        data-live-play
+        data-video-play
         data-player-title={t.catalog.videoPlayer}
       >
-        {embed ? cta : t.lives.openPlatform}
+        {canPlayHere ? cta : t.lives.openPlatform}
       </a>
     </p>
-  </div>
+  </VideoPlayer>
 </article>
 
 <style>
   .live {
-    display: grid;
-    gap: 0.85rem;
     min-width: 0;
-  }
-  .thumb {
-    aspect-ratio: 16 / 9;
-    background: #10131a;
-  }
-  .thumb :global(img) {
-    object-fit: contain;
-    height: 100%;
-    background: #10131a;
   }
   h3 {
     font-size: clamp(1.2rem, 3vw, 1.7rem);
@@ -103,15 +90,5 @@ const embed = embedUrl(live.url);
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: 0.4rem;
-  }
-  .featured {
-    gap: 1.1rem;
-  }
-  @media (min-width: 900px) {
-    .featured {
-      grid-template-columns: 1.25fr 0.9fr;
-      align-items: center;
-      gap: 2rem;
-    }
   }
 </style>

@@ -6,20 +6,26 @@ import LiveCard from "../components/LiveCard.astro";
 import SocialChannels from "../components/SocialChannels.astro";
 import CTASection from "../components/CTASection.astro";
 import { pageI18n } from "../i18n/request";
+import { localizeLive } from "../i18n/localize";
+import { isCatalogVideo } from "../content/video-catalog";
 import { getLives, getSettings } from "../lib/queries";
 
-const { t, href } = pageI18n(Astro.locals);
+const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const lives = await getLives();
+const lives = (await getLives()).map((item) => localizeLive(item, locale));
+const videos = lives.filter((item) => isCatalogVideo(item));
+const restLives = lives.filter((item) => !isCatalogVideo(item));
 const groups = [
-  { key: "en-direct" as const, title: t.lives.liveTitle, items: lives.filter((item) => item.status === "en-direct") },
-  { key: "programme" as const, title: t.lives.scheduledTitle, items: lives.filter((item) => item.status === "programme") },
-  { key: "replay" as const, title: t.lives.replayTitle, items: lives.filter((item) => item.status === "replay") },
+  { key: "en-direct" as const, title: t.lives.liveTitle, items: restLives.filter((item) => item.status === "en-direct") },
+  { key: "programme" as const, title: t.lives.scheduledTitle, items: restLives.filter((item) => item.status === "programme") },
+  { key: "replay" as const, title: t.lives.replayTitle, items: restLives.filter((item) => item.status === "replay") },
 ].filter((group) => group.items.length > 0);
-const featured = groups[0]?.items[0];
+const featuredVideo = videos[0];
+const otherVideos = videos.slice(1);
+const featuredLive = groups[0]?.items[0];
 const restGroups = groups.map((group) => ({
   ...group,
-  items: group.items.filter((item) => item.id !== featured?.id),
+  items: group.items.filter((item) => item.id !== featuredLive?.id),
 })).filter((group) => group.items.length > 0);
 ---
 
@@ -38,7 +44,21 @@ const restGroups = groups.map((group) => ({
         <p class="lead">{t.lives.follow}</p>
         <ul class="topics">{t.lives.items.map((item) => <li>{item}</li>)}</ul>
       </header>
-      {featured && <LiveCard live={featured} featured />}
+      {
+        videos.length > 0 && (
+          <section class="shelf videos">
+            <h2>{t.lives.videosTitle}</h2>
+            <p class="lead">{t.lives.videosLead}</p>
+            {featuredVideo && <LiveCard live={featuredVideo} featured />}
+            {otherVideos.length > 0 && (
+              <div class="list">
+                {otherVideos.map((live) => <LiveCard live={live} />)}
+              </div>
+            )}
+          </section>
+        )
+      }
+      {featuredLive && <LiveCard live={featuredLive} featured />}
       {
         restGroups.map((group) => (
           <section class="shelf">
@@ -49,6 +69,15 @@ const restGroups = groups.map((group) => ({
           </section>
         ))
       }
+      {
+        lives.length === 0 && (
+          <div class="ready" aria-hidden="true">
+            <div class="stage media-frame">
+              <span class="play-mark"></span>
+            </div>
+          </div>
+        )
+      }
       {lives.length === 0 && <EmptyState title={t.lives.empty} />}
       <section class="networks">
         <h2>{t.lives.cta}</h2>
@@ -57,7 +86,6 @@ const restGroups = groups.map((group) => ({
     </div>
   </section>
   <CTASection title={t.lives.cta} primaryHref={href("/contact")} primaryLabel={t.nav.contact} />
-  <script is:inline src="/live-player.js"></script>
 </BaseLayout>
 
 <style>
@@ -104,6 +132,13 @@ const restGroups = groups.map((group) => ({
     text-transform: uppercase;
     color: var(--mute);
   }
+  .videos > .lead {
+    max-width: 40rem;
+    margin: 0 0 1.5rem;
+  }
+  .videos .list {
+    margin-top: 2rem;
+  }
   .list {
     display: grid;
     gap: 2rem;
@@ -112,6 +147,38 @@ const restGroups = groups.map((group) => ({
     margin-top: 2.6rem;
     padding-top: 1.4rem;
     border-top: 1px solid var(--line);
+  }
+  .ready {
+    margin: 0 0 1.4rem;
+  }
+  .ready .stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #10131a;
+  }
+  .play-mark {
+    position: absolute;
+    inset: 0;
+    width: 4.2rem;
+    height: 4.2rem;
+    min-width: 44px;
+    min-height: 44px;
+    margin: auto;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-ember) 92%, #000);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-ember) 22%, transparent);
+  }
+  .play-mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0.7rem 0 0.7rem 1.15rem;
+    border-color: transparent transparent transparent #10131a;
+    transform: translateX(0.18rem);
   }
   @media (min-width: 820px) {
     .list {

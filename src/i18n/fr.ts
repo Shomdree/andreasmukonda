@@ -268,6 +268,10 @@ export const fr = {
     liveTitle: "En direct",
     replayTitle: "Replays",
     openPlatform: "Ouvrir sur la plateforme",
+    playVideo: "Lire la vidéo",
+    videosTitle: "Vidéos",
+    videosLead: "Les vidéos de réalisation sont présentées ici, à part des lives, pour rester faciles à parcourir.",
+    videosKicker: "Vidéo",
   },
   questions: {
     title: "Vous avez une question ? Posez-la-moi.",

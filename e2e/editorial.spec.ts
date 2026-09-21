@@ -17,6 +17,10 @@ test("editorial pages keep their titles and a useful action", async ({ page }) =
 
   await page.goto("/lives");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/contenus et mes interventions/i);
+  await expect(page.locator('script[src="/video-player.js"]')).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: /^Vidéos$/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Conception d.une affiche pour église/i }).first()).toBeVisible();
+  await expect(page.locator("[data-video-card]")).toHaveCount(5);
 
   await page.goto("/actualites");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/Ce que j’apprends/i);

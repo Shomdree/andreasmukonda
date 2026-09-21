@@ -22,6 +22,7 @@
     "optimize:services": "node scripts/optimize-service-images.mjs",
     "optimize:posters": "node scripts/optimize-poster-images.mjs",
     "optimize:logos": "node scripts/optimize-logo-images.mjs",
+    "optimize:videos": "node scripts/optimize-video-posters.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {
