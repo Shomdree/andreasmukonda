@@ -19,9 +19,12 @@ function skipLocale(pathname: string): boolean {
   return /\.[a-z0-9]+$/i.test(pathname);
 }
 
-function withSecurity(response: Response): Response {
+function withSecurity(response: Response, hostname = ""): Response {
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value);
+  }
+  if (hostname.endsWith(".onrender.com")) {
+    response.headers.set("X-Robots-Tag", "noindex, follow");
   }
   let supabaseHost = "";
   try {
@@ -94,7 +97,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           init.body = context.request.body;
           init.duplex = "half";
         }
-        return withSecurity(await context.rewrite(new Request(nextUrl, init)));
+        return withSecurity(await context.rewrite(new Request(nextUrl, init)), context.url.hostname);
       }
     }
   }
@@ -110,14 +113,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    return withSecurity(await next());
+    return withSecurity(await next(), context.url.hostname);
   } catch {
     logServerError("middleware", "next");
     if (context.request.method === "POST") {
       const dest = new URL(context.url);
       dest.searchParams.set("err", "1");
       dest.searchParams.delete("ok");
-      return withSecurity(context.redirect(`${dest.pathname}${dest.search}`));
+      return withSecurity(context.redirect(`${dest.pathname}${dest.search}`), context.url.hostname);
     }
     throw new Error("page_render");
   }

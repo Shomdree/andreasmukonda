@@ -17,6 +17,7 @@ type Props = {
   canonicalPath?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   settings?: SiteSettings;
+  robots?: string;
 };
 
 const { locale, path, t } = pageI18n(Astro.locals);
@@ -46,6 +47,7 @@ const canonicalPath = Astro.props.canonicalPath ?? path;
       path={canonicalPath}
       locale={locale}
       jsonLd={Astro.props.jsonLd}
+      robots={Astro.props.robots}
     />
     {analytics && (
       <script defer is:inline src={analytics.src} data-domain={analytics.domain}></script>

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { localizedPath } from "../i18n/utils";
+import { absoluteLocaleUrl } from "../i18n/utils";
 import { locales } from "../i18n/config";
 import { getPosts, getProjects, getServices, getTrainings } from "../lib/queries";
 import { siteUrl } from "../lib/env";
@@ -36,10 +36,10 @@ export const GET: APIRoute = async () => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${paths
   .map((path) => {
-    const loc = `${origin}${localizedPath("fr", path) === "/" ? "" : localizedPath("fr", path)}`;
+    const loc = absoluteLocaleUrl(origin, "fr", path);
     const links = locales
       .map((locale) => {
-        const href = `${origin}${localizedPath(locale, path) === "/" ? "" : localizedPath(locale, path)}`;
+        const href = absoluteLocaleUrl(origin, locale, path);
         return `    <xhtml:link rel="alternate" hreflang="${locale}" href="${href}" />`;
       })
       .join("\n");

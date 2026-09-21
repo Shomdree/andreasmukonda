@@ -243,6 +243,7 @@ export const en = {
     logosTitle: "Logos",
     logosLead: "Brand marks and visual identities are shown here, apart from the posters, so they stay easy to browse.",
     logosMore: "See all logos",
+    archiveNote: "These works show my graphic design. Visible dates, prices and contact details may belong to older communications. Current services are quoted individually.",
   },
   lives: {
     title: "Find my content and live sessions.",
@@ -291,6 +292,7 @@ export const en = {
       "You receive a proposal and quote.",
     ],
     quoteNote: "All services are quoted individually.",
+    processNote: "I review your project. We talk if anything needs clarifying, then I send a suitable quote. Timing and terms are confirmed before work starts.",
     cta: "Send my request",
     successTitle: "Your request has been received.",
     successBody: "Keep your reference number. It will help us find your project quickly when we talk.",

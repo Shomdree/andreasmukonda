@@ -45,6 +45,7 @@ const nextHref = `${href("/portfolio")}?${new URLSearchParams({
         <h1 class="display">{t.portfolio.title}</h1>
         <p class="lead">{t.portfolio.lead}</p>
         <p class="lead follow">{t.portfolio.follow}</p>
+        <p class="lead follow">{t.portfolio.archiveNote}</p>
         <ul class="topics">{t.portfolio.items.map((item) => <li>{item}</li>)}</ul>
       </header>
       <PortfolioFilter categories={categories} current={current} />

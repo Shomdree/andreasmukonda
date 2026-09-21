@@ -87,6 +87,7 @@ const wa2 = whatsappUrl(settings.whatsappSecondary, orderText);
               {t.order.steps.map((step) => <li>{step}</li>)}
             </ol>
             <p><strong>{t.order.quoteNote}</strong></p>
+            <p class="lead">{t.order.processNote}</p>
             {
               isUnavailableMessage(errors?.form) ? (
                 <UnavailableNotice variant="order" message={t.form.unavailableOrder} primaryHref={wa1} secondaryHref={wa2} />

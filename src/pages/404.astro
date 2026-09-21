@@ -7,7 +7,7 @@ const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
 ---
 
-<BaseLayout settings={settings} title={t.seo.notFoundTitle} description={t.seo.notFoundDescription} canonicalPath={Astro.locals.pathWithoutLocale || "/"}>
+<BaseLayout settings={settings} title={t.seo.notFoundTitle} description={t.seo.notFoundDescription} canonicalPath={Astro.locals.pathWithoutLocale || "/"} robots="noindex">
   <section class="section">
     <div class="container-am">
       <p class="kicker">404</p>

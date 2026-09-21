@@ -256,6 +256,7 @@ export const fr = {
     logosTitle: "Logos",
     logosLead: "Les marques et identités visuelles sont présentées ici, à part des affiches, pour rester faciles à parcourir.",
     logosMore: "Voir tous les logos",
+    archiveNote: "Ces créations présentent mon travail graphique. Les dates, prix et coordonnées visibles peuvent correspondre à d’anciennes communications. Les prestations actuelles sont proposées sur devis.",
   },
   lives: {
     title: "Retrouvez mes contenus et mes interventions.",
@@ -304,6 +305,7 @@ export const fr = {
       "Vous recevez une proposition adaptée.",
     ],
     quoteNote: "Les services sont proposés sur devis.",
+    processNote: "Je prends connaissance de votre projet. Nous échangeons si des précisions sont nécessaires, puis je vous propose un devis adapté. Le délai et les modalités sont précisés avant de commencer.",
     cta: "Envoyer ma demande",
     successTitle: "Votre demande est bien arrivée.",
     successBody: "Conservez votre numéro de référence. Il nous aidera à retrouver rapidement votre projet lors de nos échanges.",

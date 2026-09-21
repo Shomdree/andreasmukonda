@@ -4,4 +4,4 @@ export { fr } from "./fr";
 export { ln } from "./ln";
 export { en } from "./en";
 export type { Messages } from "./types";
-export { hreflangLinks, isLocale, localeFromCookie, localizedPath, parseLocale, stripLocalePrefix, ui } from "./utils";
+export { absoluteLocaleUrl, hreflangLinks, isLocale, localeFromCookie, localizedPath, parseLocale, stripLocalePrefix, ui } from "./utils";

@@ -68,8 +68,23 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(readServerEnv("PUBLIC_SUPABASE_URL") && readServerEnv("PUBLIC_SUPABASE_ANON_KEY"));
 }
 
+export const PUBLIC_ORIGIN = "https://andreasmukonda.com";
+
+export function publicSiteOrigin(configured: string): string {
+  const value = (configured || "http://localhost:4321").replace(/\/$/, "");
+  try {
+    const host = new URL(value).hostname;
+    if (host === "andreasmukonda.com" || host === "www.andreasmukonda.com" || host.endsWith(".onrender.com")) {
+      return PUBLIC_ORIGIN;
+    }
+  } catch {
+    return value;
+  }
+  return value;
+}
+
 export function siteUrl(): string {
-  return (readServerEnv("PUBLIC_SITE_URL") || "http://localhost:4321").replace(/\/$/, "");
+  return publicSiteOrigin(readServerEnv("PUBLIC_SITE_URL") || "http://localhost:4321");
 }
 
 export function envWhatsApp(): string {

@@ -38,6 +38,16 @@ describe("i18n utils", () => {
     ]);
   });
 
+  it("keeps home hreflang without a trailing slash", () => {
+    const links = hreflangLinks("https://andreasmukonda.com", "/");
+    expect(links).toEqual([
+      { lang: "fr", href: "https://andreasmukonda.com" },
+      { lang: "ln", href: "https://andreasmukonda.com/ln" },
+      { lang: "en", href: "https://andreasmukonda.com/en" },
+      { lang: "x-default", href: "https://andreasmukonda.com" },
+    ]);
+  });
+
   it("exposes the same dictionary keys", () => {
     expect(Object.keys(ln)).toEqual(Object.keys(fr));
     expect(Object.keys(en)).toEqual(Object.keys(fr));
@@ -45,6 +55,8 @@ describe("i18n utils", () => {
     expect(ui("en").catalog.trainings.anglais.title).toBe("English");
     expect(ui("en").theme.light).toBe("Light");
     expect(Object.keys(ln.portfolio)).toEqual(Object.keys(fr.portfolio));
+    expect(Object.keys(en.order)).toEqual(Object.keys(fr.order));
+    expect(Object.keys(ln.order)).toEqual(Object.keys(fr.order));
     expect(Object.keys(en.questions)).toEqual(Object.keys(fr.questions));
     expect(Object.keys(ln.consultingPage)).toEqual(Object.keys(fr.consultingPage));
     expect(Object.keys(en.trainings)).toEqual(Object.keys(fr.trainings));

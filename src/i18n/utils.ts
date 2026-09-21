@@ -44,12 +44,17 @@ export function localeFromCookie(cookieHeader: string | null): Locale | null {
   return isLocale(value) ? value : null;
 }
 
+export function absoluteLocaleUrl(origin: string, locale: Locale, pathWithoutLocale: string): string {
+  const path = localizedPath(locale, pathWithoutLocale || "/");
+  return `${origin}${path === "/" ? "" : path}`;
+}
+
 export function hreflangLinks(origin: string, pathWithoutLocale: string): { lang: string; href: string }[] {
   const path = pathWithoutLocale || "/";
   return [
-    { lang: "fr", href: `${origin}${localizedPath("fr", path)}` },
-    { lang: "ln", href: `${origin}${localizedPath("ln", path)}` },
-    { lang: "en", href: `${origin}${localizedPath("en", path)}` },
-    { lang: "x-default", href: `${origin}${localizedPath("fr", path)}` },
+    { lang: "fr", href: absoluteLocaleUrl(origin, "fr", path) },
+    { lang: "ln", href: absoluteLocaleUrl(origin, "ln", path) },
+    { lang: "en", href: absoluteLocaleUrl(origin, "en", path) },
+    { lang: "x-default", href: absoluteLocaleUrl(origin, "fr", path) },
   ];
 }

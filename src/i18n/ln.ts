@@ -251,6 +251,7 @@ export const ln = {
     logosTitle: "Ba logos",
     logosLead: "Ba marques mpe ba identités visuelles emonanaka awa, na esika ya bango, mpo ezala pete mpo na kotambola.",
     logosMore: "Tala ba logos nyonso",
+    archiveNote: "Ba créations oyo emonisa misala na ngai ya design. Ba dates, prix mpe ba coordonnées oyo emonanaka ekoki kozala ya ba communications ya kala. Misala ya lelo ezali na devis.",
   },
   lives: {
     title: "Zwa ba contenus mpe ba interventions na ngai.",
@@ -299,6 +300,7 @@ export const ln = {
       "Okozwa proposition mpe devis.",
     ],
     quoteNote: "Misala nyonso ezali na devis.",
+    processNote: "Nazali koyeba projet na yo. Tosolola soki ezali na posa ya précisions, nsima napesa yo devis oyo ekwani. Délai mpe ba modalités etalami liboso ya kobanda.",
     cta: "Tinda demande",
     successTitle: "Demande na yo ekomi malamu.",
     successBody: "Bomba numéro ya référence. Yango ekosalisaka biso kozwa projet na yo noki na ntango ya masolo.",
