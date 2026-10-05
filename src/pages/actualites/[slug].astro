@@ -14,7 +14,10 @@ const related = (await getPosts())
   .map((item) => localizePost(item, locale))
   .filter((item) => item.id !== post.id && item.category === post.category)
   .slice(0, 3);
-const paragraphs = post.content.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+const paragraphs = post.content
+  .split(/\n{2,}/)
+  .map((item) => item.trim())
+  .filter((item) => item && item !== post.excerpt.trim());
 const words = `${post.excerpt} ${post.content}`.trim().split(/\s+/).filter(Boolean).length;
 const reading = t.news.readingTime.replace("{n}", String(Math.max(1, Math.round(words / 200) || 1)));
 const date = post.publishedAt ? new Date(post.publishedAt) : null;
