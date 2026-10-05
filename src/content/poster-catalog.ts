@@ -19,6 +19,9 @@ export type PosterMeta = {
 const designCategory = { id: "cat-design", name: "Design", slug: "design" };
 
 export const posterWorkMeta: PosterMeta[] = [
+  { id: "p-aff-097", slug: "les-amis-de-rodrick-mampangi", files: ["aff-097.jpg"], sources: ["Shirt-Badrio-2.jpg"] },
+  { id: "p-aff-098", slug: "excellencia-travel-visa-touristique", files: ["aff-098.jpg"], sources: ["touristique - Copie.jpg"] },
+  { id: "p-aff-099", slug: "shomdree-design-promo-t-shirt", files: ["aff-099.jpg"], sources: ["SD-Shirt-promo3_ - Copie - Copie.jpg"] },
   { id: "p-aff-001", slug: "affiche-biographique-presentation-d-un-auteur", files: ["aff-001.jpg"], sources: ["Bio-grace-2 - Copie - Copie.jpg"] },
   { id: "p-aff-002", slug: "acces-2026-trois-jours-de-jeune-et-de-priere", files: ["aff-002.jpg", "aff-003.jpg", "aff-051.jpg", "aff-057.jpg"], sources: ["3days-1.jpg", "3days-2.jpg", "jj-2 - Copie - Copie - Copie.jpg", "Mercredi------ - Copie - Copie - Copie.jpg"] },
   { id: "p-aff-004", slug: "seminaire-delivre-pour-servir", files: ["aff-004.jpg"], sources: ["6days - Copie - Copie - Copie - Copie.jpg"] },
@@ -93,11 +96,11 @@ export const posterWorkMeta: PosterMeta[] = [
   { id: "p-aff-084", slug: "best-life-affiche-de-presentation-produit", files: ["aff-084.jpg"], sources: ["PRES PRODUIT-life+.jpg"] },
   { id: "p-aff-085", slug: "rentree-scolaire-affiche-pour-des-sacs-personnalises", files: ["aff-085.jpg"], sources: ["PROMO SACS.jpg"] },
   { id: "p-aff-086", slug: "soiree-d-adoration-pres-du-pere", files: ["aff-086.jpg"], sources: ["SAD.jpg"] },
-  { id: "p-aff-087", slug: "shomdree-academia-annonce-d-une-formation-en-design", files: ["aff-087.jpg"], sources: ["Sa-PS-1.jpg"] },
+  { id: "p-aff-087", slug: "shomdree-academia-annonce-d-une-formation-en-design", files: ["aff-087.jpg", "aff-100.jpg"], sources: ["Sa-PS-1.jpg", "Sa-PS-2.jpg"] },
   { id: "p-aff-088", slug: "shomdree-academia-presenter-plusieurs-formats-de-formation", files: ["aff-088.jpg"], sources: ["Sa-PSSHOM.jpg"] },
   { id: "p-aff-089", slug: "mariage-coutumier-annonce-de-date", files: ["aff-089.jpg"], sources: ["SAVE THE DATE-ema.jpg"] },
   { id: "p-aff-090", slug: "shomdree-design-visuel-d-encouragement-sportif", files: ["aff-090.jpg"], sources: ["SD-CD.jpg"] },
-  { id: "p-aff-091", slug: "shomdree-design-presentation-d-un-bilan-de-creations", files: ["aff-091.jpg"], sources: ["SD-confiance- - Copie - Copie - Copie.jpg"] },
+  { id: "p-aff-091", slug: "shomdree-design-presentation-d-un-bilan-de-creations", files: ["aff-091.jpg", "aff-101.jpg"], sources: ["SD-confiance- - Copie - Copie - Copie.jpg", "SD-confiance - Copie - Copie - Copie.jpg"] },
   { id: "p-aff-092", slug: "shomdree-design-mieux-expliquer-une-offre-en-ligne", files: ["aff-092.jpg"], sources: ["SD-confiance-achat - Copie - Copie - Copie.jpg"] },
   { id: "p-aff-093", slug: "retraite-teshoua-presentation-des-intervenants", files: ["aff-093.jpg"], sources: ["Teshoua-2.jpg"] },
   { id: "p-aff-094", slug: "shomdree-academia-faire-connaitre-ses-formations", files: ["aff-094.jpg", "aff-095.jpg"], sources: ["YOU SD-form.jpg", "YOU SD-formb.jpg"] },

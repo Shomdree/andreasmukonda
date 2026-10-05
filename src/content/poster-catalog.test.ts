@@ -9,9 +9,9 @@ import { posterCatalogEn, posterCatalogFr, posterCatalogLn } from "./poster-copy
 
 describe("poster catalog", () => {
   it("keeps unique slugs and files without inventing extra works", () => {
-    expect(posterWorkMeta).toHaveLength(83);
-    expect(catalogPosterProjects).toHaveLength(83);
-    expect(new Set(posterWorkMeta.map((item) => item.slug)).size).toBe(83);
+    expect(posterWorkMeta).toHaveLength(86);
+    expect(catalogPosterProjects).toHaveLength(86);
+    expect(new Set(posterWorkMeta.map((item) => item.slug)).size).toBe(86);
     expect(posterWorkMeta.every((item) => item.files.length === item.sources.length)).toBe(true);
   });
 
@@ -25,6 +25,10 @@ describe("poster catalog", () => {
     const photo = posterWorkMeta.find((item) => item.slug === "shomdree-presentation-du-service-de-photographie");
     expect(photo?.files).toEqual(["aff-078.jpg"]);
     expect(photo?.sources).toEqual(["photo7$.jpg"]);
+    const design = posterWorkMeta.find((item) => item.slug === "shomdree-academia-annonce-d-une-formation-en-design");
+    expect(design?.files).toEqual(["aff-087.jpg", "aff-100.jpg"]);
+    const bilan = posterWorkMeta.find((item) => item.slug === "shomdree-design-presentation-d-un-bilan-de-creations");
+    expect(bilan?.files).toEqual(["aff-091.jpg", "aff-101.jpg"]);
   });
 
   it("keeps the same slugs in FR, LN and EN", () => {
@@ -35,7 +39,7 @@ describe("poster catalog", () => {
   });
 
   it("does not duplicate poster projects already present", () => {
-    expect(withPosterCatalog(catalogPosterProjects)).toHaveLength(83);
+    expect(withPosterCatalog(catalogPosterProjects)).toHaveLength(86);
     expect(isPosterProject({ id: "p-aff-001", slug: "affiche-biographique-presentation-d-un-auteur" })).toBe(true);
     expect(isPosterProject({ id: "other", slug: "autre" })).toBe(false);
   });

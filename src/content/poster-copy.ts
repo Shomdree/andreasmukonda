@@ -1,6 +1,24 @@
 export type PosterCopy = { title: string; excerpt: string; description: string };
 
 export const posterCatalogFr: Record<string, PosterCopy> = {
+  "les-amis-de-rodrick-mampangi": {
+    title: "Les Amis de Rodrick Mampangi — réalisation graphique",
+    excerpt: "Une fiche de portfolio consacrée à la mise en page d’un portrait et d’un nom de groupe sur un même support.",
+    description:
+      "Cette réalisation réunit un portrait et un intitulé dans une composition claire, facile à reconnaître au premier regard. Son intérêt dans le portfolio est de montrer un travail de mise en page : donner une place au visage, au nom et à la lecture du message, sans disperser les éléments. La fiche documente la création graphique, sans évaluer les personnes représentées ni présenter le contenu de l’affiche comme une prise de position du site.",
+  },
+  "excellencia-travel-visa-touristique": {
+    title: "Excellencia Travel : visa touristique",
+    excerpt: "Présenter une offre de visa touristique et aider le visiteur à retrouver le sujet avant le premier contact.",
+    description:
+      "Une agence peut proposer plusieurs démarches, mais le public a d’abord besoin de comprendre de quelle offre il s’agit. Une affiche consacrée au visa touristique permet de rassembler le sujet, quelques destinations et les informations de contact dans un même support. Elle prépare le premier échange, sans remplacer les précisions que l’agence donnera ensuite. Le travail graphique consiste à rendre l’annonce lisible, pour que la personne intéressée sache à qui s’adresser.",
+  },
+  "shomdree-design-promo-t-shirt": {
+    title: "SHOMDREE DESIGN : promo T-shirt",
+    excerpt: "Présenter une offre de T-shirts personnalisés avec des exemples de modèles faciles à comparer.",
+    description:
+      "Vous souhaitez faire porter un nom, un logo ou un message sur un T-shirt ? Une affiche de présentation montre plusieurs modèles ensemble, pour aider le visiteur à se représenter le résultat. Elle réunit le type de prestation et les informations de contact dans un support simple à partager. Le client peut ainsi préparer sa demande à partir d’exemples concrets, avant de préciser le texte, les couleurs et le nombre de pièces lors de l’échange.",
+  },
   "affiche-biographique-presentation-d-un-auteur": {
     title: "Affiche biographique : présentation d’un auteur",
     excerpt: "Présenter un auteur et son parcours dans un support clair, facile à partager avec ses lecteurs.",
@@ -502,6 +520,24 @@ export const posterCatalogFr: Record<string, PosterCopy> = {
 };
 
 export const posterCatalogEn: Record<string, PosterCopy> = {
+  "les-amis-de-rodrick-mampangi": {
+    title: "Les Amis de Rodrick Mampangi — graphic work",
+    excerpt: "A portfolio sheet devoted to laying out a portrait and a group name on one support.",
+    description:
+      "This piece brings a portrait and a title together in a clear composition, easy to recognise at first glance. Its interest in the portfolio is to show layout work: giving a place to the face, the name and the reading of the message, without scattering the elements. The sheet documents the graphic creation, without evaluating the people represented or presenting the poster’s content as a position of the site.",
+  },
+  "excellencia-travel-visa-touristique": {
+    title: "Excellencia Travel: tourist visa",
+    excerpt: "Present a tourist-visa offer and help visitors find the subject before the first contact.",
+    description:
+      "An agency may offer several procedures, but the public first needs to understand which offer it is. A poster devoted to the tourist visa can gather the subject, a few destinations and the contact details in one support. It prepares the first exchange, without replacing the details the agency will give afterwards. The graphic work is to make the announcement readable, so that the interested person knows whom to contact.",
+  },
+  "shomdree-design-promo-t-shirt": {
+    title: "SHOMDREE DESIGN: T-shirt promo",
+    excerpt: "Present a personalized T-shirt offer with example models that are easy to compare.",
+    description:
+      "Do you want a name, a logo or a message worn on a T-shirt? A presentation poster shows several models together, to help the visitor picture the result. It gathers the type of service and the contact details in a support that is simple to share. The client can then prepare the request from concrete examples, before specifying the text, the colours and the number of pieces during the exchange.",
+  },
   "affiche-biographique-presentation-d-un-auteur": {
     title: "Biographical poster: presenting an author",
     excerpt: "Present an author and their path in a clear support that is easy to share with readers.",
@@ -1003,6 +1039,24 @@ export const posterCatalogEn: Record<string, PosterCopy> = {
 };
 
 export const posterCatalogLn: Record<string, PosterCopy> = {
+  "les-amis-de-rodrick-mampangi": {
+    title: "Les Amis de Rodrick Mampangi — réalisation graphique",
+    excerpt: "Fiche ya portfolio oyo ezali mpo na mise en page ya portrait mpe nkombo ya groupe na support moko.",
+    description:
+      "Réalisation oyo ebundisaka portrait mpe titre na composition ya polele, ya pete ya koyeba noki. Ntina na yango na portfolio ezali komonisa mosala ya mise en page : kopesa esika na elongi, na nkombo mpe na kotanga likambo, mpe te kobwakola ba éléments. Fiche elakisaka création graphique, mpe te kofuta bato oyo elakisami to kolakisa contenu ya affiche lokola position ya site.",
+  },
+  "excellencia-travel-visa-touristique": {
+    title: "Excellencia Travel : visa touristique",
+    excerpt: "Kolakisa offre ya visa touristique mpe kosalisa visiteur asosola likambo liboso ya contact ya liboso.",
+    description:
+      "Agence ekoki kopesa ba démarches ebele, kasi public asengeli liboso kososola offre nini ezali. Affiche oyo ezali mpo na visa touristique esalisaka kobundisa likambo, ba destinations mpe ba informations ya contact na support moko. Esalisaka masolo ya liboso, mpe te kozwa esika ya ba précisions oyo agence ekopesa nsima. Mosala ya graphique ezali kosala annonce eyebana malamu, mpo moto oyo azali na posa ayeba nani akosunga.",
+  },
+  "shomdree-design-promo-t-shirt": {
+    title: "SHOMDREE DESIGN : promo T-shirt",
+    excerpt: "Kolakisa offre ya ba T-shirts personnalisés na ba modèles oyo bakoki kokompara pete.",
+    description:
+      "Olingi komema nkombo, logo to likambo na T-shirt ? Affiche ya présentation elakisaka ba modèles ebele elongo, mpo visiteur ayeba ndenge ekomonana. Ebundisaka lolenge ya mosala mpe ba informations ya contact na support ya pete ya kokabola. Client akoki kobongisa demande na ye na ba exemples ya solo, liboso ya kolimbola texte, ba couleurs mpe motango ya ba pièces na masolo.",
+  },
   "affiche-biographique-presentation-d-un-auteur": {
     title: "Affiche biographique : présentation d’un auteur",
     excerpt: "Kolakisa mokomi mpe nzela na ye na support ya polele, ya pete ya kokabola na ba lecteurs na ye.",
