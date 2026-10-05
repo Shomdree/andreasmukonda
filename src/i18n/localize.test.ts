@@ -55,6 +55,11 @@ describe("catalog localization", () => {
     expect(localizePost(item, "en").title).toBe("Digital Technology as a Driver of Opportunity in the DRC");
     expect(localizePost(item, "ln").title).toBe("Numérique lokola nzela ya mabaku na RDC");
     expect(localizePost(item, "fr").slug).toBe(item.slug);
+
+    const advice = { ...item, id: "post-debuter-design-graphique-rdc", slug: "debuter-dans-le-design-graphique-en-rdc" };
+    expect(localizePost(advice, "en").title).toBe("Starting Graphic Design in the DRC: What You Need to Understand Today");
+    expect(localizePost(advice, "ln").title).toBe("Kobanda design graphique na RDC : makambo oyo osengeli koyeba lelo");
+    expect(localizePost(advice, "fr").slug).toBe(advice.slug);
   });
 
   it("translates budget labels without changing stored values", () => {

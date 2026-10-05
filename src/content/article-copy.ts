@@ -13,6 +13,11 @@ export type ArticleMeta = {
 
 export const articleWorkMeta: ArticleMeta[] = [
   {
+    id: "post-debuter-design-graphique-rdc",
+    slug: "debuter-dans-le-design-graphique-en-rdc",
+    publishedAt: "2026-10-05",
+  },
+  {
     id: "post-rdc-numerique-opportunites",
     slug: "le-numerique-comme-levier-dopportunites-en-rdc",
     publishedAt: "2026-10-05",
@@ -20,6 +25,21 @@ export const articleWorkMeta: ArticleMeta[] = [
 ];
 
 export const articleCatalogFr: Record<string, ArticleCopy> = {
+  "post-debuter-design-graphique-rdc": {
+    title: "Débuter dans le design graphique en RDC : ce qu’il faut comprendre aujourd’hui",
+    excerpt: "Le design graphique reste une compétence rentable, mais le métier a changé.",
+    category: "Design",
+    content: [
+      "Le design graphique reste une compétence rentable, mais le métier a changé.",
+      "Avec l’intelligence artificielle, n’importe qui peut aujourd’hui générer une image en quelques secondes. Le graphiste qui se limite seulement à « faire de belles images » risque donc d’être rapidement dévalué.",
+      "Votre véritable valeur doit être ailleurs : comprendre le besoin du client, organiser l’information, maîtriser les couleurs, la typographie et transformer une idée en communication efficace.",
+      "En RDC, il faut aussi tenir compte des réalités : machines peu puissantes, coupures de courant et connexion Internet instable. Travaillez intelligemment avec ce que vous avez. Téléchargez vos polices, images et ressources à l’avance, gardez vos fichiers hors ligne et utilisez des outils adaptés à votre matériel.",
+      "Et surtout, ne combattez pas l’IA : apprenez à l’utiliser.",
+      "Le graphiste de demain ne sera pas simplement remplacé par l’IA. Il sera surtout dépassé par un autre graphiste qui sait mieux l’utiliser.",
+      "Un bon outil aide. Une bonne machine accélère. Mais la compétence reste votre véritable capital.",
+      "— Andréas Mukonda Eke-Shomba",
+    ].join("\n\n"),
+  },
   "post-rdc-numerique-opportunites": {
     title: "Le numérique comme levier d’opportunités en RDC",
     excerpt:
@@ -42,6 +62,21 @@ export const articleCatalogFr: Record<string, ArticleCopy> = {
 };
 
 export const articleCatalogEn: Record<string, ArticleCopy> = {
+  "post-debuter-design-graphique-rdc": {
+    title: "Starting Graphic Design in the DRC: What You Need to Understand Today",
+    excerpt: "Graphic design can still be profitable, but the profession has changed.",
+    category: "Design",
+    content: [
+      "Graphic design can still be profitable, but the profession has changed.",
+      "With artificial intelligence, almost anyone can now generate an image in a few seconds. A designer who only knows how to make “beautiful images” can therefore quickly lose value.",
+      "Your real value must be elsewhere: understanding the client’s needs, organizing information, mastering color, typography and turning an idea into effective communication.",
+      "In the DRC, you also have to work with local realities: limited computers, power cuts and unstable Internet access. Learn to work intelligently with what you have. Download your fonts, images and resources in advance, keep important files offline and use tools that match your equipment.",
+      "Most importantly, do not fight AI: learn how to use it.",
+      "The designer of tomorrow will not simply be replaced by AI. He will more likely be overtaken by another designer who knows how to use AI better.",
+      "Good tools help. A good computer makes you faster. But skill remains your real capital.",
+      "— Andréas Mukonda Eke-Shomba",
+    ].join("\n\n"),
+  },
   "post-rdc-numerique-opportunites": {
     title: "Digital Technology as a Driver of Opportunity in the DRC",
     excerpt:
@@ -64,6 +99,21 @@ export const articleCatalogEn: Record<string, ArticleCopy> = {
 };
 
 export const articleCatalogLn: Record<string, ArticleCopy> = {
+  "post-debuter-design-graphique-rdc": {
+    title: "Kobanda design graphique na RDC : makambo oyo osengeli koyeba lelo",
+    excerpt: "Design graphique ezali naino mosala oyo ekoki kopesa mbongo, kasi mosala yango ebongwani.",
+    category: "Design",
+    content: [
+      "Design graphique ezali naino mosala oyo ekoki kopesa mbongo, kasi mosala yango ebongwani.",
+      "Na intelligence artificielle, moto nyonso akoki lelo kosala image na mwa baseconde. Yango wana, graphiste oyo ayebi kaka kosala “ba images ya kitoko” akoki noki kobungisa valeur na ye.",
+      "Valeur na yo ya solo esengeli kozala na makambo mosusu : kososola besoin ya client, kobongisa information, koyeba kosalela ba couleurs, typographie mpe kobongola idée na communication ya malamu.",
+      "Na RDC, esengeli mpe koyeba kosala na ba réalités na biso : ba ordinateurs oyo ezali makasi mingi te, kokatakata ya courant mpe Internet oyo ezalaka stable te. Salela malamu oyo ozali na yango. Télécharger ba polices, images mpe ba ressources na yo liboso, bomba ba fichiers importants hors ligne mpe salela ba outils oyo ebongi na machine na yo.",
+      "Mpe koleka nyonso, kobunda na IA te : yekola kosalela yango.",
+      "Graphiste ya lobi akozala kaka te remplacé na IA. Akoki nde kolekama na graphiste mosusu oyo ayebi kosalela IA malamu koleka ye.",
+      "Outil ya malamu esalisaka. Machine ya malamu epesaka vitesse. Kasi compétence na yo nde ezali capital na yo ya solo , eko permettre yo o se retrouver .",
+      "— Andréas Mukonda Eke-Shomba",
+    ].join("\n\n"),
+  },
   "post-rdc-numerique-opportunites": {
     title: "Numérique lokola nzela ya mabaku na RDC",
     excerpt:
