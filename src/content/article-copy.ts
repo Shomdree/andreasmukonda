@@ -9,6 +9,7 @@ export type ArticleMeta = {
   id: string;
   slug: string;
   publishedAt: string;
+  images?: string[];
 };
 
 export const articleWorkMeta: ArticleMeta[] = [
@@ -28,7 +29,7 @@ export const articleCatalogFr: Record<string, ArticleCopy> = {
   "post-debuter-design-graphique-rdc": {
     title: "Débuter dans le design graphique en RDC : ce qu’il faut comprendre aujourd’hui",
     excerpt: "Le design graphique reste une compétence rentable, mais le métier a changé.",
-    category: "Design",
+    category: "Conseil",
     content: [
       "Le design graphique reste une compétence rentable, mais le métier a changé.",
       "Avec l’intelligence artificielle, n’importe qui peut aujourd’hui générer une image en quelques secondes. Le graphiste qui se limite seulement à « faire de belles images » risque donc d’être rapidement dévalué.",
@@ -65,7 +66,7 @@ export const articleCatalogEn: Record<string, ArticleCopy> = {
   "post-debuter-design-graphique-rdc": {
     title: "Starting Graphic Design in the DRC: What You Need to Understand Today",
     excerpt: "Graphic design can still be profitable, but the profession has changed.",
-    category: "Design",
+    category: "Advice",
     content: [
       "Graphic design can still be profitable, but the profession has changed.",
       "With artificial intelligence, almost anyone can now generate an image in a few seconds. A designer who only knows how to make “beautiful images” can therefore quickly lose value.",
@@ -102,7 +103,7 @@ export const articleCatalogLn: Record<string, ArticleCopy> = {
   "post-debuter-design-graphique-rdc": {
     title: "Kobanda design graphique na RDC : makambo oyo osengeli koyeba lelo",
     excerpt: "Design graphique ezali naino mosala oyo ekoki kopesa mbongo, kasi mosala yango ebongwani.",
-    category: "Design",
+    category: "Conseil",
     content: [
       "Design graphique ezali naino mosala oyo ekoki kopesa mbongo, kasi mosala yango ebongwani.",
       "Na intelligence artificielle, moto nyonso akoki lelo kosala image na mwa baseconde. Yango wana, graphiste oyo ayebi kaka kosala “ba images ya kitoko” akoki noki kobungisa valeur na ye.",

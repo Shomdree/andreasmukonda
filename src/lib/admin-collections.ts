@@ -124,7 +124,7 @@ export const adminCollections: AdminCollection[] = [
       { name: "excerpt", label: "Extrait", type: "textarea" },
       { name: "content", label: "Contenu", type: "textarea" },
       { name: "cover_image", label: "Couverture", type: "url" },
-      { name: "category", label: "Catégorie", type: "select", options: ["Design", "Formation", "Communication", "Réflexion", "Coulisses", "Événements"] },
+      { name: "category", label: "Catégorie", type: "select", options: ["Réflexion", "Conseil", "Article", "Design", "Formation", "Communication", "Coulisses", "Événements"] },
       { name: "published", label: "Publié", type: "checkbox" },
       { name: "seo_title", label: "SEO titre", type: "text" },
       { name: "seo_description", label: "SEO description", type: "textarea" },

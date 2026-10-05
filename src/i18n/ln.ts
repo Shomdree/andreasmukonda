@@ -469,6 +469,15 @@ export const ln = {
     readingTime: "Lokola miniti {n} ya kotanga",
     share: "Kabola page oyo",
     related: "Kotanga mpe oyo",
+    gallery: "Ba images",
+    openImage: "Tala image",
+    closeImage: "Kanga",
+    kinds: {
+      reflexion: "Réflexion",
+      conseil: "Conseil",
+      article: "Article",
+      autre: "Sango",
+    },
   },
   faq: {
     title: "Ba motuna oyo bato batunaka mingi",

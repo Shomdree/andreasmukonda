@@ -1,5 +1,8 @@
 ---
 import type { PostItem } from "../lib/types";
+import NewsKind from "./NewsKind.astro";
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { editorialImages } from "../content/news-kinds";
 import { pageI18n } from "../i18n/request";
 
 type Props = {
@@ -14,23 +17,54 @@ const dateOk = Boolean(parsed && !Number.isNaN(parsed.getTime()));
 const dateLabel = dateOk && parsed
   ? parsed.toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" })
   : "";
+const picture = editorialImages(post)[0];
+const hrefPost = href(`/actualites/${post.slug}`);
 ---
 
-<article class:list={["story", variant]} data-reveal="up">
-  <p class="kicker">{post.category}</p>
-  <h3 class="display">
-    <a href={href(`/actualites/${post.slug}`)}>{post.title}</a>
-  </h3>
-  {post.excerpt && <p>{post.excerpt}</p>}
-  <p class="meta">
-    {dateOk && <time datetime={post.publishedAt}>{dateLabel}</time>}
-    {readingTime && <span>{readingTime}</span>}
-  </p>
+<article class:list={["story", variant, picture && "has-media"]} data-reveal="up">
+  {
+    picture && (
+      <a class="visual media-frame" href={hrefPost}>
+        <ResponsiveImage
+          src={picture.url}
+          alt={picture.alt}
+          width={960}
+          height={640}
+          eager={variant === "lead"}
+          sizes={variant === "lead" ? "(max-width: 799px) 92vw, 720px" : "(max-width: 799px) 92vw, 360px"}
+        />
+      </a>
+    )
+  }
+  <div class="copy">
+    <NewsKind category={post.category} />
+    <h3 class="display">
+      <a href={hrefPost}>{post.title}</a>
+    </h3>
+    {post.excerpt && <p>{post.excerpt}</p>}
+    <p class="meta">
+      {dateOk && <time datetime={post.publishedAt}>{dateLabel}</time>}
+      {readingTime && <span>{readingTime}</span>}
+    </p>
+  </div>
 </article>
 
 <style>
   .story {
     min-width: 0;
+  }
+  .has-media {
+    display: grid;
+    gap: 1rem;
+  }
+  .visual {
+    display: block;
+    aspect-ratio: 16 / 10;
+  }
+  .visual :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   h3 {
     font-size: clamp(1.25rem, 3vw, 1.85rem);
@@ -67,5 +101,16 @@ const dateLabel = dateOk && parsed
   .list {
     padding: 1.1rem 0;
     border-top: 1px solid var(--line);
+  }
+  @media (min-width: 800px) {
+    .lead.has-media,
+    .list.has-media {
+      grid-template-columns: minmax(11rem, 18rem) 1fr;
+      align-items: start;
+      gap: 1.4rem 1.8rem;
+    }
+    .lead.has-media {
+      grid-template-columns: minmax(16rem, 28rem) 1fr;
+    }
   }
 </style>

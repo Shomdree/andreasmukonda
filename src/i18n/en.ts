@@ -461,6 +461,15 @@ export const en = {
     readingTime: "About {n} min read",
     share: "Share this page",
     related: "More to read",
+    gallery: "Images",
+    openImage: "View image",
+    closeImage: "Close",
+    kinds: {
+      reflexion: "Reflection",
+      conseil: "Advice",
+      article: "Article",
+      autre: "News",
+    },
   },
   faq: {
     title: "Frequently asked questions",

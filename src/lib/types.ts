@@ -135,6 +135,7 @@ export type PostItem = {
   excerpt: string;
   content: string;
   coverImage: string;
+  images: { url: string; alt: string }[];
   category: string;
   publishedAt: string;
   tags: string[];

@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import NewsKind from "../../components/NewsKind.astro";
+import ResponsiveImage from "../../components/ResponsiveImage.astro";
+import { editorialImages, newsKindFromCategory } from "../../content/news-kinds";
 import { pageI18n } from "../../i18n/request";
 import { localizePost } from "../../i18n/localize";
 import { getPost, getPosts, getSettings } from "../../lib/queries";
@@ -10,9 +13,11 @@ const settings = await getSettings();
 const found = await getPost(Astro.params.slug ?? "");
 if (!found) return Astro.redirect(href("/"));
 const post = localizePost(found, locale);
+const kind = newsKindFromCategory(post.category);
+const pictures = editorialImages(post);
 const related = (await getPosts())
   .map((item) => localizePost(item, locale))
-  .filter((item) => item.id !== post.id && item.category === post.category)
+  .filter((item) => item.id !== post.id && newsKindFromCategory(item.category) === kind)
   .slice(0, 3);
 const paragraphs = post.content
   .split(/\n{2,}/)
@@ -40,7 +45,7 @@ const jsonLd = {
   settings={settings}
   title={`${post.title} — ${t.nav.news}`}
   description={post.excerpt}
-  image={post.coverImage}
+  image={pictures[0]?.url}
   canonicalPath={`/actualites/${post.slug}`}
   jsonLd={jsonLd}
 >
@@ -54,7 +59,7 @@ const jsonLd = {
           { href: href(`/actualites/${post.slug}`), label: post.title },
         ]}
       />
-      {post.category && <p class="kicker">{post.category}</p>}
+      <NewsKind category={post.category} />
       <h1 class="display">{post.title}</h1>
       <p class="meta">
         <span>{settings.name}</span>
@@ -62,6 +67,38 @@ const jsonLd = {
         <span>{reading}</span>
       </p>
       {post.excerpt && <p class="lead">{post.excerpt}</p>}
+      {
+        pictures.length > 0 && (
+          <figure class:list={["gallery", pictures.length === 1 && "single"]}>
+            {pictures.length > 1 && <figcaption class="kicker">{t.news.gallery}</figcaption>}
+            <div class="shots">
+              {pictures.map((item, index) => {
+                const popId = `news-image-${index}`;
+                return (
+                  <>
+                    <button type="button" class="shot media-frame" popovertarget={popId} aria-label={t.news.openImage}>
+                      <ResponsiveImage
+                        src={item.url}
+                        alt={item.alt}
+                        width={1200}
+                        height={800}
+                        eager={index === 0}
+                        sizes={pictures.length === 1 ? "(max-width: 799px) 92vw, 42rem" : "(max-width: 799px) 92vw, 22rem"}
+                      />
+                    </button>
+                    <div id={popId} popover="auto" class="image-pop">
+                      <button type="button" class="close" popovertarget={popId} popovertargetaction="hide">
+                        {t.news.closeImage}
+                      </button>
+                      <img src={item.url} alt={item.alt} />
+                    </div>
+                  </>
+                );
+              })}
+            </div>
+          </figure>
+        )
+      }
       <div class="prose">
         {paragraphs.map((item) => <p>{item}</p>)}
       </div>
@@ -110,9 +147,67 @@ const jsonLd = {
     line-height: 1.55;
     max-width: 40rem;
   }
+  .gallery {
+    margin: 1.6rem 0 0;
+    max-width: 42rem;
+  }
+  .gallery .kicker {
+    margin-bottom: 0.7rem;
+  }
+  .shots {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .shot {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+    aspect-ratio: 16 / 10;
+  }
+  .shot :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .image-pop {
+    border: 0;
+    padding: 1rem;
+    background: rgba(8, 10, 14, 0.94);
+    color: var(--fg);
+    width: min(96vw, 1100px);
+  }
+  .image-pop img {
+    display: block;
+    max-width: 100%;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+  .close {
+    display: inline-flex;
+    min-height: 44px;
+    margin-bottom: 0.6rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-weight: 650;
+  }
   .prose {
     max-width: 42rem;
     margin-top: 1.6rem;
+  }
+  @media (min-width: 800px) {
+    .shots {
+      grid-template-columns: 1fr 1fr;
+    }
+    .single .shots {
+      grid-template-columns: 1fr;
+    }
   }
   .prose p {
     color: var(--fg);

@@ -48,6 +48,7 @@ describe("catalog localization", () => {
       excerpt: "FR",
       content: "FR",
       coverImage: "/x.svg",
+      images: [],
       category: "Réflexion",
       publishedAt: "2026-10-05",
       tags: [],

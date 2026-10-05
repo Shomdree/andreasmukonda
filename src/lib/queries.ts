@@ -349,6 +349,7 @@ function mapPost(row: Record<string, unknown>): PostItem {
     excerpt: String(row.excerpt ?? ""),
     content: String(row.content ?? ""),
     coverImage: String(row.cover_image ?? "/images/covers/branding.svg"),
+    images: [],
     category: String(row.category ?? "Réflexion"),
     publishedAt: String(row.published_at ?? ""),
     tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],

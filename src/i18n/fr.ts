@@ -474,6 +474,15 @@ export const fr = {
     readingTime: "Environ {n} min de lecture",
     share: "Partager cette page",
     related: "À lire aussi",
+    gallery: "Images",
+    openImage: "Voir l’image",
+    closeImage: "Fermer",
+    kinds: {
+      reflexion: "Réflexion",
+      conseil: "Conseil",
+      article: "Article",
+      autre: "Actualité",
+    },
   },
   faq: {
     title: "Questions fréquentes",
