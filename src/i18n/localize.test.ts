@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { en } from "./en";
 import { fr } from "./fr";
 import { ln } from "./ln";
-import { localizeBudget, localizeCategory, localizeService, localizeTraining, trainingStatusLabel } from "./localize";
+import { localizeBudget, localizeCategory, localizePost, localizeService, localizeTraining, trainingStatusLabel } from "./localize";
 import { ui } from "./utils";
 
 describe("catalog localization", () => {
@@ -38,6 +38,23 @@ describe("catalog localization", () => {
     expect(localizeTraining(item, ui("en")).title).toBe("English");
     expect(localizeTraining(item, ui("ln")).title).toBe("Anglais");
     expect(trainingStatusLabel("sur-demande", ui("en"))).toBe("On request");
+  });
+
+  it("translates the confirmed news article by id", () => {
+    const item = {
+      id: "post-rdc-numerique-opportunites",
+      title: "FR",
+      slug: "le-numerique-comme-levier-dopportunites-en-rdc",
+      excerpt: "FR",
+      content: "FR",
+      coverImage: "/x.svg",
+      category: "Réflexion",
+      publishedAt: "2026-10-05",
+      tags: [],
+    };
+    expect(localizePost(item, "en").title).toBe("Digital Technology as a Driver of Opportunity in the DRC");
+    expect(localizePost(item, "ln").title).toBe("Numérique lokola nzela ya mabaku na RDC");
+    expect(localizePost(item, "fr").slug).toBe(item.slug);
   });
 
   it("translates budget labels without changing stored values", () => {

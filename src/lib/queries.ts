@@ -13,6 +13,7 @@ import { withPrintCatalog } from "../content/print-catalog";
 import { withPosterCatalog } from "../content/poster-catalog";
 import { withLogoCatalog } from "../content/logo-catalog";
 import { withVideoCatalog } from "../content/video-catalog";
+import { withArticleCatalog } from "../content/article-catalog";
 import { defaultSettings } from "../content/defaults";
 import { envWhatsApp, isSupabaseConfigured, logServerError } from "./env";
 import { createBrowserSupabase } from "./supabase";
@@ -195,16 +196,17 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 }
 
 export async function getPosts(): Promise<PostItem[]> {
+  const demo = withArticleCatalog(demoPosts);
   return fallback(async () => {
     const supabase = createBrowserSupabase();
-    if (!supabase) return demoPosts;
+    if (!supabase) return demo;
     const { data } = await supabase
       .from("posts")
       .select("*")
       .eq("published", true)
       .order("published_at", { ascending: false });
-    return (data ?? []).map(mapPost);
-  }, demoPosts);
+    return withArticleCatalog((data ?? []).map(mapPost));
+  }, demo);
 }
 
 export async function getPost(slug: string): Promise<PostItem | undefined> {

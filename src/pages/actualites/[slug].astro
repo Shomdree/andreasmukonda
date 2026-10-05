@@ -2,13 +2,16 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { pageI18n } from "../../i18n/request";
+import { localizePost } from "../../i18n/localize";
 import { getPost, getPosts, getSettings } from "../../lib/queries";
 
 const { t, href, locale } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const post = await getPost(Astro.params.slug ?? "");
-if (!post) return Astro.redirect(href("/"));
+const found = await getPost(Astro.params.slug ?? "");
+if (!found) return Astro.redirect(href("/"));
+const post = localizePost(found, locale);
 const related = (await getPosts())
+  .map((item) => localizePost(item, locale))
   .filter((item) => item.id !== post.id && item.category === post.category)
   .slice(0, 3);
 const paragraphs = post.content.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);

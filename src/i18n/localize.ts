@@ -1,8 +1,9 @@
-import type { LiveItem, PortfolioCategory, PortfolioProject, ServiceItem, TrainingItem } from "../lib/types";
+import type { LiveItem, PortfolioCategory, PortfolioProject, PostItem, ServiceItem, TrainingItem } from "../lib/types";
 import type { Messages } from "./types";
 import { posterCatalogEn, posterCatalogFr, posterCatalogLn } from "../content/poster-copy";
 import { logoCatalogEn, logoCatalogFr, logoCatalogLn } from "../content/logo-copy";
 import { videoCatalogEn, videoCatalogFr, videoCatalogLn } from "../content/video-copy";
+import { articleCatalogEn, articleCatalogFr, articleCatalogLn } from "../content/article-copy";
 
 type TrainingCopy = Messages["catalog"]["trainings"][keyof Messages["catalog"]["trainings"]];
 type ServiceCopy = Messages["catalog"]["services"][keyof Messages["catalog"]["services"]];
@@ -24,6 +25,12 @@ const videoByLocale: Record<string, Record<string, { title: string }>> = {
   fr: videoCatalogFr,
   en: videoCatalogEn,
   ln: videoCatalogLn,
+};
+
+const articleByLocale: Record<string, Record<string, { title: string; excerpt: string; content: string; category: string }>> = {
+  fr: articleCatalogFr,
+  en: articleCatalogEn,
+  ln: articleCatalogLn,
 };
 
 function pick(map: Record<string, string>, key: string, fallback: string): string {
@@ -53,6 +60,18 @@ export function localizeLive(item: LiveItem, locale: string): LiveItem {
   const copy = videoByLocale[locale]?.[item.id];
   if (!copy) return item;
   return { ...item, title: copy.title };
+}
+
+export function localizePost(item: PostItem, locale: string): PostItem {
+  const copy = articleByLocale[locale]?.[item.id];
+  if (!copy) return item;
+  return {
+    ...item,
+    title: copy.title,
+    excerpt: copy.excerpt,
+    content: copy.content,
+    category: copy.category,
+  };
 }
 
 export function localizeCategory(category: PortfolioCategory, t: Messages): PortfolioCategory {
