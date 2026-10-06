@@ -125,6 +125,88 @@ export function enhanceForms(root: ParentNode = document): () => void {
   };
 }
 
+type ProofItem = { id: string; src: string; alt: string; title: string };
+
+export function bindProofLightbox(root: ParentNode = document): () => void {
+  const dialog = root.querySelector<HTMLDialogElement>("#proof-lightbox");
+  const img = dialog?.querySelector("img");
+  const heading = dialog?.querySelector("#proof-lightbox-title");
+  const triggers = [...root.querySelectorAll<HTMLElement>("[data-proof-open]")];
+  if (!dialog || !img || !triggers.length) return () => undefined;
+
+  const items: ProofItem[] = triggers
+    .map((node) => ({
+      id: node.dataset.proofId || "",
+      src: node.dataset.proofSrc || "",
+      alt: node.dataset.proofAlt || "",
+      title: node.dataset.proofTitle || "",
+    }))
+    .filter((item) => item.id && item.src);
+
+  let index = 0;
+
+  const show = (next: number) => {
+    if (!items.length) return;
+    index = (next + items.length) % items.length;
+    const item = items[index];
+    if (!item) return;
+    img.src = item.src;
+    img.alt = item.alt;
+    if (heading) heading.textContent = item.title;
+  };
+
+  const open = (id: string) => {
+    const found = items.findIndex((item) => item.id === id);
+    show(found >= 0 ? found : 0);
+    if (!dialog.open) dialog.showModal();
+  };
+
+  const onClick = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const trigger = target.closest<HTMLElement>("[data-proof-open]");
+    if (trigger) {
+      event.preventDefault();
+      open(trigger.dataset.proofId || "");
+      return;
+    }
+    if (target === dialog || target.closest("[data-proof-close]")) {
+      dialog.close();
+      return;
+    }
+    if (target.closest("[data-proof-prev]")) {
+      event.preventDefault();
+      show(index - 1);
+      return;
+    }
+    if (target.closest("[data-proof-next]")) {
+      event.preventDefault();
+      show(index + 1);
+    }
+  };
+
+  const onKey = (event: KeyboardEvent) => {
+    if (!dialog.open) return;
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      show(index - 1);
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      show(index + 1);
+    }
+  };
+
+  root.addEventListener("click", onClick);
+  document.addEventListener("keydown", onKey);
+
+  return () => {
+    root.removeEventListener("click", onClick);
+    document.removeEventListener("keydown", onKey);
+    if (dialog.open) dialog.close();
+  };
+}
+
 export function bindHeader(header: HTMLElement | null): () => void {
   if (!header) return () => undefined;
   const onScroll = () => {
@@ -143,6 +225,7 @@ export function bootMotion(): void {
     observeReveal(),
     enhanceForms(),
     bindQuestionMatch(),
+    bindProofLightbox(),
     bindHeader(document.querySelector(".site-header")),
   ];
   const parallaxRoot = document.querySelector<HTMLElement>("[data-parallax]");

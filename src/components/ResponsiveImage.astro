@@ -7,10 +7,11 @@ type Props = {
   width: number;
   height: number;
   eager?: boolean;
+  contain?: boolean;
   class?: string;
   sizes?: string;
 };
-const { src, alt, width, height, eager } = Astro.props;
+const { src, alt, width, height, eager, contain } = Astro.props;
 const loading = eager ? "eager" : "lazy";
 const fetchpriority = eager ? "high" : "auto";
 const base = publicImageBase(src);
@@ -32,7 +33,7 @@ const sizes = Astro.props.sizes ?? "(max-width: 700px) 92vw, 360px";
         sizes={sizes}
       />
       <img
-        class:list={["responsive", Astro.props.class]}
+        class:list={["responsive", contain && "contain", Astro.props.class]}
         src={`${base}-720.jpg`}
         srcset={`${base}-480.jpg 480w, ${base}-720.jpg 720w, ${base}-960.jpg 960w`}
         sizes={sizes}
@@ -46,7 +47,7 @@ const sizes = Astro.props.sizes ?? "(max-width: 700px) 92vw, 360px";
     </picture>
   ) : (
     <img
-      class:list={["responsive", Astro.props.class]}
+      class:list={["responsive", contain && "contain", Astro.props.class]}
       src={src}
       alt={alt}
       width={width}
@@ -65,5 +66,9 @@ const sizes = Astro.props.sizes ?? "(max-width: 700px) 92vw, 360px";
     display: block;
     object-fit: cover;
     background: color-mix(in srgb, var(--bg-elev) 80%, #1c2230);
+  }
+  .contain {
+    object-fit: contain;
+    background: transparent;
   }
 </style>

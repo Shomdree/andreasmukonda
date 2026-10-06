@@ -14,5 +14,7 @@ describe("public files", () => {
     expect(publicFileExists("/images/portfolio/aff-001.jpg")).toBe(true);
     expect(hasOptimizedPublicVariants("/images/portfolio/aff-001.jpg")).toBe(true);
     expect(hasOptimizedPublicVariants("/images/missing.jpg")).toBe(false);
+    expect(publicFileExists("/images/testimonials/t-1.jpg")).toBe(true);
+    expect(hasOptimizedPublicVariants("/images/testimonials/t-1.jpg")).toBe(true);
   });
 });

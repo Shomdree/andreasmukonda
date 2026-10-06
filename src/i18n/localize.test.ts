@@ -11,6 +11,8 @@ describe("catalog localization", () => {
     expect(Object.keys(en.faq)).toEqual(Object.keys(fr.faq));
     expect(ln.faq.items).toHaveLength(fr.faq.items.length);
     expect(en.faq.items).toHaveLength(fr.faq.items.length);
+    expect(Object.keys(ln.testimonials)).toEqual(Object.keys(fr.testimonials));
+    expect(Object.keys(en.testimonials)).toEqual(Object.keys(fr.testimonials));
     expect(Object.keys(ln.catalog)).toEqual(Object.keys(fr.catalog));
     expect(Object.keys(en.catalog)).toEqual(Object.keys(fr.catalog));
     expect(Object.keys(ln.catalog.trainings)).toEqual(Object.keys(fr.catalog.trainings));

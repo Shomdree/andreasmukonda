@@ -23,6 +23,7 @@
     "optimize:posters": "node scripts/optimize-poster-images.mjs",
     "optimize:logos": "node scripts/optimize-logo-images.mjs",
     "optimize:videos": "node scripts/optimize-video-posters.mjs",
+    "optimize:testimonials": "node scripts/optimize-testimonial-images.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

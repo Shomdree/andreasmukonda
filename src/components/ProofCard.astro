@@ -1,0 +1,107 @@
+---
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { pageI18n } from "../i18n/request";
+import { hasOptimizedPublicVariants, publicImageBase } from "../lib/public-file";
+import type { TestimonialProof } from "../content/testimonial-catalog";
+
+type Props = { item: TestimonialProof; sizes?: string };
+const { item } = Astro.props;
+const { t } = pageI18n(Astro.locals);
+const sizes = Astro.props.sizes ?? "(max-width: 700px) 86vw, (max-width: 1099px) 45vw, 360px";
+const base = publicImageBase(item.image);
+const largeSrc = hasOptimizedPublicVariants(item.image) ? `${base}-960.jpg` : item.image;
+---
+
+<article class="proof" data-reveal="up">
+  <p class="kicker">
+    <span class="mark" aria-hidden="true">“</span>
+    {item.category}
+  </p>
+  <button
+    class="shot"
+    type="button"
+    data-proof-open
+    data-proof-id={item.id}
+    data-proof-src={largeSrc}
+    data-proof-alt={item.alt}
+    data-proof-title={item.title}
+    aria-label={`${t.testimonials.open} : ${item.title}`}
+  >
+    <ResponsiveImage
+      src={item.image}
+      alt={item.alt}
+      width={item.width}
+      height={item.height}
+      contain
+      sizes={sizes}
+    />
+  </button>
+  <h3 class="display">{item.title}</h3>
+  <p>{item.description}</p>
+  <p class="real">{t.testimonials.real}</p>
+</article>
+
+<style>
+  .proof {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    padding: 1.05rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--bg-elev);
+    transition:
+      border-color var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
+  .proof:hover {
+    border-color: color-mix(in srgb, var(--fg) 28%, var(--line));
+  }
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+  }
+  .mark {
+    color: var(--color-ember);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+  .shot {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 0.7rem 0;
+    margin: 0;
+    border: 0;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg) 82%, #1c2230);
+    cursor: zoom-in;
+  }
+  .shot :global(img) {
+    border-radius: 8px;
+  }
+  h3 {
+    font-size: clamp(1.12rem, 2.2vw, 1.38rem);
+    margin: 0.15rem 0 0;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  p {
+    margin: 0;
+    color: var(--fg-soft);
+  }
+  .real {
+    color: var(--mute);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .proof {
+      transition: none;
+    }
+  }
+</style>

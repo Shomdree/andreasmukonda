@@ -7,10 +7,13 @@ import LogoWall from "../components/LogoWall.astro";
 import CTASection from "../components/CTASection.astro";
 import EcosystemGrid from "../components/EcosystemGrid.astro";
 import Portrait from "../components/Portrait.astro";
+import ProofCard from "../components/ProofCard.astro";
+import ProofLightbox from "../components/ProofLightbox.astro";
 import { pageI18n } from "../i18n/request";
 import { identity } from "../i18n/identity";
 import { getProjects, getSettings } from "../lib/queries";
 import { isLogoProject } from "../content/logo-catalog";
+import { featuredTestimonials } from "../content/testimonial-catalog";
 import { personJsonLd } from "../lib/person-jsonld";
 import { whatsappUrl } from "../lib/whatsapp";
 
@@ -20,6 +23,7 @@ const studio = settings.aboutPortrait || settings.portrait;
 const allProjects = await getProjects();
 const projects = allProjects.filter((item) => item.featured);
 const logos = allProjects.filter((item) => isLogoProject(item));
+const proofs = featuredTestimonials(locale);
 const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
 const showStudio = Boolean(studio) && !studio.includes("placeholder");
 const serviceCards = [
@@ -136,6 +140,27 @@ const poles = [
     )
   }
 
+  {
+    proofs.length > 0 && (
+      <section class:list={["section", logos.length === 0 && "alt"]} id="temoignages">
+        <div class="container-am">
+          <SectionHeading title={t.testimonials.title} text={t.testimonials.lead} />
+          <div class="proofs">
+            {proofs.map((item) => (
+              <ProofCard item={item} sizes="(max-width: 879px) 78vw, 32vw" />
+            ))}
+          </div>
+          <p class="more">
+            <a class="btn btn-ghost" href={href("/temoignages")}>
+              {t.testimonials.more} <span aria-hidden="true">→</span>
+            </a>
+          </p>
+        </div>
+        <ProofLightbox />
+      </section>
+    )
+  }
+
   <CTASection
     title={t.cta.title}
     text={t.cta.lead}
@@ -220,6 +245,19 @@ const poles = [
   .more {
     margin-top: 1.5rem;
   }
+  .proofs {
+    display: grid;
+    gap: 1rem;
+    grid-auto-flow: column;
+    grid-auto-columns: min(86vw, 22rem);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.35rem;
+  }
+  .proofs > :global(article) {
+    scroll-snap-align: start;
+  }
   .about {
     display: grid;
     gap: 1.6rem;
@@ -252,6 +290,13 @@ const poles = [
     }
   }
   @media (min-width: 880px) {
+    .proofs {
+      grid-auto-flow: row;
+      grid-template-columns: 1fr 1fr 1fr;
+      overflow: visible;
+      scroll-snap-type: none;
+      padding-bottom: 0;
+    }
     .about:has(.about-photo) {
       grid-template-columns: 0.7fr 1.3fr;
       align-items: center;

@@ -1,0 +1,81 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ProofCard from "../components/ProofCard.astro";
+import ProofLightbox from "../components/ProofLightbox.astro";
+import { pageI18n } from "../i18n/request";
+import { getSettings } from "../lib/queries";
+import { testimonialsFor } from "../content/testimonial-catalog";
+
+const { locale, t, href } = pageI18n(Astro.locals);
+const settings = await getSettings();
+const items = testimonialsFor(locale);
+---
+
+<BaseLayout
+  settings={settings}
+  title={t.seo.testimonialsTitle}
+  description={t.seo.testimonialsDescription}
+  canonicalPath="/temoignages"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: t.seo.testimonialsTitle,
+    description: t.seo.testimonialsDescription,
+  }}
+>
+  <section class="section desk">
+    <div class="container-am">
+      <Breadcrumbs
+        homeHref={href("/")}
+        homeLabel={t.nav.home}
+        items={[{ href: href("/temoignages"), label: t.nav.testimonials }]}
+      />
+      <header class="intro">
+        <h1 class="display">{t.testimonials.pageTitle}</h1>
+        <p class="lead">{t.testimonials.lead}</p>
+        <p class="lead">{t.testimonials.pageLead}</p>
+      </header>
+      <div class="grid">
+        {items.map((item) => (
+          <ProofCard item={item} sizes="(max-width: 719px) 92vw, (max-width: 1099px) 46vw, 360px" />
+        ))}
+      </div>
+    </div>
+    <ProofLightbox />
+  </section>
+</BaseLayout>
+
+<style>
+  .desk {
+    padding-top: clamp(1.6rem, 4vw, 3.2rem);
+  }
+  .intro {
+    max-width: 40rem;
+    margin-bottom: 1.8rem;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 7vw, 3.8rem);
+    max-width: 16ch;
+    overflow-wrap: anywhere;
+    line-height: 0.98;
+  }
+  .lead {
+    color: var(--fg-soft);
+    margin: 0.6rem 0 0;
+  }
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1100px) {
+    .grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+</style>

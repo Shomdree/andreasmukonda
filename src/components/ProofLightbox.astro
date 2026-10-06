@@ -1,0 +1,57 @@
+---
+import { pageI18n } from "../i18n/request";
+
+const { t } = pageI18n(Astro.locals);
+---
+
+<dialog class="proof-box" id="proof-lightbox" aria-labelledby="proof-lightbox-title">
+  <div class="panel">
+    <p class="kicker" id="proof-lightbox-title"></p>
+    <img alt="" width="720" height="1018" />
+    <div class="tools">
+      <button type="button" class="btn btn-ghost" data-proof-prev>{t.testimonials.prev}</button>
+      <button type="button" class="btn btn-ghost" data-proof-next>{t.testimonials.next}</button>
+      <button type="button" class="btn btn-primary" data-proof-close>{t.testimonials.close}</button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .proof-box {
+    width: min(92vw, 42rem);
+    max-height: 94vh;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--bg-elev);
+    color: var(--fg);
+  }
+  .proof-box::backdrop {
+    background: color-mix(in srgb, #05070b 72%, transparent);
+  }
+  .panel {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem 1rem 1.1rem;
+  }
+  .kicker {
+    margin: 0;
+    padding-inline: 0.2rem;
+  }
+  img {
+    width: 100%;
+    height: auto;
+    max-height: min(72vh, 820px);
+    object-fit: contain;
+    background: color-mix(in srgb, var(--bg) 82%, #1c2230);
+    border-radius: 10px;
+  }
+  .tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .tools .btn {
+    min-height: 44px;
+  }
+</style>

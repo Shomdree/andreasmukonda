@@ -58,6 +58,8 @@ describe("i18n utils", () => {
     expect(Object.keys(en.order)).toEqual(Object.keys(fr.order));
     expect(Object.keys(ln.order)).toEqual(Object.keys(fr.order));
     expect(Object.keys(en.questions)).toEqual(Object.keys(fr.questions));
+    expect(Object.keys(ln.testimonials)).toEqual(Object.keys(fr.testimonials));
+    expect(Object.keys(en.testimonials)).toEqual(Object.keys(fr.testimonials));
     expect(Object.keys(ln.consultingPage)).toEqual(Object.keys(fr.consultingPage));
     expect(Object.keys(en.trainings)).toEqual(Object.keys(fr.trainings));
     expect(Object.keys(ln.lives)).toEqual(Object.keys(fr.lives));
