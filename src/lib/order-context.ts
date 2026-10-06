@@ -4,7 +4,7 @@ import type { ServiceItem } from "./types";
 
 export { designKindFromService, isPrintService };
 
-export type OrderKind = "design" | "web" | "training" | "generic";
+export type OrderKind = "design" | "print" | "web" | "training" | "consulting" | "media" | "generic";
 
 export const DESIGN_KINDS = [
   "logo",
@@ -74,6 +74,11 @@ export const TRAINING_AUDIENCES = ["individuelle", "groupe", "organisation", "un
 export const TRAINING_GROUP = ["groupe", "organisation"] as const;
 export const TRAINING_SPECIAL = ["autre", "unsure"] as const;
 
+export const WEB_FEATURES_SIMPLE = ["presenter", "contact", "whatsapp", "portfolio", "autre"] as const;
+
+export const CONSULTING_NEEDS = ["start", "present", "organize"] as const;
+export const MEDIA_KINDS = ["evenement", "shooting", "video", "communication"] as const;
+
 export type OrderAnswers = Record<string, string | undefined>;
 
 type Labeled = Record<string, string>;
@@ -93,23 +98,31 @@ function line(label: string, value?: string): string {
   return `${label} : ${text}`;
 }
 
-export function orderKindFromService(item?: Pick<ServiceItem, "id" | "slug"> | null, fallbackId = ""): OrderKind {
+export function orderKindFromService(item?: Pick<ServiceItem, "id" | "slug" | "title"> | null, fallbackId = ""): OrderKind {
   const id = (item?.id || fallbackId).toLowerCase();
   const slug = (item?.slug || fallbackId).toLowerCase();
-  const blob = `${id} ${slug}`;
+  const title = (item?.title || "").toLowerCase();
+  const blob = `${id} ${slug} ${title}`;
+  const printHit = isPrintService(item) || isPrintService({ id: fallbackId, slug: fallbackId });
+  if (printHit) {
+    if (slug.includes("creation-d-affiches") || slug.includes("creation-affiches")) return "design";
+    return "print";
+  }
   if (
     id === "s-design" ||
-    slug === "design-graphique" ||
     slug.includes("design-graphique") ||
-    isPrintService(item) ||
-    isPrintService({ id: fallbackId, slug: fallbackId })
+    (/identit[eé] visuelle|brand identity|design graphique|graphic design/.test(blob) && !/formation|training|boyekoli/.test(blob))
   ) {
     return "design";
   }
-  if (id === "s-web" || slug === "sites-web-solutions-numeriques" || slug.includes("sites-web") || slug.includes("solutions-numeriques")) {
+  if (id === "s-web" || slug.includes("sites-web") || slug.includes("solutions-numeriques") || /\bsites?\sweb\b|website|solution(s)? num[eé]rique/.test(blob)) {
     return "web";
   }
-  if (id === "s-formation" || slug === "formation-professionnelle" || /(^|[\s-])formation/.test(blob)) return "training";
+  if (id === "s-formation" || slug === "formation-professionnelle" || /formation|training|boyekoli|academia/.test(blob)) {
+    return "training";
+  }
+  if (id === "s-consulting" || /consulting|accompagnement|conseil|consultation/.test(blob)) return "consulting";
+  if (id === "s-media" || /photo|m[eé]dias?|shooting|vid[eé]o/.test(blob)) return "media";
   return "generic";
 }
 
@@ -255,6 +268,57 @@ export function composeOrderContent(
       .filter(Boolean)
       .join("\n");
     return { projectType, description: description || trainingLabel || o.trainingPick, fields };
+  }
+
+  if (kind === "print") {
+    add(o.reviewService, data.serviceTitle);
+    add(o.printQuantity, data.printQuantity);
+    add(o.printText, data.printText);
+    add(o.printFormat, data.printFormat);
+    add(o.printColors, data.printColors);
+    add(o.deadline, data.desiredDeadline);
+    add(o.details, data.description);
+    const projectType = (data.serviceTitle || o.printQuantity).slice(0, 80);
+    const description = [
+      line(o.printQuantity, data.printQuantity),
+      line(o.printText, data.printText),
+      line(o.printFormat, data.printFormat),
+      line(o.printColors, data.printColors),
+      line(o.deadline, data.desiredDeadline),
+      line(o.details, data.description),
+    ]
+      .filter(Boolean)
+      .join("\n");
+    return { projectType, description: description || data.serviceTitle || o.printQuantity, fields };
+  }
+
+  if (kind === "consulting") {
+    const needLabel = pick(o.consultingNeeds, data.consultingNeed || "");
+    add(o.reviewService, data.serviceTitle);
+    add(o.consultingNeed, needLabel);
+    add(o.consultingExplain, data.description);
+    const projectType = (needLabel || o.consultingNeed).slice(0, 80);
+    const description = [line(o.consultingNeed, needLabel), line(o.consultingExplain, data.description)].filter(Boolean).join("\n");
+    return { projectType, description: description || needLabel || o.consultingNeed, fields };
+  }
+
+  if (kind === "media") {
+    const kindLabel = pick(o.mediaKinds, data.mediaKind || "");
+    add(o.reviewService, data.serviceTitle);
+    add(o.mediaKind, kindLabel);
+    add(o.mediaDate, data.mediaDate);
+    add(o.mediaPlace, data.mediaPlace);
+    add(o.mediaCover, data.description);
+    const projectType = (kindLabel || o.mediaKind).slice(0, 80);
+    const description = [
+      line(o.mediaKind, kindLabel),
+      line(o.mediaDate, data.mediaDate),
+      line(o.mediaPlace, data.mediaPlace),
+      line(o.mediaCover, data.description),
+    ]
+      .filter(Boolean)
+      .join("\n");
+    return { projectType, description: description || kindLabel || o.mediaKind, fields };
   }
 
   add(o.reviewService, data.serviceTitle);

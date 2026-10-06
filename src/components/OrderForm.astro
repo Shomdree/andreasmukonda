@@ -6,17 +6,16 @@ import {
   DESIGN_ORIGINS,
   DESIGN_STYLES,
   WEB_CONTENT,
-  WEB_DOMAIN,
   WEB_EXISTS,
-  WEB_FEATURES,
-  WEB_HOSTING,
-  WEB_IDENTITY,
+  WEB_FEATURES_SIMPLE,
   WEB_TYPES,
   TRAINING_AUDIENCES,
   TRAINING_FORMATS,
-  TRAINING_GOALS,
   TRAINING_LEVELS,
+  CONSULTING_NEEDS,
+  MEDIA_KINDS,
   designKindFromService,
+  isPrintService,
   orderKindFromService,
   selectedList,
 } from "../lib/order-context";
@@ -38,6 +37,8 @@ const e = Astro.props.errors ?? {};
 const v = Astro.props.values ?? {};
 const services = Astro.props.services.map((item) => localizeService(item, t));
 const trainings = (Astro.props.trainings ?? []).map((item) => localizeTraining(item, t));
+const mainServices = services.filter((item) => !isPrintService(item));
+const printServices = services.filter((item) => isPrintService(item));
 const selected = v.serviceId || services.find((s) => s.slug === Astro.props.selectedSlug)?.id;
 const selectedService = services.find((s) => s.id === selected);
 const presetDesignKind = v.designKind || designKindFromService(selectedService);
@@ -49,16 +50,14 @@ const designOrigins = t.order.designOrigins as Record<string, string>;
 const designStyles = t.order.designStyles as Record<string, string>;
 const webTypes = t.order.webTypes as Record<string, string>;
 const webExists = t.order.webExistsOptions as Record<string, string>;
-const webDomain = t.order.webDomainOptions as Record<string, string>;
-const webHosting = t.order.webHostingOptions as Record<string, string>;
 const webFeatureOptions = t.order.webFeatureOptions as Record<string, string>;
 const webContent = t.order.webContentOptions as Record<string, string>;
-const webIdentity = t.order.webIdentityOptions as Record<string, string>;
 const trainingSpecial = t.order.trainingSpecial as Record<string, string>;
 const trainingLevels = t.order.trainingLevels as Record<string, string>;
-const trainingGoals = t.order.trainingGoals as Record<string, string>;
 const trainingFormats = t.order.trainingFormats as Record<string, string>;
 const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
+const consultingNeeds = t.order.consultingNeeds as Record<string, string>;
+const mediaKinds = t.order.mediaKinds as Record<string, string>;
 ---
 
 <form class="stack js-form js-order" method="post" action={Astro.props.action} enctype="multipart/form-data" novalidate data-astro-reload>
@@ -79,12 +78,25 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
       <label for="serviceId">{t.form.service}</label>
       <select id="serviceId" name="serviceId" required>
         <option value="">{t.form.choose}</option>
+        <optgroup label={t.order.serviceGroupMain}>
+          {
+            mainServices.map((s) => (
+              <option value={s.id} selected={selected === s.id} data-title={s.title} data-kind={orderKindFromService(s)} data-design-kind={designKindFromService(s)}>
+                {s.title}
+              </option>
+            ))
+          }
+        </optgroup>
         {
-          services.map((s) => (
-            <option value={s.id} selected={selected === s.id} data-title={s.title} data-kind={orderKindFromService(s)} data-design-kind={designKindFromService(s)}>
-              {s.title}
-            </option>
-          ))
+          printServices.length > 0 && (
+            <optgroup label={t.servicesPage.printTitle}>
+              {printServices.map((s) => (
+                <option value={s.id} selected={selected === s.id} data-title={s.title} data-kind={orderKindFromService(s)} data-design-kind={designKindFromService(s)}>
+                  {s.title}
+                </option>
+              ))}
+            </optgroup>
+          )
         }
       </select>
       {e.serviceId && <p class="error">{e.serviceId}</p>}
@@ -97,6 +109,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
     <p class="hint">
       <button type="button" class="text-btn" data-change-service>{t.order.changeService}</button>
     </p>
+    <p class="hint" data-picked-service data-picked-label={t.order.pickedService} hidden></p>
 
     <div data-kind-panel="design">
       <div class="field">
@@ -157,6 +170,32 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
       </div>
     </div>
 
+    <div data-kind-panel="print">
+      <div class="field">
+        <label for="printQuantity">{t.order.printQuantity}</label>
+        <input id="printQuantity" name="printQuantity" inputmode="numeric" maxlength="20" value={v.printQuantity ?? ""} />
+        {e.printQuantity && <p class="error">{e.printQuantity}</p>}
+      </div>
+      <div class="field">
+        <label for="printText" data-print-text-label data-label-default={t.order.printText} data-label-names={t.order.printTextNames}>
+          <span data-print-text-copy>{t.order.printText}</span>
+          <span class="opt">({t.form.optional})</span>
+        </label>
+        <input id="printText" name="printText" maxlength="500" value={v.printText ?? ""} />
+      </div>
+      <div class="field">
+        <label for="printFormat" data-print-format-label data-label-default={t.order.printFormat} data-label-apparel={t.order.printFormatApparel}>
+          <span data-print-format-copy>{t.order.printFormat}</span>
+          <span class="opt" data-print-format-opt>({t.form.optional})</span>
+        </label>
+        <input id="printFormat" name="printFormat" maxlength="80" value={v.printFormat ?? ""} />
+      </div>
+      <div class="field">
+        <label for="printColors">{t.order.printColors} <span class="opt">({t.form.optional})</span></label>
+        <input id="printColors" name="printColors" maxlength="200" value={v.printColors ?? ""} />
+      </div>
+    </div>
+
     <div data-kind-panel="web">
       <div class="field">
         <label for="webType">{t.order.webType}</label>
@@ -187,30 +226,10 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         <label for="webUrl">{t.order.webUrl} <span class="opt">({t.form.optional})</span></label>
         <input id="webUrl" name="webUrl" maxlength="200" value={v.webUrl ?? ""} inputmode="url" />
       </div>
-      <div class="field">
-        <label for="webDomain">{t.order.webDomain}</label>
-        <select id="webDomain" name="webDomain">
-          <option value="">{t.form.choose}</option>
-          {WEB_DOMAIN.map((key) => (
-            <option value={key} selected={v.webDomain === key}>{lab(webDomain, key)}</option>
-          ))}
-        </select>
-        {e.webDomain && <p class="error">{e.webDomain}</p>}
-      </div>
-      <div class="field">
-        <label for="webHosting">{t.order.webHosting}</label>
-        <select id="webHosting" name="webHosting">
-          <option value="">{t.form.choose}</option>
-          {WEB_HOSTING.map((key) => (
-            <option value={key} selected={v.webHosting === key}>{lab(webHosting, key)}</option>
-          ))}
-        </select>
-        {e.webHosting && <p class="error">{e.webHosting}</p>}
-      </div>
       <fieldset class="inner">
         <legend>{t.order.webFeatures}</legend>
         <div class="checks">
-          {WEB_FEATURES.map((key) => (
+          {WEB_FEATURES_SIMPLE.map((key) => (
             <label class="check">
               <input type="checkbox" name="webFeatures" value={key} checked={features.includes(key) ? true : undefined} />
               {lab(webFeatureOptions, key)}
@@ -232,16 +251,6 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
           ))}
         </select>
         {e.webContent && <p class="error">{e.webContent}</p>}
-      </div>
-      <div class="field">
-        <label for="webIdentity">{t.order.webIdentity}</label>
-        <select id="webIdentity" name="webIdentity">
-          <option value="">{t.form.choose}</option>
-          {WEB_IDENTITY.map((key) => (
-            <option value={key} selected={v.webIdentity === key}>{lab(webIdentity, key)}</option>
-          ))}
-        </select>
-        {e.webIdentity && <p class="error">{e.webIdentity}</p>}
       </div>
     </div>
 
@@ -274,20 +283,6 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         {e.trainingLevel && <p class="error">{e.trainingLevel}</p>}
       </div>
       <div class="field">
-        <label for="trainingGoal">{t.order.trainingGoal}</label>
-        <select id="trainingGoal" name="trainingGoal">
-          <option value="">{t.form.choose}</option>
-          {TRAINING_GOALS.map((key) => (
-            <option value={key} selected={v.trainingGoal === key}>{lab(trainingGoals, key)}</option>
-          ))}
-        </select>
-        {e.trainingGoal && <p class="error">{e.trainingGoal}</p>}
-      </div>
-      <div class="field" data-when-name="trainingGoal" data-when-is="autre">
-        <label for="trainingGoalOther">{t.order.otherPrecision}</label>
-        <input id="trainingGoalOther" name="trainingGoalOther" maxlength="80" value={v.trainingGoalOther ?? ""} />
-      </div>
-      <div class="field">
         <label for="trainingFormat">{t.order.trainingFormat}</label>
         <select id="trainingFormat" name="trainingFormat">
           <option value="">{t.form.choose}</option>
@@ -313,16 +308,42 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         {e.trainingParticipants && <p class="error">{e.trainingParticipants}</p>}
       </div>
       <div class="field">
-        <label for="trainingDays">{t.order.trainingDays} <span class="opt">({t.form.optional})</span></label>
-        <input id="trainingDays" name="trainingDays" maxlength="80" value={v.trainingDays ?? ""} />
-      </div>
-      <div class="field">
-        <label for="trainingPeriod">{t.order.trainingPeriod} <span class="opt">({t.form.optional})</span></label>
-        <input id="trainingPeriod" name="trainingPeriod" maxlength="80" value={v.trainingPeriod ?? ""} />
-      </div>
-      <div class="field">
-        <label for="trainingAvailability">{t.order.trainingAvailability} <span class="opt">({t.form.optional})</span></label>
+        <label for="trainingAvailability">{t.order.trainingWhen} <span class="opt">({t.form.optional})</span></label>
         <textarea id="trainingAvailability" name="trainingAvailability" maxlength="400">{v.trainingAvailability ?? ""}</textarea>
+      </div>
+    </div>
+
+    <div data-kind-panel="consulting">
+      <div class="field">
+        <label for="consultingNeed">{t.order.consultingNeed}</label>
+        <select id="consultingNeed" name="consultingNeed">
+          <option value="">{t.form.choose}</option>
+          {CONSULTING_NEEDS.map((key) => (
+            <option value={key} selected={v.consultingNeed === key}>{lab(consultingNeeds, key)}</option>
+          ))}
+        </select>
+        {e.consultingNeed && <p class="error">{e.consultingNeed}</p>}
+      </div>
+    </div>
+
+    <div data-kind-panel="media">
+      <div class="field">
+        <label for="mediaKind">{t.order.mediaKind}</label>
+        <select id="mediaKind" name="mediaKind">
+          <option value="">{t.form.choose}</option>
+          {MEDIA_KINDS.map((key) => (
+            <option value={key} selected={v.mediaKind === key}>{lab(mediaKinds, key)}</option>
+          ))}
+        </select>
+        {e.mediaKind && <p class="error">{e.mediaKind}</p>}
+      </div>
+      <div class="field">
+        <label for="mediaDate">{t.order.mediaDate} <span class="opt">({t.form.optional})</span></label>
+        <input id="mediaDate" name="mediaDate" maxlength="80" value={v.mediaDate ?? ""} />
+      </div>
+      <div class="field">
+        <label for="mediaPlace">{t.order.mediaPlace} <span class="opt">({t.form.optional})</span></label>
+        <input id="mediaPlace" name="mediaPlace" maxlength="120" value={v.mediaPlace ?? ""} />
       </div>
     </div>
 
@@ -335,15 +356,19 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
     </div>
 
     <div class="field">
-      <label for="description">{t.order.details} <span class="opt" data-for-kind="design web training">({t.form.optional})</span></label>
+      <label for="description" data-description-label data-label-default={t.order.details} data-label-consulting={t.order.consultingExplain} data-label-media={t.order.mediaCover}>
+        <span data-desc-text>{t.order.details}</span>
+        <span class="opt" data-desc-optional>({t.form.optional})</span>
+      </label>
       <textarea id="description" name="description" maxlength="5000">{v.description ?? ""}</textarea>
       {e.description && <p class="error">{e.description}</p>}
     </div>
 
-    <div class="field" data-for-kind="design web generic">
+    <div class="field" data-for-kind="design web generic print media">
       <label for="attachment">{t.form.attachment}</label>
       <p class="hint" data-for-kind="design">{t.order.designAttachment}</p>
-      <p class="hint" data-for-kind="web generic">{t.form.attachmentHint}</p>
+      <p class="hint" data-for-kind="print">{t.order.printHint}</p>
+      <p class="hint" data-for-kind="web generic media">{t.form.attachmentHint}</p>
       <div class="file-wrap">
         <input id="attachment" name="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.avif,application/pdf,image/jpeg,image/png,image/webp,image/avif" data-no-file={t.form.noFile} />
         <label class="file-ui" for="attachment">
@@ -387,11 +412,11 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         <option value="telephone" selected={v.contactPreference === "telephone"}>{t.form.phone}</option>
       </select>
     </div>
-    <div class="field" data-for-kind="web generic design">
+    <div class="field" data-for-kind="web generic design print">
       <label for="desiredDeadline">{t.form.deadline} <span class="opt">({t.form.optional})</span></label>
       <input id="desiredDeadline" name="desiredDeadline" maxlength="80" value={v.desiredDeadline ?? ""} />
     </div>
-    <div class="field" data-for-kind="web generic">
+    <div class="field" data-for-kind="web generic design print media">
       <p class="hint">{t.form.budgetHint}</p>
       <label for="budgetRange">{t.form.budget}</label>
       <select id="budgetRange" name="budgetRange">
@@ -446,9 +471,35 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
       return true;
     };
 
+    const printKindOf = () => select?.selectedOptions[0]?.dataset.designKind || "";
+
     const syncTitle = () => {
       const option = select?.selectedOptions[0];
-      if (hiddenTitle && option) hiddenTitle.value = option.text.trim();
+      const title = option?.dataset.title || option?.text.trim() || "";
+      if (hiddenTitle && option) hiddenTitle.value = title;
+      const picked = form.querySelector<HTMLElement>("[data-picked-service]");
+      if (picked) {
+        const label = picked.dataset.pickedLabel || "";
+        picked.textContent = title && option?.value ? `${label} : ${title}` : "";
+        picked.hidden = !option?.value;
+      }
+    };
+
+    const applyPrintLabels = () => {
+      const printKind = printKindOf();
+      const textLabel = form.querySelector<HTMLElement>("[data-print-text-label]");
+      const textCopy = form.querySelector<HTMLElement>("[data-print-text-copy]");
+      const formatLabel = form.querySelector<HTMLElement>("[data-print-format-label]");
+      const formatCopy = form.querySelector<HTMLElement>("[data-print-format-copy]");
+      const formatOpt = form.querySelector<HTMLElement>("[data-print-format-opt]");
+      if (textLabel && textCopy) {
+        const names = printKind === "badge" || printKind === "carte";
+        textCopy.textContent = (names ? textLabel.dataset.labelNames : textLabel.dataset.labelDefault) || "";
+      }
+      if (formatLabel && formatCopy) {
+        formatCopy.textContent = (printKind === "tshirt" ? formatLabel.dataset.labelApparel : formatLabel.dataset.labelDefault) || "";
+      }
+      if (formatOpt) formatOpt.hidden = printKind === "affiche" || printKind === "bache";
     };
 
     const applyDesignPreset = (force = false) => {
@@ -489,6 +540,17 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         const allowed = (node.dataset.forKind || "").split(/\s+/).filter(Boolean);
         node.hidden = allowed.length > 0 && !allowed.includes(kind);
       });
+      const descLabel = form.querySelector<HTMLElement>("[data-description-label]");
+      const descText = form.querySelector<HTMLElement>("[data-desc-text]");
+      const descOptional = form.querySelector<HTMLElement>("[data-desc-optional]");
+      if (descLabel && descText) {
+        descText.textContent =
+          (kind === "consulting" ? descLabel.dataset.labelConsulting : kind === "media" ? descLabel.dataset.labelMedia : descLabel.dataset.labelDefault) ||
+          descLabel.dataset.labelDefault ||
+          "";
+      }
+      if (descOptional) descOptional.hidden = kind === "consulting" || kind === "generic";
+      applyPrintLabels();
       applyWhen();
       form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea").forEach((input) => {
         if (["locale", "website", "startedAt", "serviceTitle", "serviceId"].includes(input.name)) {
@@ -538,9 +600,10 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         const required =
           field.required ||
           field.matches(
-            "#designKind, #displayName, #designOrigin, #webType, #webExists, #webDomain, #webHosting, #webContent, #webIdentity, #trainingPick, #trainingLevel, #trainingGoal, #trainingFormat, #trainingAudience, #projectType",
+            "#designKind, #displayName, #designOrigin, #webType, #webExists, #webContent, #trainingPick, #trainingLevel, #trainingFormat, #trainingAudience, #printQuantity, #consultingNeed, #mediaKind, #projectType",
           ) ||
-          (kindOf() === "generic" && field.id === "description");
+          ((kindOf() === "generic" || kindOf() === "consulting") && field.id === "description") ||
+          (kindOf() === "print" && (printKindOf() === "affiche" || printKindOf() === "bache") && field.id === "printFormat");
         if (required && !String(field.value || "").trim()) {
           field.focus();
           return true;
@@ -566,16 +629,23 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
         if (!field || field.disabled) return "";
         return field.value.trim();
       };
+      const visibleLabel = (id: string) =>
+        [...form.querySelectorAll<HTMLLabelElement>(`label[for="${id}"]`)].find((node) => visible(node))?.textContent || "";
       push(form.querySelector("label[for=serviceId]")?.textContent || "Service", select?.selectedOptions[0]?.text.trim() || "");
-      push(form.querySelector("label[for=designKind]")?.textContent || "", optionLabel("designKind"));
-      push(form.querySelector("label[for=displayName]")?.textContent || "", val("displayName"));
-      push(form.querySelector("label[for=webType]")?.textContent || "", optionLabel("webType"));
-      push(form.querySelector("label[for=trainingPick]")?.textContent || "", optionLabel("trainingPick"));
-      push(form.querySelector("label[for=projectType]")?.textContent || "", val("projectType"));
-      push(form.querySelector("label[for=fullName]")?.textContent || "", val("fullName"));
-      push(form.querySelector("label[for=desiredDeadline]")?.textContent || "", val("desiredDeadline"));
-      push(form.querySelector("label[for=budgetRange]")?.textContent || "", optionLabel("budgetRange"));
-      push(form.querySelector("label[for=description]")?.textContent || "", val("description"));
+      push(visibleLabel("designKind"), optionLabel("designKind"));
+      push(visibleLabel("displayName"), val("displayName"));
+      push(visibleLabel("printQuantity"), val("printQuantity"));
+      push(visibleLabel("printText"), val("printText"));
+      push(visibleLabel("webType"), optionLabel("webType"));
+      push(visibleLabel("trainingPick"), optionLabel("trainingPick"));
+      push(visibleLabel("consultingNeed"), optionLabel("consultingNeed"));
+      push(visibleLabel("mediaKind"), optionLabel("mediaKind"));
+      push(visibleLabel("mediaDate"), val("mediaDate"));
+      push(visibleLabel("projectType"), val("projectType"));
+      push(visibleLabel("fullName"), val("fullName"));
+      push(visibleLabel("desiredDeadline"), val("desiredDeadline"));
+      push(visibleLabel("budgetRange"), optionLabel("budgetRange"));
+      push(visibleLabel("description"), val("description"));
       review.innerHTML = `<dl>${rows.join("")}</dl>`;
     };
 
@@ -604,6 +674,7 @@ const trainingAudiences = t.order.trainingAudiences as Record<string, string>;
 
 <style>
   .stack { display: grid; gap: 1.2rem; max-width: 40rem; }
+  [hidden] { display: none !important; }
   fieldset { border: 1px solid var(--line); padding: 1rem; display: grid; gap: 0.9rem; border-radius: 14px; }
   fieldset.inner { padding: 0.8rem; }
   legend { padding: 0 0.4rem; color: var(--color-ember); }

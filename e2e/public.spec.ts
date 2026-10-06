@@ -15,7 +15,7 @@ async function sendOrder(page: Page) {
   await page.locator("form.js-order [data-submit]:visible").click();
 }
 
-async function chooseService(page: Page, kind: "design" | "web" | "training" | "generic") {
+async function chooseService(page: Page, kind: "design" | "print" | "web" | "training" | "consulting" | "media" | "generic") {
   const value = await page.locator(`#serviceId option[data-kind="${kind}"]`).first().getAttribute("value");
   await page.selectOption("#serviceId", value || { index: 1 });
 }
@@ -82,12 +82,9 @@ test("commande site web", async ({ page }) => {
   await continueOrder(page);
   await page.selectOption("#webType", "vitrine");
   await page.selectOption("#webExists", "nouveau");
-  await page.selectOption("#webDomain", "non");
-  await page.selectOption("#webHosting", "non");
   await page.locator('input[name=webFeatures][value=presenter]').check();
   await page.locator('input[name=webFeatures][value=contact]').check();
   await page.selectOption("#webContent", "aide");
-  await page.selectOption("#webIdentity", "non");
   await continueOrder(page);
   await fillOrderContact(page, "alex-web@studio.test");
   await continueOrder(page);
@@ -101,11 +98,49 @@ test("commande formation", async ({ page }) => {
   await continueOrder(page);
   await page.selectOption("#trainingPick", "unsure");
   await page.selectOption("#trainingLevel", "debutant");
-  await page.selectOption("#trainingGoal", "travail");
   await page.selectOption("#trainingFormat", "presentiel");
   await page.selectOption("#trainingAudience", "individuelle");
   await continueOrder(page);
   await fillOrderContact(page, "alex-training@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
+  await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
+});
+
+test("commande impression", async ({ page }) => {
+  await page.goto("/commander");
+  await chooseService(page, "print");
+  await continueOrder(page);
+  await page.fill("#printQuantity", "20");
+  await page.fill("#printText", "Studio Alex");
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-print@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
+  await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
+});
+
+test("commande consulting", async ({ page }) => {
+  await page.goto("/commander");
+  await chooseService(page, "consulting");
+  await continueOrder(page);
+  await page.selectOption("#consultingNeed", "organize");
+  await page.fill("#description", "Je veux clarifier les prochaines étapes de mon activité.");
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-consulting@studio.test");
+  await continueOrder(page);
+  await sendOrder(page);
+  await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();
+});
+
+test("commande photo", async ({ page }) => {
+  await page.goto("/commander");
+  await chooseService(page, "media");
+  await continueOrder(page);
+  await page.selectOption("#mediaKind", "evenement");
+  await page.fill("#mediaPlace", "Kinshasa");
+  await continueOrder(page);
+  await fillOrderContact(page, "alex-media@studio.test");
   await continueOrder(page);
   await sendOrder(page);
   await expect(page.getByText("Votre demande est bien arrivée.")).toBeVisible();

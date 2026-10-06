@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fr } from "../i18n/fr";
 import type { Messages } from "../i18n";
+import type { OrderKind } from "./order-context";
 
 const emptyToUndefined = (value: unknown) => (value === "" || value === undefined ? undefined : value);
 type FormErrors = Messages["form"]["errors"];
@@ -34,7 +35,7 @@ export function makeQuestionSchema(e: FormErrors) {
   });
 }
 
-export function makeOrderSchema(e: FormErrors, kind: "design" | "web" | "training" | "generic" = "generic") {
+export function makeOrderSchema(e: FormErrors, kind: OrderKind = "generic") {
   return z
     .object({
       serviceId: z.string().trim().min(1, e.service).max(80),
@@ -61,6 +62,14 @@ export function makeOrderSchema(e: FormErrors, kind: "design" | "web" | "trainin
       designStyle: z.string().trim().max(40).optional().default(""),
       designStyleOther: z.string().trim().max(80).optional().default(""),
       designFormat: z.string().trim().max(80).optional().default(""),
+      printQuantity: z.string().trim().max(20).optional().default(""),
+      printText: z.string().trim().max(500).optional().default(""),
+      printFormat: z.string().trim().max(80).optional().default(""),
+      printColors: z.string().trim().max(200).optional().default(""),
+      consultingNeed: z.string().trim().max(40).optional().default(""),
+      mediaKind: z.string().trim().max(40).optional().default(""),
+      mediaDate: z.string().trim().max(80).optional().default(""),
+      mediaPlace: z.string().trim().max(120).optional().default(""),
       webType: z.string().trim().max(40).optional().default(""),
       webTypeOther: z.string().trim().max(80).optional().default(""),
       webExists: z.string().trim().max(40).optional().default(""),
@@ -96,25 +105,29 @@ export function makeOrderSchema(e: FormErrors, kind: "design" | "web" | "trainin
         need("designStyleOther", data.designStyle !== "autre" || data.designStyleOther.trim().length > 1);
         const needsFormat = ["affiche", "flyer", "carte", "badge", "bache", "tshirt", "print", "autre"].includes(data.designKind);
         need("designFormat", !needsFormat || data.designFormat.trim().length > 1);
+      } else if (kind === "print") {
+        need("printQuantity", data.printQuantity.trim().length > 0);
       } else if (kind === "web") {
         need("webType", data.webType.trim().length > 0);
         need("webTypeOther", data.webType !== "autre" || data.webTypeOther.trim().length > 1);
         need("webExists", data.webExists.trim().length > 0);
-        need("webDomain", data.webDomain.trim().length > 0);
-        need("webHosting", data.webHosting.trim().length > 0);
         need("webContent", data.webContent.trim().length > 0);
-        need("webIdentity", data.webIdentity.trim().length > 0);
         need("webFeatureOther", !data.webFeatures.split(",").includes("autre") || data.webFeatureOther.trim().length > 1);
       } else if (kind === "training") {
         need("trainingPick", data.trainingPick.trim().length > 0);
         need("trainingOther", data.trainingPick !== "autre" || data.trainingOther.trim().length > 1);
         need("trainingLevel", data.trainingLevel.trim().length > 0);
-        need("trainingGoal", data.trainingGoal.trim().length > 0);
-        need("trainingGoalOther", data.trainingGoal !== "autre" || data.trainingGoalOther.trim().length > 1);
         need("trainingFormat", data.trainingFormat.trim().length > 0);
         need("trainingAudience", data.trainingAudience.trim().length > 0);
         const grouped = data.trainingAudience === "groupe" || data.trainingAudience === "organisation";
         need("trainingParticipants", !grouped || /^\d+$/.test(data.trainingParticipants.trim()));
+      } else if (kind === "consulting") {
+        need("consultingNeed", data.consultingNeed.trim().length > 0);
+        if (data.description.trim().length < 12) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: e.message, path: ["description"] });
+        }
+      } else if (kind === "media") {
+        need("mediaKind", data.mediaKind.trim().length > 0);
       } else {
         need("projectType", data.projectType.trim().length >= 2);
         if (data.description.trim().length < 20) {

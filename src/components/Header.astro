@@ -143,7 +143,13 @@ function active(match: string) {
     width: auto;
     max-width: min(190px, 62vw);
     object-fit: contain;
-    transition: transform var(--motion-fast) var(--ease-standard), opacity var(--motion-fast);
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      opacity var(--motion-fast),
+      filter var(--motion-fast) var(--ease-standard);
+  }
+  :global(html[data-theme="light"]) .brand-logo {
+    filter: brightness(0);
   }
   .brand:hover .brand-logo {
     transform: translateY(-1px);

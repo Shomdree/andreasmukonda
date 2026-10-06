@@ -104,6 +104,10 @@ const extraLinks = [
     width: auto;
     max-width: min(160px, 48vw);
     object-fit: contain;
+    transition: filter var(--motion-fast) var(--ease-standard);
+  }
+  :global(html[data-theme="light"]) .foot-logo {
+    filter: brightness(0);
   }
   .name {
     margin: 0;
