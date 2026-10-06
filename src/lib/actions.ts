@@ -14,7 +14,11 @@ import { notifyAfterSave } from "./notifications";
 import { isOrderReference, nextOrderReference } from "./order-reference";
 import { consumeRateLimit, hashedClientKey } from "./rate-limit";
 import { composeOrderContent, joinedFormValues, orderKindFromService } from "./order-context";
-import { getServices, getTrainings } from "./queries";
+import { getFaq, getPublicQuestions, getServices, getTrainings } from "./queries";
+import { collectKnownQuestions, findKnownQuestion, normalizeQuestion } from "./question-match";
+import { en } from "../i18n/en";
+import { fr } from "../i18n/fr";
+import { ln } from "../i18n/ln";
 import { spamReason } from "./spam";
 import { createCookieSupabase, createServiceSupabase } from "./supabase";
 import { uniqueAttachmentName, validateOrderAttachment, verifyAttachmentMagic } from "./uploads";
@@ -64,6 +68,47 @@ function valuesFrom(data: FormData): Record<string, string> {
   delete values.consent;
   delete values.startedAt;
   return values;
+}
+
+function faqNeedles(): string[][] {
+  return fr.faq.items.map((_, index) =>
+    [fr.faq.items[index]?.q, ln.faq.items[index]?.q, en.faq.items[index]?.q].filter(
+      (value): value is string => Boolean(value),
+    ),
+  );
+}
+
+async function knownQuestionsFor(t: Messages) {
+  const [faqRows, publicQuestions] = await Promise.all([getFaq(), getPublicQuestions()]);
+  return collectKnownQuestions({
+    faqDisplay: t.faq.items,
+    faqNeedles: faqNeedles(),
+    publicQuestions,
+    extraFaq: faqRows,
+  });
+}
+
+async function pendingQuestionAlreadyAsked(text: string): Promise<boolean> {
+  try {
+    const client = persistClient();
+    if (!client) return false;
+    const { data } = await client
+      .from("questions")
+      .select("question")
+      .eq("published", false)
+      .order("created_at", { ascending: false })
+      .limit(250);
+    const known = (data ?? []).map((row, index) => ({
+      id: `pending-${index}`,
+      source: "public" as const,
+      needles: [String(row.question ?? "")],
+      question: String(row.question ?? ""),
+      answer: "",
+    }));
+    return Boolean(findKnownQuestion(text, known));
+  } catch {
+    return false;
+  }
 }
 
 async function tooMany(request: Request, bucket: string, t?: Messages): Promise<ActionResult<never> | null> {
@@ -164,6 +209,30 @@ export async function submitQuestion(request: Request, data: FormData): Promise<
   if (bait) return bait;
   const limited = await tooMany(request, "question", t);
   if (limited) return limited;
+  const known = await knownQuestionsFor(t);
+  const existing = findKnownQuestion(parsed.data.question, known);
+  if (existing) {
+    return {
+      ok: false,
+      errors: {
+        form: t.questions.alreadyAsked,
+        duplicate: existing.id,
+      },
+      values: valuesFrom(data),
+    };
+  }
+  if (await pendingQuestionAlreadyAsked(parsed.data.question)) {
+    return {
+      ok: false,
+      errors: {
+        form: t.questions.alreadyAskedPending,
+        duplicate: "pending",
+      },
+      values: valuesFrom(data),
+    };
+  }
+  const dup = await duplicate(request, "question-sig", normalizeQuestion(parsed.data.question).slice(0, 80), t);
+  if (dup) return { ...dup, values: valuesFrom(data) };
   const payload = {
     full_name: sanitizeText(parsed.data.fullName),
     email: parsed.data.email ?? null,

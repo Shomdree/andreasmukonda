@@ -299,35 +299,7 @@ export const catalogTestimonials: Testimonial[] = [];
 export const catalogPosts: PostItem[] = [];
 export const catalogPublicQuestions: PublicQuestion[] = [];
 
-export const catalogFaq: FaqItem[] = [
-  {
-    id: "f1",
-    question: "Comment commander un projet ?",
-    answer:
-      "Utilisez la page Commander. Vous recevez une référence du type AM-2026-0001. Un devis suit après analyse. Aucun paiement n'est pris sur le site pour le moment.",
-    category: "Commandes",
-  },
-  {
-    id: "f2",
-    question: "Où se trouve Andréas Mukonda ?",
-    answer: "Kinshasa, République démocratique du Congo. Les modalités de collaboration se précisent au devis.",
-    category: "Collaboration",
-  },
-  {
-    id: "f3",
-    question: "Les tarifs sont-ils en ligne ?",
-    answer:
-      "Les prestations sont indiquées « sur devis ». Les montants peuvent être mis à jour depuis l'administration lorsqu'ils sont confirmés.",
-    category: "Tarifs",
-  },
-  {
-    id: "f4",
-    question: "Qu'est-ce que Global SHOMDREE Industries ?",
-    answer:
-      "C'est l'écosystème fondé en 2022 par Andréas Mukonda, organisé autour de SHOMDREE Academia, SHOMDREE Business, SHOMDREE Design et SHOMDREE Medias.",
-    category: "Marque",
-  },
-];
+export const catalogFaq: FaqItem[] = [];
 
 /** @deprecated use catalog* names */
 export const demoCategories = catalogCategories;

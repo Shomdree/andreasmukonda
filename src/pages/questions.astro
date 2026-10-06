@@ -1,30 +1,64 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
+import FAQAccordion from "../components/FAQAccordion.astro";
 import QuestionCard from "../components/QuestionCard.astro";
 import QuestionForm from "../components/QuestionForm.astro";
 import { pageI18n } from "../i18n/request";
+import { fr } from "../i18n/fr";
+import { en } from "../i18n/en";
+import { ln } from "../i18n/ln";
 import { submitQuestion } from "../lib/actions";
-import { getPublicQuestions, getSettings } from "../lib/queries";
+import { getFaq, getPublicQuestions, getSettings } from "../lib/queries";
 import { questionCategories } from "../content/defaults";
 import { localizeQuestionCategory } from "../i18n/localize";
+import { collectKnownQuestions, findKnownQuestion } from "../lib/question-match";
 
 const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const questions = await getPublicQuestions();
+const [questions, faqRows] = await Promise.all([getPublicQuestions(), getFaq()]);
 const theme = Astro.url.searchParams.get("theme");
 const visible = theme ? questions.filter((item) => item.category === theme) : questions;
 const usedThemes = questionCategories.filter((item) => questions.some((entry) => entry.category === item));
+const faqItems = t.faq.items.map((item) => ({ question: item.q, answer: item.a }));
+const known = collectKnownQuestions({
+  faqDisplay: t.faq.items,
+  faqNeedles: fr.faq.items.map((_, index) =>
+    [fr.faq.items[index]?.q, ln.faq.items[index]?.q, en.faq.items[index]?.q].filter(
+      (value): value is string => Boolean(value),
+    ),
+  ),
+  publicQuestions: questions,
+  extraFaq: faqRows,
+});
+const extraFaq = known
+  .filter((item) => item.source === "faq" && item.id.startsWith("faq-extra-"))
+  .map((item) => ({ question: item.question, answer: item.answer }));
 let errors: Record<string, string> | undefined;
 let values: Record<string, string> | undefined;
 let sent = Astro.url.searchParams.get("ok") === "1";
+let duplicate = known.find((item) => item.id === Astro.url.searchParams.get("deja"));
 
 if (Astro.request.method === "POST") {
   const result = await submitQuestion(Astro.request, await Astro.request.formData());
   if (result.ok) return Astro.redirect(`${href("/questions")}?ok=1`);
   errors = result.errors;
   values = result.values;
+  if (errors.duplicate === "pending") {
+    duplicate = {
+      id: "pending",
+      source: "public",
+      needles: [],
+      question: values.question ?? "",
+      answer: "",
+    };
+  } else if (errors.duplicate) {
+    duplicate = known.find((item) => item.id === errors?.duplicate) ?? findKnownQuestion(values.question ?? "", known);
+  }
 }
+
+const knownJson = JSON.stringify(known).replace(/</g, "\\u003c");
+const pendingOnly = duplicate?.id === "pending";
 ---
 
 <BaseLayout
@@ -33,6 +67,7 @@ if (Astro.request.method === "POST") {
   description={t.seo.questionsDescription}
   canonicalPath="/questions"
 >
+  <script is:inline type="application/json" id="known-questions" set:html={knownJson}></script>
   <section class="section desk">
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/questions"), label: t.nav.questions }]} />
@@ -41,10 +76,19 @@ if (Astro.request.method === "POST") {
         <p class="lead">{t.questions.lead}</p>
         <p class="lead">{t.questions.follow}</p>
         <nav class="actions" aria-label={t.nav.questions}>
+          <a class="btn btn-ghost" href="#faq">{t.questions.faqTitle}</a>
           <a class="btn btn-ghost" href="#reponses">{t.questions.find}</a>
           <a class="btn btn-primary" href="#poser">{t.questions.ask}</a>
         </nav>
       </header>
+      <section id="faq" class="faq-block">
+        <h2>{t.questions.faqTitle}</h2>
+        <p class="hint">{t.questions.faqLead}</p>
+        <FAQAccordion items={[...faqItems, ...extraFaq]} />
+        <p class="to-form">
+          <a href={href("/faq")}>{t.questions.faqMore}</a>
+        </p>
+      </section>
       <details class="demo">
         <summary>{t.questions.demoSummary}</summary>
         <p class="label">{t.questions.demoLabel}</p>
@@ -78,7 +122,31 @@ if (Astro.request.method === "POST") {
           sent ? (
             <p class="ok" role="status">{t.questions.success}</p>
           ) : (
-            <QuestionForm action={href("/questions")} errors={errors} values={values} />
+            <QuestionForm action={href("/questions")} errors={errors?.duplicate ? { ...errors, form: "" } : errors} values={values}>
+              <aside
+                slot="known"
+                id="q-known"
+                class="known"
+                hidden={!duplicate}
+                role="status"
+                data-already-asked={t.questions.alreadyAsked}
+                data-already-asked-lead={t.questions.alreadyAskedLead}
+                data-already-asked-cta={t.questions.alreadyAskedCta}
+              >
+                <p class="known-kicker" data-known-title>{t.questions.alreadyAsked}</p>
+                <p data-known-lead>{pendingOnly ? t.questions.alreadyAskedPending : t.questions.alreadyAskedLead}</p>
+                <p class="known-q" data-known-question>{duplicate?.question ?? ""}</p>
+                <p data-known-answer>{duplicate?.answer ?? ""}</p>
+                <a
+                  class="known-link"
+                  data-known-link
+                  hidden={pendingOnly}
+                  href={duplicate && duplicate.source === "faq" ? "#faq" : duplicate ? `#${duplicate.id}` : "#faq"}
+                >
+                  {t.questions.alreadyAskedCta}
+                </a>
+              </aside>
+            </QuestionForm>
           )
         }
       </section>
@@ -109,6 +177,15 @@ if (Astro.request.method === "POST") {
     flex-wrap: wrap;
     gap: 0.55rem;
     margin-top: 1.3rem;
+  }
+  .faq-block {
+    margin-top: 2.2rem;
+    max-width: 40rem;
+  }
+  .faq-block h2,
+  .ask h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
   }
   .demo {
     margin: 2rem 0 0;
@@ -162,9 +239,41 @@ if (Astro.request.method === "POST") {
     padding-top: 1.4rem;
     border-top: 1px solid var(--line);
   }
-  h2 {
-    font-size: 1.4rem;
-    margin-bottom: 0.6rem;
+  .known {
+    margin: 0 0 1.1rem;
+    padding: 1rem 1.05rem;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg-elev) 88%, var(--color-ember));
+    max-width: 36rem;
+  }
+  .known[hidden] {
+    display: none;
+  }
+  .known-kicker {
+    margin: 0 0 0.35rem;
+    font-weight: 700;
+  }
+  .known p {
+    margin: 0.35rem 0 0;
+    color: var(--fg-soft);
+  }
+  .known-q {
+    color: var(--fg) !important;
+    font-weight: 650;
+  }
+  .known-q:empty,
+  [data-known-answer]:empty {
+    display: none;
+  }
+  .known-link[hidden] {
+    display: none;
+  }
+  .known-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    margin-top: 0.55rem;
+    font-weight: 650;
   }
   .ok {
     color: var(--color-ok);

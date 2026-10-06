@@ -14,7 +14,7 @@ const e = Astro.props.errors ?? {};
 const v = Astro.props.values ?? {};
 ---
 
-<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload>
+<form class="stack js-form" method="post" action={Astro.props.action} novalidate data-astro-reload data-known-questions>
   {e.form && <p class="banner" role="alert">{e.form}</p>}
   <FormGuard />
   <input type="hidden" name="locale" value={locale} />
@@ -43,6 +43,7 @@ const v = Astro.props.values ?? {};
     <textarea id="q-text" name="question" required maxlength="2000">{v.question ?? ""}</textarea>
     {e.question && <p class="error">{e.question}</p>}
   </div>
+  <slot name="known" />
   <label class="check">
     <input type="checkbox" name="consentPublication" />
     {t.form.publish}

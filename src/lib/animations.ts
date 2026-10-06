@@ -1,3 +1,5 @@
+import { bindQuestionMatch } from "./question-form";
+
 export const MOTION_FAST_MS = 180;
 export const MOTION_NORMAL_MS = 320;
 export const MOTION_SLOW_MS = 650;
@@ -102,7 +104,8 @@ export function enhanceForms(root: ParentNode = document): () => void {
     const started = form.querySelector<HTMLInputElement>("[data-started]");
     if (started && !started.value) started.value = String(Date.now());
 
-    const onSubmit = () => {
+    const onSubmit = (event: SubmitEvent) => {
+      if (event.defaultPrevented) return;
       if (form.dataset.sending === "1") return false;
       form.dataset.sending = "1";
       const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
@@ -139,6 +142,7 @@ export function bootMotion(): void {
   const stops = [
     observeReveal(),
     enhanceForms(),
+    bindQuestionMatch(),
     bindHeader(document.querySelector(".site-header")),
   ];
   const parallaxRoot = document.querySelector<HTMLElement>("[data-parallax]");

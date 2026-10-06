@@ -272,6 +272,13 @@ export const en = {
     ask: "Ask a question",
     allThemes: "All topics",
     notFound: "Did not find your answer? Ask your question.",
+    alreadyAsked: "This question has already been asked.",
+    alreadyAskedLead: "Here is the answer already available. There is no need to send it again.",
+    alreadyAskedPending: "This question has already been asked. An answer will be given according to availability.",
+    alreadyAskedCta: "See the answer",
+    faqTitle: "Frequently asked questions",
+    faqLead: "These answers come up often. Read them before asking a new question.",
+    faqMore: "Open the FAQ page",
     demoSummary: "See an example",
     demoLabel: "Usage example — no message is sent",
     demoQuestion: "I want to order a poster. What should I prepare?",
@@ -473,6 +480,8 @@ export const en = {
   },
   faq: {
     title: "Frequently asked questions",
+    lead: "The answers below come up often. If yours is not there, ask it.",
+    ask: "Ask another question",
     items: [
       {
         q: "How can I know the price of a service?",
@@ -493,6 +502,14 @@ export const en = {
       {
         q: "How can I learn about upcoming training sessions?",
         a: "Check the Training page or contact me directly.",
+      },
+      {
+        q: "What is Global SHOMDREE Industries?",
+        a: "It is the ecosystem founded by Andréas Mukonda, around SHOMDREE Academia, SHOMDREE Business, SHOMDREE Design and SHOMDREE Medias.",
+      },
+      {
+        q: "Will my question be published?",
+        a: "Not automatically. A question is published only with your agreement, if the answer can help other people.",
       },
     ],
   },

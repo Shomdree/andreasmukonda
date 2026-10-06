@@ -280,6 +280,13 @@ export const ln = {
     ask: "Tinda motuna na ngai",
     allThemes: "Ba thèmes nyonso",
     notFound: "Ozwi eyano te ? Tinda motuna na yo.",
+    alreadyAsked: "Motuna oyo etunami déjà.",
+    alreadyAskedLead: "Eyano oyo ezali déjà. Esengeli te otinda yango lisusu.",
+    alreadyAskedPending: "Motuna oyo etunami déjà. Eyano ekoya na ndenge ya ntango.",
+    alreadyAskedCta: "Tala eyano",
+    faqTitle: "Ba motuna oyo bato batunaka mingi",
+    faqLead: "Ba eyano oyo ezali mbala mingi. Tanga yango liboso ya kotinda motuna ya sika.",
+    faqMore: "Fungola page FAQ",
     demoSummary: "Tala exemple",
     demoLabel: "Exemple ya kosalela — message etindami te",
     demoQuestion: "Nalingi kosala commande ya affiche. Nini nasengeli kobongisa ?",
@@ -481,6 +488,8 @@ export const ln = {
   },
   faq: {
     title: "Ba motuna oyo bato batunaka mingi",
+    lead: "Ba eyano oyo ezali awa ezali oyo bato batunaka mingi. Soki eyano na yo ezali te, tinda motuna.",
+    ask: "Tinda motuna mosusu",
     items: [
       {
         q: "Ndenge nini nakoki koyeba prix ?",
@@ -501,6 +510,14 @@ export const ln = {
       {
         q: "Ndenge nini nakoki koyeba ba formations oyo ezali koya ?",
         a: "Tala page Formations to solola na ngai directement.",
+      },
+      {
+        q: "Global SHOMDREE Industries ezali nini ?",
+        a: "Ezali écosystème oyo Andréas Mukonda atongi, zingazinga ya SHOMDREE Academia, SHOMDREE Business, SHOMDREE Design mpe SHOMDREE Medias.",
+      },
+      {
+        q: "Motuna na ngai ekobima na site ?",
+        a: "Te, na yango moko te. Motuna ekobima kaka soki oyebisi ngai, soki eyano ekoki kosalisa bato mosusu.",
       },
     ],
   },

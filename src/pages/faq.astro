@@ -3,11 +3,28 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import FAQAccordion from "../components/FAQAccordion.astro";
 import { pageI18n } from "../i18n/request";
-import { getSettings } from "../lib/queries";
+import { fr } from "../i18n/fr";
+import { en } from "../i18n/en";
+import { ln } from "../i18n/ln";
+import { getFaq, getSettings } from "../lib/queries";
+import { collectKnownQuestions } from "../lib/question-match";
 
 const { t, href } = pageI18n(Astro.locals);
 const settings = await getSettings();
-const items = t.faq.items.map((item) => ({ question: item.q, answer: item.a }));
+const faqRows = await getFaq();
+const known = collectKnownQuestions({
+  faqDisplay: t.faq.items,
+  faqNeedles: fr.faq.items.map((_, index) =>
+    [fr.faq.items[index]?.q, ln.faq.items[index]?.q, en.faq.items[index]?.q].filter(
+      (value): value is string => Boolean(value),
+    ),
+  ),
+  publicQuestions: [],
+  extraFaq: faqRows,
+});
+const items = known
+  .filter((item) => item.source === "faq")
+  .map((item) => ({ question: item.question, answer: item.answer }));
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -30,11 +47,23 @@ const jsonLd = {
     <div class="container-am">
       <Breadcrumbs homeHref={href("/")} homeLabel={t.nav.home} items={[{ href: href("/faq"), label: t.nav.faq }]} />
       <h1 class="display">{t.faq.title}</h1>
+      <p class="lead">{t.faq.lead}</p>
       <FAQAccordion items={items} />
+      <p class="ask">
+        <a class="btn btn-primary" href={`${href("/questions")}#poser`}>{t.faq.ask}</a>
+      </p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  h1 { font-size: clamp(2.4rem, 8vw, 4.2rem); margin-bottom: 1.2rem; }
+  h1 { font-size: clamp(2.4rem, 8vw, 4.2rem); margin-bottom: 0.7rem; }
+  .lead {
+    color: var(--fg-soft);
+    max-width: 38rem;
+    margin: 0 0 1.3rem;
+  }
+  .ask {
+    margin-top: 1.6rem;
+  }
 </style>

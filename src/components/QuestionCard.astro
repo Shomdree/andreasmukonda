@@ -9,7 +9,7 @@ const long = item.answer.trim().length > 220;
 const preview = long ? `${item.answer.trim().slice(0, 160).trim()}…` : item.answer;
 ---
 
-<article class="q">
+<article class="q" id={`public-${item.id}`}>
   <p class="kicker">{item.category} · {item.displayName}</p>
   <h3>{item.question}</h3>
   {

@@ -285,6 +285,13 @@ export const fr = {
     ask: "Poser ma question",
     allThemes: "Tous les thèmes",
     notFound: "Vous n’avez pas trouvé votre réponse ? Posez votre question.",
+    alreadyAsked: "Cette question a déjà été posée.",
+    alreadyAskedLead: "Voici la réponse déjà disponible. Inutile de l’envoyer à nouveau.",
+    alreadyAskedPending: "Cette question a déjà été posée. Une réponse sera donnée selon les disponibilités.",
+    alreadyAskedCta: "Voir la réponse",
+    faqTitle: "Questions fréquentes",
+    faqLead: "Ces réponses reviennent souvent. Lisez-les avant de poser une nouvelle question.",
+    faqMore: "Ouvrir la page FAQ",
     demoSummary: "Voir un exemple",
     demoLabel: "Exemple d’utilisation — aucun message envoyé",
     demoQuestion: "Je souhaite commander une affiche. Que dois-je préparer ?",
@@ -486,6 +493,8 @@ export const fr = {
   },
   faq: {
     title: "Questions fréquentes",
+    lead: "Les réponses ci-dessous reviennent souvent. Si la vôtre n’y est pas, posez-la.",
+    ask: "Poser une autre question",
     items: [
       {
         q: "Comment connaître le prix d’un service ?",
@@ -506,6 +515,14 @@ export const fr = {
       {
         q: "Comment connaître les prochaines formations ?",
         a: "Consultez la page Formations ou contactez-moi directement.",
+      },
+      {
+        q: "Qu’est-ce que Global SHOMDREE Industries ?",
+        a: "C’est l’écosystème fondé par Andréas Mukonda, autour de SHOMDREE Academia, SHOMDREE Business, SHOMDREE Design et SHOMDREE Medias.",
+      },
+      {
+        q: "Ma question sera-t-elle publiée ?",
+        a: "Non, pas automatiquement. Une question n’est publiée qu’avec votre accord, si la réponse peut aider d’autres personnes.",
       },
     ],
   },
