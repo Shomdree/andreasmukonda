@@ -2,6 +2,7 @@ import type { LiveItem, PortfolioCategory, PortfolioProject, PostItem, ServiceIt
 import type { Messages } from "./types";
 import { posterCatalogEn, posterCatalogFr, posterCatalogLn } from "../content/poster-copy";
 import { logoCatalogEn, logoCatalogFr, logoCatalogLn } from "../content/logo-copy";
+import { conceptCatalogEn, conceptCatalogFr, conceptCatalogLn } from "../content/concept-copy";
 import { videoCatalogEn, videoCatalogFr, videoCatalogLn } from "../content/video-copy";
 import { articleCatalogEn, articleCatalogFr, articleCatalogLn } from "../content/article-copy";
 
@@ -21,6 +22,12 @@ const logoByLocale: Record<string, Record<string, PosterCopy>> = {
   ln: logoCatalogLn,
 };
 
+const conceptByLocale: Record<string, Record<string, PosterCopy>> = {
+  fr: conceptCatalogFr,
+  en: conceptCatalogEn,
+  ln: conceptCatalogLn,
+};
+
 const videoByLocale: Record<string, Record<string, { title: string }>> = {
   fr: videoCatalogFr,
   en: videoCatalogEn,
@@ -38,7 +45,10 @@ function pick(map: Record<string, string>, key: string, fallback: string): strin
 }
 
 export function localizeProject(item: PortfolioProject, t: Messages, locale: string): PortfolioProject {
-  const copy = posterByLocale[locale]?.[item.slug] ?? logoByLocale[locale]?.[item.slug];
+  const copy =
+    posterByLocale[locale]?.[item.slug] ??
+    logoByLocale[locale]?.[item.slug] ??
+    conceptByLocale[locale]?.[item.slug];
   if (!copy) {
     return {
       ...item,

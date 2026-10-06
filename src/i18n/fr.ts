@@ -257,6 +257,16 @@ export const fr = {
     logosTitle: "Logos",
     logosLead: "Les marques et identités visuelles sont présentées ici, à part des affiches, pour rester faciles à parcourir.",
     logosMore: "Voir tous les logos",
+    conceptsTitle: "Conception graphique",
+    conceptsLead: "Cartes, calendriers, mockups et autres supports sont présentés ici, à part des affiches et des logos.",
+    conceptsMore: "Voir toute la conception graphique",
+    conceptKinds: {
+      mockup: "Mockups",
+      carte: "Cartes",
+      calendrier: "Calendriers",
+      document: "Documents",
+      portrait: "Portraits",
+    },
     archiveNote: "Ces créations présentent mon travail graphique. Les dates, prix et coordonnées visibles peuvent correspondre à d’anciennes communications. Les prestations actuelles sont proposées sur devis.",
   },
   lives: {
@@ -721,6 +731,7 @@ export const fr = {
     videoPlayer: "Lecteur vidéo",
     categories: {
       design: "Design",
+      "conception-graphique": "Conception graphique",
       branding: "Branding",
       photographie: "Photographie",
       "web-logiciels": "Web & logiciels",

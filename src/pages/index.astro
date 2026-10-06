@@ -13,6 +13,7 @@ import { pageI18n } from "../i18n/request";
 import { identity } from "../i18n/identity";
 import { getProjects, getSettings } from "../lib/queries";
 import { isLogoProject } from "../content/logo-catalog";
+import { homeConceptProjects, isConceptProject } from "../content/concept-catalog";
 import { featuredTestimonials } from "../content/testimonial-catalog";
 import { personJsonLd } from "../lib/person-jsonld";
 import { whatsappUrl } from "../lib/whatsapp";
@@ -23,6 +24,7 @@ const studio = settings.aboutPortrait || settings.portrait;
 const allProjects = await getProjects();
 const projects = allProjects.filter((item) => item.featured);
 const logos = allProjects.filter((item) => isLogoProject(item));
+const concepts = homeConceptProjects(allProjects.filter((item) => isConceptProject(item)));
 const proofs = featuredTestimonials(locale);
 const wa = whatsappUrl(settings.whatsapp, t.whatsapp.generic);
 const showStudio = Boolean(studio) && !studio.includes("placeholder");
@@ -141,8 +143,20 @@ const poles = [
   }
 
   {
+    concepts.length > 0 && (
+      <section class:list={["section", logos.length === 0 && "alt"]} id="conception">
+        <div class="container-am">
+          <SectionHeading title={t.portfolio.conceptsTitle} text={t.portfolio.conceptsLead} />
+          <PortfolioGrid projects={concepts} variant="gallery" />
+          <p class="more"><a class="btn btn-ghost" href={`${href("/portfolio")}#conception`}>{t.portfolio.conceptsMore}</a></p>
+        </div>
+      </section>
+    )
+  }
+
+  {
     proofs.length > 0 && (
-      <section class:list={["section", logos.length === 0 && "alt"]} id="temoignages">
+      <section class:list={["section", (concepts.length ? logos.length > 0 : logos.length === 0) && "alt"]} id="temoignages">
         <div class="container-am">
           <SectionHeading title={t.testimonials.title} text={t.testimonials.lead} />
           <div class="proofs">

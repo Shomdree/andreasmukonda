@@ -37,6 +37,7 @@ test("homepage", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText("Andréas Mukonda").first()).toBeVisible();
   await expect(page.getByText(/Créer aujourd’hui les solutions/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Conception graphique$/ }).first()).toBeVisible();
 });
 
 test("portfolio", async ({ page }) => {

@@ -8,6 +8,7 @@ import { localizeProject } from "../../i18n/localize";
 import { getProject, getSettings } from "../../lib/queries";
 import { isPosterProject } from "../../content/poster-catalog";
 import { isLogoProject } from "../../content/logo-catalog";
+import { isConceptProject } from "../../content/concept-catalog";
 import { publicFileExists } from "../../lib/public-file";
 import VideoPlayer from "../../components/VideoPlayer.astro";
 
@@ -19,7 +20,7 @@ const project = localizeProject(found, t, locale);
 const categoryName = project.category?.name ?? t.catalog.project;
 const showImage = publicFileExists(project.coverImage);
 const gallery = project.gallery.filter((item) => publicFileExists(item.url));
-const markWork = isPosterProject(project) || isLogoProject(project);
+const markWork = isPosterProject(project) || isLogoProject(project) || isConceptProject(project);
 const videoUrl = project.videoUrl?.trim() || "";
 const orderHref = markWork
   ? `${href("/commander")}?service=design-graphique`

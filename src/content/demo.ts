@@ -14,6 +14,7 @@ import { catalogPosterProjects } from "./poster-catalog";
 
 export const catalogCategories: PortfolioCategory[] = [
   { id: "cat-design", name: "Design", slug: "design" },
+  { id: "cat-conception", name: "Conception graphique", slug: "conception-graphique" },
   { id: "cat-branding", name: "Branding", slug: "branding" },
   { id: "cat-photo", name: "Photographie", slug: "photographie" },
   { id: "cat-web", name: "Web & logiciels", slug: "web-logiciels" },

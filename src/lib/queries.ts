@@ -12,6 +12,7 @@ import {
 import { withPrintCatalog } from "../content/print-catalog";
 import { withPosterCatalog } from "../content/poster-catalog";
 import { withLogoCatalog } from "../content/logo-catalog";
+import { withConceptCatalog } from "../content/concept-catalog";
 import { withVideoCatalog } from "../content/video-catalog";
 import { withArticleCatalog } from "../content/article-catalog";
 import { defaultSettings } from "../content/defaults";
@@ -103,12 +104,22 @@ export async function getCategories(): Promise<PortfolioCategory[]> {
     if (!supabase) return demoCategories;
     const { data } = await supabase.from("portfolio_categories").select("*").order("name");
     const rows = (data ?? []).map((row) => ({ id: row.id, name: row.name, slug: row.slug }));
-    return rows.length ? rows : demoCategories;
-  }, demoCategories);
+    return withConceptCategory(rows.length ? rows : demoCategories);
+  }, withConceptCategory(demoCategories));
 }
 
 function withPortfolioCatalog(projects: PortfolioProject[]): PortfolioProject[] {
-  return withLogoCatalog(withPosterCatalog(projects));
+  return withConceptCatalog(withLogoCatalog(withPosterCatalog(projects)));
+}
+
+function withConceptCategory(categories: PortfolioCategory[]): PortfolioCategory[] {
+  if (categories.some((item) => item.slug === "conception-graphique")) return categories;
+  const concept = { id: "cat-conception", name: "Conception graphique", slug: "conception-graphique" };
+  const afterDesign = categories.findIndex((item) => item.slug === "design");
+  if (afterDesign >= 0) {
+    return [...categories.slice(0, afterDesign + 1), concept, ...categories.slice(afterDesign + 1)];
+  }
+  return [...categories, concept];
 }
 
 export async function getProjects(options?: { featured?: boolean }): Promise<PortfolioProject[]> {

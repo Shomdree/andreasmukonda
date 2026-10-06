@@ -5,6 +5,8 @@ test("editorial pages keep their titles and a useful action", async ({ page }) =
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/Quelques projets/i);
   await expect(page.getByRole("heading", { name: /SHOMDREE DESIGN : présentation des services graphiques/i }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: /^Logos$/ }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Conception graphique$/ }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Mockup : gilet Georges Congo Service/i }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "SHOMDREE Design" }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Créer quelque chose de similaire/i }).first()).toBeVisible();
 

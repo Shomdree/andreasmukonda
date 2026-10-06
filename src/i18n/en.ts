@@ -244,6 +244,16 @@ export const en = {
     logosTitle: "Logos",
     logosLead: "Brand marks and visual identities are shown here, apart from the posters, so they stay easy to browse.",
     logosMore: "See all logos",
+    conceptsTitle: "Graphic design",
+    conceptsLead: "Cards, calendars, mockups and other supports are shown here, apart from posters and logos.",
+    conceptsMore: "See all graphic design work",
+    conceptKinds: {
+      mockup: "Mockups",
+      carte: "Cards",
+      calendrier: "Calendars",
+      document: "Documents",
+      portrait: "Portraits",
+    },
     archiveNote: "These works show my graphic design. Visible dates, prices and contact details may belong to older communications. Current services are quoted individually.",
   },
   lives: {
@@ -708,6 +718,7 @@ export const en = {
     videoPlayer: "Video player",
     categories: {
       design: "Design",
+      "conception-graphique": "Graphic design",
       branding: "Branding",
       photographie: "Photography",
       "web-logiciels": "Web & software",

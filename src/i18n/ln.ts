@@ -252,6 +252,16 @@ export const ln = {
     logosTitle: "Ba logos",
     logosLead: "Ba marques mpe ba identités visuelles emonanaka awa, na esika ya bango, mpo ezala pete mpo na kotambola.",
     logosMore: "Tala ba logos nyonso",
+    conceptsTitle: "Conception graphique",
+    conceptsLead: "Ba cartes, ba calendriers, ba mockups mpe ba supports mosusu emonanaka awa, na esika ya bango, kati na ba affiches mpe ba logos te.",
+    conceptsMore: "Tala misala nyonso ya conception graphique",
+    conceptKinds: {
+      mockup: "Ba mockups",
+      carte: "Ba cartes",
+      calendrier: "Ba calendriers",
+      document: "Ba documents",
+      portrait: "Ba portraits",
+    },
     archiveNote: "Ba créations oyo emonisa misala na ngai ya design. Ba dates, prix mpe ba coordonnées oyo emonanaka ekoki kozala ya ba communications ya kala. Misala ya lelo ezali na devis.",
   },
   lives: {
@@ -716,6 +726,7 @@ export const ln = {
     videoPlayer: "Lecteur vidéo",
     categories: {
       design: "Design",
+      "conception-graphique": "Conception graphique",
       branding: "Branding",
       photographie: "Photo",
       "web-logiciels": "Web",
