@@ -190,13 +190,6 @@ export const conceptWorkMeta: ConceptMeta[] = [
     sources: ["CV-Shom2024.jpg"],
   },
   {
-    id: "p-cg-049",
-    slug: "cv-milla",
-    kind: "document",
-    files: ["cg-049.jpg"],
-    sources: ["cv-milla.jpg"],
-  },
-  {
     id: "p-cg-050",
     slug: "portraits-studio-gadol-shom",
     kind: "portrait",
@@ -223,13 +216,6 @@ export const conceptWorkMeta: ConceptMeta[] = [
     kind: "portrait",
     files: ["cg-054.jpg"],
     sources: ["Portraits numerique.jpg"],
-  },
-  {
-    id: "p-cg-055",
-    slug: "portrait-de-mariage",
-    kind: "portrait",
-    files: ["cg-055.jpg"],
-    sources: ["IMG_3588.jpeg"],
   },
 ];
 

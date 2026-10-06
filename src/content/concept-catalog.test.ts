@@ -12,14 +12,16 @@ import { publicFileExists } from "../lib/public-file";
 
 describe("concept catalog", () => {
   it("keeps unique slugs and grouped variants without skipped files", () => {
-    expect(conceptWorkMeta).toHaveLength(30);
-    expect(catalogConceptProjects).toHaveLength(30);
-    expect(new Set(conceptWorkMeta.map((item) => item.slug)).size).toBe(30);
+    expect(conceptWorkMeta).toHaveLength(28);
+    expect(catalogConceptProjects).toHaveLength(28);
+    expect(new Set(conceptWorkMeta.map((item) => item.slug)).size).toBe(28);
     expect(conceptWorkMeta.every((item) => item.files.length === item.sources.length)).toBe(true);
     const sources = conceptWorkMeta.flatMap((item) => item.sources);
     expect(sources.some((source) => /\.pdf$/i.test(source) || /\.docx$/i.test(source))).toBe(false);
     expect(sources).not.toContain("sa-logo.png");
     expect(sources).not.toContain("b7.png");
+    expect(conceptWorkMeta.some((item) => item.slug === "cv-milla")).toBe(false);
+    expect(conceptWorkMeta.some((item) => item.slug === "portrait-de-mariage")).toBe(false);
   });
 
   it("groups calendars, leaflets, cards, menus and presentation pages", () => {
@@ -44,7 +46,7 @@ describe("concept catalog", () => {
   });
 
   it("does not duplicate concept projects already present", () => {
-    expect(withConceptCatalog(catalogConceptProjects)).toHaveLength(30);
+    expect(withConceptCatalog(catalogConceptProjects)).toHaveLength(28);
     expect(isConceptProject({ id: "p-cg-001", slug: "mockup-gilet-georges-congo-service" })).toBe(true);
     expect(isConceptProject({ id: "p-aff-001", slug: "affiche-biographique-presentation-d-un-auteur" })).toBe(false);
     expect(homeConceptProjects(catalogConceptProjects).map((item) => item.slug)).toEqual([
@@ -57,7 +59,7 @@ describe("concept catalog", () => {
 
   it("has a public image for every catalog file", () => {
     const files = conceptWorkMeta.flatMap((item) => item.files);
-    expect(files).toHaveLength(55);
+    expect(files).toHaveLength(53);
     for (const file of files) {
       expect(publicFileExists(`/images/conception/${file}`), file).toBe(true);
     }

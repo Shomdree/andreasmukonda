@@ -145,12 +145,6 @@ export const conceptCatalogFr: Record<string, ConceptCopy> = {
     description:
       "Un curriculum vitæ doit se parcourir vite, sans perdre les rubriques. Cette mise en page présente un CV d’informaticien et infographe, avec des blocs distincts pour l’identité, les études, les expériences et les compétences. La fiche documente le travail graphique. Les informations personnelles visibles appartiennent à ce document ; l’identité du site reste celle déjà publiée par ailleurs.",
   },
-  "cv-milla": {
-    title: "Curriculum vitæ : Marceline Aya Milla",
-    excerpt: "Mettre en page un CV simple, avec l’identité, les études, l’expérience et les langues.",
-    description:
-      "Un CV clair aide une personne à se présenter sans long texte. Cette réalisation organise les rubriques d’un curriculum vitæ sur une page, avec une colonne d’identité et un parcours à droite. Elle montre un travail de mise en page, pas une offre d’emploi. Les coordonnées visibles appartiennent au document de la personne concernée.",
-  },
   "portraits-studio-gadol-shom": {
     title: "Portraits studio : Gloren's Gadol Mutumosi et Andréas Mukonda",
     excerpt: "Une composition qui réunit un souvenir et deux portraits de studio, plus un cadrage isolé.",
@@ -174,12 +168,6 @@ export const conceptCatalogFr: Record<string, ConceptCopy> = {
     excerpt: "Travailler un portrait en pied, avec un fond coloré et une retouche destinée à la publication.",
     description:
       "Un portrait destiné aux réseaux ou à une affiche a souvent besoin d’un fond plus calme que la photo d’origine. Cette réalisation isole la personne, unifie l’arrière-plan et conserve le geste. Elle montre un travail de retouche utile avant impression ou publication. Aucun nom supplémentaire n’est ajouté au-delà de ce que l’image montre.",
-  },
-  "portrait-de-mariage": {
-    title: "Portrait de mariage",
-    excerpt: "Conserver un souvenir de cérémonie dans un cadrage destiné à l’impression ou au cadre.",
-    description:
-      "Une photo de mariage se garde souvent comme un document de famille. Cette image présente un couple en tenue de cérémonie, dans un cadrage prêt à être imprimé ou encadré. La fiche documente le travail photographique. Aucun nom n’est inventé au-delà de ce que l’image permet de voir.",
   },
 };
 
@@ -328,12 +316,6 @@ export const conceptCatalogEn: Record<string, ConceptCopy> = {
     description:
       "A curriculum vitae should be scanned quickly without losing its sections. This layout presents a CV for an IT specialist and graphic designer, with separate blocks for identity, studies, experience and skills. The page documents the graphic work. Personal details shown belong to this document; the site identity remains the one already published elsewhere.",
   },
-  "cv-milla": {
-    title: "Curriculum vitae: Marceline Aya Milla",
-    excerpt: "Lay out a simple CV, with identity, studies, experience and languages.",
-    description:
-      "A clear CV helps someone introduce themselves without a long text. This work organises the sections of a curriculum vitae on one page, with an identity column and a path on the right. It shows a layout, not a job offer. The contacts shown belong to the person’s document.",
-  },
   "portraits-studio-gadol-shom": {
     title: "Studio portraits: Gloren's Gadol Mutumosi and Andréas Mukonda",
     excerpt: "A composition that brings together a memory and two studio portraits, plus a tighter crop.",
@@ -357,12 +339,6 @@ export const conceptCatalogEn: Record<string, ConceptCopy> = {
     excerpt: "Work a full-length portrait, with a coloured background and a retouch meant for publication.",
     description:
       "A portrait meant for social media or a poster often needs a calmer background than the original photo. This work isolates the person, unifies the background and keeps the gesture. It shows a retouch useful before printing or publishing. No extra name is added beyond what the image shows.",
-  },
-  "portrait-de-mariage": {
-    title: "Wedding portrait",
-    excerpt: "Keep a ceremony memory in a crop meant for print or a frame.",
-    description:
-      "A wedding photograph is often kept as a family document. This image presents a couple in ceremonial dress, in a crop ready to be printed or framed. The page documents the photographic work. No name is invented beyond what the image allows one to see.",
   },
 };
 
@@ -511,12 +487,6 @@ export const conceptCatalogLn: Record<string, ConceptCopy> = {
     description:
       "Curriculum vitæ esengeli kotambolama noki, na kobunga ba rubriques te. Mise en page oyo emonisa CV ya informaticien mpe infographe, na ba blocs ya identité, ba études, ba expériences mpe ba compétences. Page oyo elakisa misala ya graphique. Ba informations personnelles oyo emonana ezali ya document oyo ; identité ya site ezali yango oyo esilaki kobimisa.",
   },
-  "cv-milla": {
-    title: "Curriculum vitæ : Marceline Aya Milla",
-    excerpt: "Kokoma CV ya pete, na identité, ba études, expérience mpe ba langues.",
-    description:
-      "CV ya polele esalisaka moto kolakisa ye moko na texte molai te. Création oyo ebongisaka ba rubriques ya curriculum vitæ na page moko, na colonne ya identité mpe parcours na loboko ya mwasi. Emonisa mise en page, offre ya mosala te. Ba coordonnées oyo emonana ezali ya document ya moto oyo.",
-  },
   "portraits-studio-gadol-shom": {
     title: "Ba portraits studio : Gloren's Gadol Mutumosi mpe Andréas Mukonda",
     excerpt: "Composition oyo esangisi souvenir mpe ba portraits mibale ya studio, mpe cadrage moko.",
@@ -540,11 +510,5 @@ export const conceptCatalogLn: Record<string, ConceptCopy> = {
     excerpt: "Kosala portrait ya mobimba, na fond ya couleur mpe retouche mpo na kobimisa.",
     description:
       "Portrait mpo na ba réseaux to affiche esengeli mbala mingi fond ya kimya koleka photo ya ebandela. Création oyo ekaboli moto, esangisi arrière-plan mpe ebateli geste. Emonisa retouche oyo ezali na ntina liboso ya kobimisa to ko imprimer. Nkombo mosusu etikali te koleka oyo image emonisa.",
-  },
-  "portrait-de-mariage": {
-    title: "Portrait ya mariage",
-    excerpt: "Kobomba souvenir ya cérémonie na cadrage mpo na impression to cadre.",
-    description:
-      "Photo ya mariage ebatelamaka mbala mingi lokola document ya libota. Image oyo emonisa couple na elamba ya cérémonie, na cadrage oyo ekoki ko imprimama to kozala na cadre. Page oyo elakisa misala ya photographie. Nkombo eponami te koleka oyo image emonisa.",
   },
 };
